@@ -20,13 +20,11 @@
     "coverage": "vitest --coverage"
   },
   "dependencies": {
-    "@effect/experimental": "^0.44.5",
     "@effect/platform": "latest",
     "@effect/platform-node": "latest",
-    "@effect/sql": "^0.33.5",
     "@effect/sql-sqlite-node": "^0.34.5",
-    "@farmap/domain": "workspace:^",
     "effect": "latest",
+    "@farmap/domain": "workspace:^",
     "sqlite3": "^5.1.7"
   },
   "effect": {

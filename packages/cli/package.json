@@ -27,16 +27,10 @@
     "@effect/cli": "latest",
     "@effect/platform": "latest",
     "@effect/platform-node": "latest",
-    "@farmap/domain": "workspace:^",
-    "effect": "latest"
+    "effect": "latest",
+    "@farmap/domain": "workspace:^"
   },
-  "devDependencies": {
-    "@effect/cli": "latest",
-    "@effect/platform": "latest",
-    "@effect/platform-node": "latest",
-    "@farmap/domain": "workspace:^",
-    "effect": "latest"
-  },
+  "devDependencies": {},
   "effect": {
     "generateExports": {
       "include": [
