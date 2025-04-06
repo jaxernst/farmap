@@ -17,13 +17,15 @@ const sqlInit = Effect.gen(function* () {
   yield* sql`
     CREATE TABLE IF NOT EXISTS attachments (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      uid INTEGER NOT NULL,
-      position TEXT NOT NULL,
+      latitude REAL NOT NULL,
+      longitude REAL NOT NULL,
       data TEXT NOT NULL,
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `;
+      createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `;
 
+  console.log("Migrations ran");
   return sql;
 });
 
