@@ -2,7 +2,7 @@
   "name": "farmap",
   "private": true,
   "type": "module",
-  "packageManager": "pnpm@9.10.0",
+  "packageManager": "bun@1.2.5",
   "workspaces": [
     "packages/*"
   ],
@@ -25,6 +25,8 @@
     "@effect/build-utils": "^0.7.7",
     "@effect/eslint-plugin": "^0.2.0",
     "@effect/language-service": "^0.2.0",
+    "@effect/experimental": "^0.44.6",
+    "@effect/sql": "^0.33.5",
     "@effect/vitest": "latest",
     "@eslint/compat": "1.2.2",
     "@eslint/eslintrc": "3.1.0",
@@ -33,7 +35,7 @@
     "@typescript-eslint/eslint-plugin": "^8.12.2",
     "@typescript-eslint/parser": "^8.12.2",
     "babel-plugin-annotate-pure-calls": "^0.4.0",
-    "effect": "^3.10.7",
+    "effect": "^3.14.6",
     "eslint": "^9.13.0",
     "eslint-import-resolver-typescript": "^3.6.3",
     "eslint-plugin-codegen": "^0.29.0",

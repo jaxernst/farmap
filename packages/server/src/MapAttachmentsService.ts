@@ -4,7 +4,7 @@ import {
   Blob,
   MapAttachmentModel,
 } from "@farmap/domain/MapAttachments";
-import { Option, Effect, Layer } from "effect";
+import { Option, Effect } from "effect";
 import { AttachmentsRepo } from "./Repo.js";
 import { AttachmentNotFound } from "@farmap/domain/Api";
 

@@ -1,6 +1,6 @@
 import { Effect } from "effect";
 import { Context, Layer } from "effect";
-import { SqliteClient } from "@effect/sql-sqlite-node";
+import { SqliteClient } from "@effect/sql-sqlite-bun";
 import { SqlClient } from "@effect/sql";
 
 const sqliteClient = SqliteClient.layer({
@@ -15,7 +15,7 @@ const sqlInit = Effect.gen(function* () {
   const sql = yield* SqlClient.SqlClient;
 
   yield* sql`
-    CREATE TABLE IF NOT EXISTS blobs (
+    CREATE TABLE IF NOT EXISTS attachments (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       uid INTEGER NOT NULL,
       position TEXT NOT NULL,
