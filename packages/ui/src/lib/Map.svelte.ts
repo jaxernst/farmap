@@ -67,7 +67,9 @@ class LeafletMapStore {
                 {
                     className: 'custom-popup',
                     autoPan: true,
-                    closeButton: true
+                    closeButton: true,
+                    autoClose: false,
+                    closeOnClick: false
                 }
             ).openPopup();
 
