@@ -5,6 +5,7 @@ import {
   AttachmentIdFromString,
   AttachmentSchema,
   PositionSchema,
+  BlobSchema,
 } from "./MapAttachments.js";
 
 export class InputError extends Schema.TaggedError<InputError>()("InputError", {
@@ -30,7 +31,7 @@ export class MapAttachmentsApi extends HttpApiGroup.make("MapAttachments")
       .setPayload(
         Schema.Struct({
           position: PositionSchema,
-          data: Schema.String,
+          blob: BlobSchema,
         })
       )
       .addSuccess(Schema.Struct({ id: AttachmentId }))

@@ -2,7 +2,6 @@ import { Model } from "@effect/sql";
 import { Schema } from "effect";
 
 export const AttachmentId = Schema.Number.pipe(Schema.brand("AttachmentId"));
-
 export type AttachmentId = typeof AttachmentId.Type;
 
 export const AttachmentIdFromString = Schema.NumberFromString.pipe(

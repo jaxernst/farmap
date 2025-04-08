@@ -11,12 +11,8 @@ const MapAttachmentsApiLive = HttpApiBuilder.group(
       const map = yield* MapAttachmentService;
 
       return handlers
-        .handle("attachPhoto", ({ payload: { position, data } }) =>
-          map.attachToMap(position, {
-            tag: "photo",
-            mimeType: "image/png",
-            data,
-          })
+        .handle("attachPhoto", ({ payload: { position, blob } }) =>
+          map.attachToMap(position, blob)
         )
         .handle("getById", ({ path: { id } }) => map.getById(id));
     })

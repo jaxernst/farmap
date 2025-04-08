@@ -70,12 +70,15 @@
       "name": "ui",
       "version": "0.0.1",
       "dependencies": {
+        "@effect/platform": "latest",
+        "@effect/platform-browser": "latest",
+        "@farmap/domain": "workspace:*",
         "@types/geojson": "^7946.0.16",
         "@types/leaflet": "^1.9.17",
+        "effect": "latest",
         "leaflet": "^1.9.4",
       },
       "devDependencies": {
-        "@farmap/domain": "workspace:*",
         "@sveltejs/adapter-auto": "^4.0.0",
         "@sveltejs/kit": "^2.16.0",
         "@sveltejs/vite-plugin-svelte": "^5.0.0",
@@ -149,6 +152,8 @@
     "@effect/language-service": ["@effect/language-service@0.2.0", "", {}, "sha512-DoK41yKGyQv79o0ca8gxEogMlt+IphXkdCXwgenbQjH1BXKD7tJAr0+VsDhblycQcvQ39f1l9NZN9CBqjM9ALA=="],
 
     "@effect/platform": ["@effect/platform@0.80.6", "", { "dependencies": { "find-my-way-ts": "^0.1.5", "msgpackr": "^1.11.2", "multipasta": "^0.2.5" }, "peerDependencies": { "effect": "^3.14.6" } }, "sha512-Q40WOVDCyZynWvXeIvp2Na1h2bEs6o7esODvJhSkPZhWRPiVdkW1j5hPR7No9q2KuOLbNtrqV/pEZeP2BnIoKg=="],
+
+    "@effect/platform-browser": ["@effect/platform-browser@0.59.6", "", { "dependencies": { "multipasta": "^0.2.5" }, "peerDependencies": { "@effect/platform": "^0.80.6", "effect": "^3.14.6" } }, "sha512-7ZoIuY8mUkjoDvC1aUApVjr4kmEGcdQehoWsyeLf0dDhlBTNLW9vMm7Q6/fkpBlx3JPmsPIxYwLUzqGwR0896A=="],
 
     "@effect/platform-bun": ["@effect/platform-bun@0.60.10", "", { "dependencies": { "@effect/platform-node-shared": "^0.30.10", "multipasta": "^0.2.5" }, "peerDependencies": { "@effect/cluster": "^0.29.10", "@effect/platform": "^0.80.6", "@effect/rpc": "^0.55.8", "@effect/sql": "^0.33.6", "effect": "^3.14.6" } }, "sha512-Dm5lV9v4EXTIhs3k/3Fl9gwF4F+D1+pwcjGRPY0Rayf1AIBxtmU1IZ+Dij8rb6Y8fUmLaucSbtE0Ap8bqhnTuw=="],
 
