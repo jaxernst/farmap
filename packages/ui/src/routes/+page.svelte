@@ -5,27 +5,49 @@
 	import { mapStore } from '$lib/Map.svelte';
 	import { type Blob, Latitude, Longitude } from '@farmap/domain';
 
+	let uploadedPhoto: Blob | null = $state(null);
+
 	async function handleUploadImage(blob: Blob) {
+		// Just store the uploaded photo temporarily
+		uploadedPhoto = blob;
+	}
+
+	async function handleSelectLocation() {
+		if (!uploadedPhoto) return;
+
 		const clickMarkerPosition = mapStore.getClickMarkerPosition();
-		const position = clickMarkerPosition || mapStore.currentLocation;
+		if (!clickMarkerPosition) {
+			alert('Please click on the map to select a location');
+			return;
+		}
 
-		if (!position) throw new Error('No position found');
+		try {
+			const { id } = await farmapApi.attachPhoto(
+				{
+					lat: Latitude.make(clickMarkerPosition.lat),
+					long: Longitude.make(clickMarkerPosition.lng)
+				},
+				uploadedPhoto
+			);
 
-		const { id } = await farmapApi.attachPhoto(
-			{
-				lat: Latitude.make(position.lat),
-				long: Longitude.make(position.lng)
-			},
-			blob
-		);
+			// save Id to local storage list
+			const photoIds = JSON.parse(localStorage.getItem('photoIds') || '[]');
+			localStorage.setItem('photoIds', JSON.stringify([...photoIds, id]));
 
-		// save Id to local storage list
-		const photoIds = JSON.parse(localStorage.getItem('photoIds') || '[]');
-		localStorage.setItem('photoIds', JSON.stringify([...photoIds, id]));
+			await farmapApi.getPhotoById(id);
 
-		await farmapApi.getPhotoById(id);
+			mapStore.addPhotoMarker(clickMarkerPosition.lat, clickMarkerPosition.lng, uploadedPhoto);
 
-		mapStore.addPhotoMarker(position.lat, position.lng, blob);
+			// Reset state to allow for new uploads
+			uploadedPhoto = null;
+		} catch (error) {
+			console.error('Error saving photo:', error);
+			alert('Failed to save photo. Please try again.');
+		}
+	}
+
+	function resetUpload() {
+		uploadedPhoto = null;
 	}
 
 	$effect(() => {
@@ -56,20 +78,19 @@
 	<p class="text-xs leading-5 font-medium text-neutral-400">Upload Everywhere</p>
 </div>
 
-<div class="fixed bottom-2 left-0 z-[1000] flex w-full items-center justify-center">
-	{#if mapStore.currentLocation}
-		<PhotoUpload onPhotoUpload={handleUploadImage} />
-	{:else}
-		<button class="upload-button" onclick={() => mapStore.requestLocation()}>
-			Find Location
+<div class="fixed bottom-2 left-0 z-[1000] flex w-full items-center justify-center gap-2">
+	{#if uploadedPhoto}
+		<button class="action-button select-button" on:click={handleSelectLocation}>
+			Select Location
 		</button>
+		<button class="action-button cancel-button" on:click={resetUpload}> Cancel </button>
+	{:else}
+		<PhotoUpload onPhotoUpload={handleUploadImage} />
 	{/if}
 </div>
 
 <style>
-	.upload-button {
-		background-color: #4caf50;
-		color: white;
+	.action-button {
 		padding: 12px 24px;
 		border-radius: 4px;
 		cursor: pointer;
@@ -78,7 +99,21 @@
 		transition: background-color 0.3s;
 	}
 
-	.upload-button:hover {
+	.select-button {
+		background-color: #4caf50;
+		color: white;
+	}
+
+	.select-button:hover {
 		background-color: #45a049;
+	}
+
+	.cancel-button {
+		background-color: #f44336;
+		color: white;
+	}
+
+	.cancel-button:hover {
+		background-color: #d32f2f;
 	}
 </style>
