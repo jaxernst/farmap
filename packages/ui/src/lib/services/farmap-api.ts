@@ -1,15 +1,19 @@
-import { HttpApi, HttpApiClient, HttpClient  } from "@effect/platform";
-import { BrowserHttpClient, BrowserRuntime } from "@effect/platform-browser";
-import { Effect, Layer, pipe } from "effect";
-import { type Blob, type Position, AttachmentId, FarMapApi, Latitude, Longitude } from "@farmap/domain";
+import {  HttpApiClient } from "@effect/platform";
+import { BrowserHttpClient } from "@effect/platform-browser";
+import { Effect, Layer, pipe, Context } from "effect";
+import { type Blob, type Position, AttachmentId, FarMapApi } from "@farmap/domain";
+import type { HttpClient } from "@effect/platform/HttpClient";
+
+class BaseUrl extends Context.Tag("ui/BaseUrl")<BaseUrl, string>() { }
 
 export class FarmapClient extends Effect.Service<FarmapClient>()(
   "ui/FarmapClient",
   {
     accessors: true,
     effect: Effect.gen(function* () {
+      const url = yield* BaseUrl
       const client = yield* HttpApiClient.make(FarMapApi, {
-        baseUrl: "/api",
+        baseUrl: url as string,
       });
 
 
@@ -43,15 +47,22 @@ export class FarmapClient extends Effect.Service<FarmapClient>()(
         signInWithFarcaster,
       } as const;
     }),
-    dependencies: [BrowserHttpClient.layerXMLHttpRequest],
   }, 
 ) {}
 
-export const farmapApi = pipe(
-  Effect.gen(function* () {
-    return yield* FarmapClient
-  }),
-  Effect.provide(FarmapClient.Default),
-  Effect.runSync
-)
+export const BrowserClient = BrowserHttpClient.layerXMLHttpRequest
 
+export function makeFarmapClient(baseURL: string, layer: Layer.Layer<HttpClient>) {
+  return pipe(
+    Effect.gen(function* () {
+      return yield* FarmapClient
+    }),
+    Effect.provide(FarmapClient.Default),
+    Effect.provide(Layer.succeed(BaseUrl, baseURL)),
+    Effect.provide(layer),
+    Effect.runSync
+  )
+}
+
+const farmapPublicClient = makeFarmapClient("/api", BrowserClient)
+export { farmapPublicClient as farmapApi }
