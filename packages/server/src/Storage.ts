@@ -17,6 +17,7 @@ const sqlInit = Effect.gen(function* () {
   yield* sql`
     CREATE TABLE IF NOT EXISTS attachments (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
+      userId INTEGER NOT NULL,
       latitude REAL NOT NULL,
       longitude REAL NOT NULL,
       data TEXT NOT NULL,
@@ -25,7 +26,26 @@ const sqlInit = Effect.gen(function* () {
     )
   `;
 
+  yield* sql`
+    CREATE TABLE IF NOT EXISTS sessions (
+      token TEXT NOT NULL,
+      userId INTEGER NOT NULL,
+      expiresAt TIMESTAMP NOT NULL,
+      createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `;
+
+  yield* sql`
+    CREATE TABLE IF NOT EXISTS users (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      fid INTEGER NOT NULL,
+      createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `;
+
   console.log("Migrations ran");
+
   return sql;
 });
 

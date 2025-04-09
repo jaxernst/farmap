@@ -1,10 +1,10 @@
-import { HttpApiClient  } from "@effect/platform";
+import { HttpApi, HttpApiClient, HttpClient  } from "@effect/platform";
 import { BrowserHttpClient, BrowserRuntime } from "@effect/platform-browser";
-import { Effect, Layer } from "effect";
+import { Effect, Layer, pipe } from "effect";
 import { type Blob, type Position, AttachmentId, FarMapApi, Latitude, Longitude } from "@farmap/domain";
 
-export class MapApiClient extends Effect.Service<MapApiClient>()(
-  "ui/MapApiClient",
+export class FarmapClient extends Effect.Service<FarmapClient>()(
+  "ui/FarmapClient",
   {
     accessors: true,
     effect: Effect.gen(function* () {
@@ -12,30 +12,46 @@ export class MapApiClient extends Effect.Service<MapApiClient>()(
         baseUrl: "/api",
       });
 
+
       async function attachPhoto(position: Position, blob: Blob) {
         return client.MapAttachments.attachPhoto({
           payload: { 
             position, 
             blob
           }
-        }).pipe(Effect.runPromise);
-      }
+        }).pipe( Effect.runPromise); }
 
       async function getPhotoById(id: number) {
         return client.MapAttachments.getById({ path: { id: AttachmentId.make(id) } }).pipe(Effect.runPromise);
       }
 
+      async function signInWithFarcaster(fid: number) {
+        return client.Auth.signInWithFarcaster({ 
+          payload: { 
+            fid, 
+            message: "Sign in with Farcaster", 
+            timestamp: Date.now(), 
+            signature: "", 
+            username: "" 
+          } 
+        }).pipe(Effect.runPromise);
+      }
+
       return {
         attachPhoto,
         getPhotoById,
+        signInWithFarcaster,
       } as const;
     }),
     dependencies: [BrowserHttpClient.layerXMLHttpRequest],
   }, 
 ) {}
 
-const makeApi = Effect.gen(function* () {
-  return yield* MapApiClient
-}).pipe(Effect.provide(MapApiClient.Default))
+export const farmapApi = pipe(
+  Effect.gen(function* () {
+    return yield* FarmapClient
+  }),
+  Effect.provide(FarmapClient.Default),
+  Effect.runSync
+)
 
-export const farmpApi = Effect.runSync(makeApi)

@@ -7,6 +7,8 @@ import {
 import { Option, Effect } from "effect";
 import { AttachmentsRepo } from "./Repo.js";
 import { AttachmentNotFound } from "@farmap/domain/Api";
+import { UserId } from "@farmap/domain/Users";
+import { AttachmentQueryParams } from "@farmap/domain/Query";
 
 export class MapAttachmentService extends Effect.Service<MapAttachmentService>()(
   "api/MapAttachment",
@@ -14,13 +16,15 @@ export class MapAttachmentService extends Effect.Service<MapAttachmentService>()
     effect: Effect.gen(function* () {
       const repo = yield* AttachmentsRepo;
 
-      const attachToMap = (position: Position, item: Blob) =>
+      const attachToMap = (userId: UserId, position: Position, item: Blob) =>
         Effect.gen(function* () {
+          console.log("attaching to map", userId, position, item);
           const res = yield* repo.insert(
             MapAttachmentModel.insert.make({
               latitude: position.lat,
               longitude: position.long,
               data: item,
+              userId: userId,
             })
           );
 
@@ -40,12 +44,23 @@ export class MapAttachmentService extends Effect.Service<MapAttachmentService>()
           });
         });
 
+      const query = (params: AttachmentQueryParams) =>
+        Effect.gen(function* () {
+          if (params.userId) {
+            const attachments = yield* repo.findByUserId(params.userId);
+            return attachments;
+          }
+
+          return [];
+        });
+
       const getByIds = repo.findByIds;
 
       return {
         attachToMap,
         getById,
         getByIds,
+        query,
       };
     }),
     dependencies: [AttachmentsRepo.Default],

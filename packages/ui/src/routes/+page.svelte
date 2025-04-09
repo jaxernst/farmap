@@ -1,16 +1,17 @@
 <script lang="ts">
 	import Map from '$lib/components/Map.svelte';
 	import PhotoUpload from '$lib/components/PhotoUpload.svelte';
-	import { farmpApi } from '$lib/api';
+	import { farmapApi } from '$lib/services/farmap-api';
 	import { mapStore } from '$lib/Map.svelte';
-	import { AttachmentId, type Blob, Latitude, Longitude } from '@farmap/domain';
+	import { type Blob, Latitude, Longitude } from '@farmap/domain';
+
 	async function handleUploadImage(blob: Blob) {
 		const clickMarkerPosition = mapStore.getClickMarkerPosition();
 		const position = clickMarkerPosition || mapStore.currentLocation;
 
 		if (!position) throw new Error('No position found');
 
-		const { id } = await farmpApi.attachPhoto(
+		const { id } = await farmapApi.attachPhoto(
 			{
 				lat: Latitude.make(position.lat),
 				long: Longitude.make(position.lng)
@@ -22,10 +23,9 @@
 		const photoIds = JSON.parse(localStorage.getItem('photoIds') || '[]');
 		localStorage.setItem('photoIds', JSON.stringify([...photoIds, id]));
 
-		await farmpApi.getPhotoById(id);
+		await farmapApi.getPhotoById(id);
 
-		const photoDataUrl = `data:${blob.mimeType};base64,${blob.data}`;
-		mapStore.addPhotoMarker(position.lat, position.lng, photoDataUrl);
+		mapStore.addPhotoMarker(position.lat, position.lng, blob);
 	}
 
 	$effect(() => {
@@ -34,11 +34,14 @@
 
 		for (const id of photoIds) {
 			(async () => {
-				const photo = await farmpApi.getPhotoById(id);
-				const photoDataUrl = `data:${photo.object.mimeType};base64,${photo.object.data}`;
-				mapStore.addPhotoMarker(photo.position.lat, photo.position.long, photoDataUrl);
+				// const photo = await farmapApi.getPhotoById(id);
+				// mapStore.addPhotoMarker(photo.position.lat, photo.position.long, photo.object);
 			})();
 		}
+	});
+
+	$effect(() => {
+		farmapApi.signInWithFarcaster(12163);
 	});
 </script>
 
@@ -57,7 +60,7 @@
 	{#if mapStore.currentLocation}
 		<PhotoUpload onPhotoUpload={handleUploadImage} />
 	{:else}
-		<button class="upload-button" on:click={() => mapStore.requestLocation()}>
+		<button class="upload-button" onclick={() => mapStore.requestLocation()}>
 			Find Location
 		</button>
 	{/if}

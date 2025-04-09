@@ -1,9 +1,9 @@
 import { Model } from "@effect/sql";
 import { Schema } from "effect";
+import { UserId } from "./Users.js";
 
-export const AttachmentId = Schema.Number.pipe(Schema.brand("AttachmentId"));
 export type AttachmentId = typeof AttachmentId.Type;
-
+export const AttachmentId = Schema.Number.pipe(Schema.brand("AttachmentId"));
 export const AttachmentIdFromString = Schema.NumberFromString.pipe(
   Schema.compose(AttachmentId)
 );
@@ -40,6 +40,7 @@ export class MapAttachmentModel extends Model.Class<MapAttachmentModel>(
   latitude: Latitude,
   longitude: Longitude,
   data: BlobSchema,
+  userId: UserId,
   createdAt: Model.DateTimeInsert,
   updatedAt: Model.DateTimeUpdate,
 }) {

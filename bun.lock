@@ -64,6 +64,7 @@
         "@effect/platform-node": "latest",
         "@effect/sql-sqlite-bun": "^0.34.6",
         "effect": "latest",
+        "uuid": "^11.1.0",
       },
     },
     "packages/ui": {
@@ -1329,6 +1330,8 @@
 
     "@eslint/plugin-kit/@eslint/core": ["@eslint/core@0.13.0", "", { "dependencies": { "@types/json-schema": "^7.0.15" } }, "sha512-yfkgDw1KR66rkT5A8ci4irzDysN7FRpq3ttJolR88OqQikAWqwA8j5VZyas+vjyBNFIJ7MfybJ9plMILI2UrCw=="],
 
+    "@farmap/server/@effect/platform-node": ["@effect/platform-node@0.76.11", "", { "dependencies": { "@effect/platform-node-shared": "^0.30.11", "mime": "^3.0.0", "undici": "^7.1.0", "ws": "^8.18.0" }, "peerDependencies": { "@effect/cluster": "^0.29.11", "@effect/platform": "^0.80.6", "@effect/rpc": "^0.55.9", "@effect/sql": "^0.33.6", "effect": "^3.14.6" } }, "sha512-ffq97jFEUEKI5NQ9/y7dUCHxxryId9od8hGk+4TccqHB4KGe/SwcNHC33Wt79iztqnEeWAkW8DmVo5eBh7HGVQ=="],
+
     "@humanfs/node/@humanwhocodes/retry": ["@humanwhocodes/retry@0.3.1", "", {}, "sha512-JBxkERygn7Bv/GbN5Rv8Ul6LVknS+5Bp6RgDC/O8gEBU/yeH5Ui5C/OlWrTb6qct7LjjfT6Re2NxB0ln0yYybA=="],
 
     "@parcel/watcher/detect-libc": ["detect-libc@1.0.3", "", { "bin": { "detect-libc": "./bin/detect-libc.js" } }, "sha512-pGjwhsmsp4kL2RTz08wcOlGN83otlqHeD/Z5T8GXZB+/YcpQ/dgo+lbU8ZsGxV0HIvqqxo9l7mqYwyYMD9bKDg=="],
@@ -1408,6 +1411,8 @@
     "wrap-ansi-cjs/string-width": ["string-width@4.2.3", "", { "dependencies": { "emoji-regex": "^8.0.0", "is-fullwidth-code-point": "^3.0.0", "strip-ansi": "^6.0.1" } }, "sha512-wKyQRQpjJ0sIp62ErSZdGsjMJWsap5oRNihHhu6G7JVO/9jIB6UyevL+tXuOqrng8j/cxKTWyWUwvSTriiZz/g=="],
 
     "wrap-ansi-cjs/strip-ansi": ["strip-ansi@6.0.1", "", { "dependencies": { "ansi-regex": "^5.0.1" } }, "sha512-Y38VPSHcqkFrCpFnQ9vuSXmquuv5oXOKpGeT6aGrr3o3Gc9AlVa6JBfUSOCnbxGGZF+/0ooI7KrPuUSztUdU5A=="],
+
+    "@farmap/server/@effect/platform-node/@effect/platform-node-shared": ["@effect/platform-node-shared@0.30.11", "", { "dependencies": { "@parcel/watcher": "^2.4.1", "multipasta": "^0.2.5", "ws": "^8.18.0" }, "peerDependencies": { "@effect/cluster": "^0.29.11", "@effect/platform": "^0.80.6", "@effect/rpc": "^0.55.9", "@effect/sql": "^0.33.6", "effect": "^3.14.6" } }, "sha512-ziGDUVBG0N0t+hAsDPc+k4G0m/he4Lxoh0dTTCxcE7isqVpwO3R039f+v9PLjqTyBCJhtIJvL1OVeke+dwRLFg=="],
 
     "@typescript-eslint/typescript-estree/minimatch/brace-expansion": ["brace-expansion@2.0.1", "", { "dependencies": { "balanced-match": "^1.0.0" } }, "sha512-XnAIvQ8eM+kC6aULx6wuQiwVsnzsi9d3WxzV3FpWTGA19F621kwdbsAcFKXgKUHZWsy+mY6iL1sHTxWEFCytDA=="],
 

@@ -1,5 +1,5 @@
 import type L from 'leaflet';
-
+import { type Blob } from '@farmap/domain';
 class LeafletMapStore {
     private L: typeof import('leaflet') | null = null;
 
@@ -52,8 +52,10 @@ class LeafletMapStore {
     }
 
     // Add a marker with a photo popup
-    async addPhotoMarker(lat: number, lng: number, photoUrl: string) {
+    async addPhotoMarker(lat: number, lng: number, photo: Blob) {
         if (!this.map) return null;
+
+        const dataUrl = `data:${photo.mimeType};base64,${photo.data}`;
 
         const L = await this.ensureLeaflet();
         const marker = L.marker([lat, lng])
@@ -61,7 +63,7 @@ class LeafletMapStore {
             .bindPopup(
                 `
                 <div class="rounded-2xl overflow-hidden" style="width: 200px;">
-                    <img src="${photoUrl}" class="w-full h-full object-cover" />
+                    <img src="${dataUrl}" class="w-full h-full object-cover" />
                 </div>
                 `,
                 {

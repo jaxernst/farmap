@@ -25,7 +25,8 @@
     "@effect/platform-bun": "^0.60.10",
     "@effect/platform-node": "latest",
     "@effect/sql-sqlite-bun": "^0.34.6",
-    "effect": "latest"
+    "effect": "latest",
+    "uuid": "^11.1.0"
   },
   "effect": {
     "generateExports": {
