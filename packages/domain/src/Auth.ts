@@ -1,4 +1,4 @@
-import { Schema, Redacted, Effect } from "effect";
+import { Schema, Redacted } from "effect";
 import { UserId } from "./Users.js";
 import { Model } from "@effect/sql";
 

@@ -21,6 +21,8 @@
     "coverage": "vitest --coverage"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.782.0",
+    "@aws-sdk/s3-request-presigner": "^3.782.0",
     "@effect/platform": "latest",
     "@effect/platform-bun": "^0.60.10",
     "@effect/platform-node": "latest",

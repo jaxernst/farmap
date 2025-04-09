@@ -1,13 +1,12 @@
-import { DateTime, Effect, Schema } from "effect";
+import { Effect, pipe, Schema } from "effect";
 import { Model, SqlClient, SqlSchema } from "@effect/sql";
 import {
   AttachmentId,
   MapAttachmentModel,
   Position,
-  PositionSchema,
 } from "@farmap/domain/MapAttachments";
 import { UserId, UserModel } from "@farmap/domain/Users";
-import { AttachmentPreviewSchema } from "@farmap/domain/Query";
+import { AttachmentSchema } from "@farmap/domain/MapAttachments";
 import { SessionModel } from "@farmap/domain/Auth";
 
 export class AttachmentsRepo extends Effect.Service<AttachmentsRepo>()(
@@ -25,34 +24,24 @@ export class AttachmentsRepo extends Effect.Service<AttachmentsRepo>()(
       const findByIds = (ids: readonly AttachmentId[]) =>
         SqlSchema.findAll({
           Request: Schema.Array(AttachmentId),
-          Result: Schema.Struct({
-            id: AttachmentId,
-            position: PositionSchema,
-            userId: UserId,
-            timestamp: Schema.Date,
-          }),
+          Result: AttachmentSchema,
           execute: (ids) =>
-            sql`SELECT (id, latitude, longitude, userId, createdAt) FROM attachments WHERE (${sql.in(ids)})`,
+            sql`SELECT * FROM attachments WHERE (${sql.in(ids)})`,
         })(ids).pipe(Effect.orDie);
 
       const findByUserId = (userId: UserId) =>
         SqlSchema.findAll({
           Request: UserId,
-          Result: AttachmentPreviewSchema,
+          Result: AttachmentSchema,
           execute: (userId) =>
-            Effect.gen(function* () {
-              const rows =
-                (yield* sql`SELECT (id, latitude, longitude, userId, createdAt) FROM attachments WHERE userId = ${userId}`) as unknown as MapAttachmentModel[];
-
-              return rows.map((row) =>
-                AttachmentPreviewSchema.make({
-                  id: row.id,
-                  position: { lat: row.latitude, long: row.longitude },
-                  userId: row.userId,
-                  timestamp: DateTime.toDate(row.createdAt),
-                })
-              );
-            }),
+            pipe(
+              sql`SELECT * FROM attachments WHERE userId = ${userId}`,
+              Effect.andThen((rows) =>
+                (rows as unknown as MapAttachmentModel[]).map((row) =>
+                  MapAttachmentModel.toAttachmentSchema(row)
+                )
+              )
+            ),
         })(userId).pipe(Effect.orDie);
 
       const findByLocationSquare = (location: Position, distance: number) =>

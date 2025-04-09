@@ -4,6 +4,7 @@ import { MapAttachmentService } from "../services/MapAttachmentsService.js";
 import { FarMapApi, InputError } from "@farmap/domain/Api";
 import { AttachmentQueryParams } from "@farmap/domain/Query";
 import { User } from "@farmap/domain/Users";
+import { FileStore } from "@farmap/domain/FileStorage";
 
 export const MapAttachmentsApiLive = HttpApiBuilder.group(
   FarMapApi,
@@ -11,38 +12,50 @@ export const MapAttachmentsApiLive = HttpApiBuilder.group(
   (handlers) =>
     Effect.gen(function* () {
       const map = yield* MapAttachmentService;
+      const fileStorage = yield* FileStore;
 
       return handlers
-        .handle("attachPhoto", ({ payload: { position, blob } }) =>
-          Effect.gen(function* () {
-            console.log("attachPhoto", position, blob);
-            const user = yield* User;
-            console.log("user", user);
-            return yield* map.attachToMap(user, position, blob);
-          })
+        .handle("createUploadUrl", ({ payload }) =>
+          fileStorage.getUploadUrl(payload).pipe(
+            Effect.map((url) => ({ url })),
+            Effect.orDie
+          )
+        )
+        .handle("attachPhoto", ({ payload: { position, fileId, fileType } }) =>
+          User.pipe(
+            Effect.andThen((user) =>
+              map.attachToMap(user, position, fileId, fileType)
+            )
+          )
+        )
+        .handle("myAttachments", () =>
+          User.pipe(
+            Effect.andThen((user) =>
+              map.query({ userId: user }).pipe(
+                Effect.map((attachments) => ({
+                  attachments,
+                  totalCount: attachments.length,
+                }))
+              )
+            )
+          )
         )
         .handle("getById", ({ path: { id } }) => map.getById(id))
         .handle("getByIds", ({ urlParams: { ids } }) =>
-          Effect.gen(function* () {
-            const attachments = yield* map.getByIds(ids);
-            return {
+          map.getByIds(ids).pipe(
+            Effect.map((attachments) => ({
               attachments,
               totalCount: attachments.length,
-            };
-          })
+            }))
+          )
         )
         .handle("query", ({ urlParams }) =>
-          Effect.gen(function* () {
-            const params = yield* Schema.decodeUnknown(AttachmentQueryParams)(
-              urlParams
-            );
-
-            const attachments = yield* map.query(params);
-            return {
+          Schema.decodeUnknown(AttachmentQueryParams)(urlParams).pipe(
+            Effect.andThen((params) => map.query(params)),
+            Effect.map((attachments) => ({
               attachments,
               totalCount: attachments.length,
-            };
-          }).pipe(
+            })),
             Effect.catchTag("ParseError", () =>
               Effect.fail(new InputError({ message: "Invalid query params" }))
             )

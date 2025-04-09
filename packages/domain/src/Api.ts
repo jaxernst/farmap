@@ -11,10 +11,15 @@ import {
   AttachmentIdFromString,
   AttachmentSchema,
   PositionSchema,
-  BlobSchema,
 } from "./MapAttachments.js";
-import { AttachmentUrlParams, AttachmentPreviewPage } from "./Query.js";
-import { UserId, UserNotFound, UserModel, User } from "./Users.js";
+import { AttachmentUrlParams, AttachmentPage } from "./Query.js";
+import { UserNotFound, UserModel, User } from "./Users.js";
+import {
+  FileTypeSchema,
+  FileUploadRequestSchema,
+  FileId,
+  FileNotFound,
+} from "./FileStorage.js";
 import {
   FarcasterCredential,
   SessionToken,
@@ -69,15 +74,28 @@ export class UsersApi extends HttpApiGroup.make("Users").add(
 
 export class MapAttachmentsApi extends HttpApiGroup.make("MapAttachments")
   .add(
+    HttpApiEndpoint.post("createUploadUrl", "/attachments/file")
+      .setPayload(FileUploadRequestSchema)
+      .addSuccess(Schema.Struct({ url: Schema.String }))
+      .addError(InputError, { status: 400 })
+  )
+  .add(
     HttpApiEndpoint.post("attachPhoto", "/attachments")
       .setPayload(
         Schema.Struct({
           position: PositionSchema,
-          blob: BlobSchema,
+          fileId: FileId,
+          fileType: FileTypeSchema,
         })
       )
       .addSuccess(Schema.Struct({ id: AttachmentId }))
       .addError(InputError, { status: 400 })
+      .addError(FileNotFound, { status: 400 })
+  )
+  .add(
+    HttpApiEndpoint.get("myAttachments", "/attachments/my").addSuccess(
+      AttachmentPage
+    )
   )
   .middlewareEndpoints(Authentication)
   // unauthenticated
@@ -92,13 +110,13 @@ export class MapAttachmentsApi extends HttpApiGroup.make("MapAttachments")
       .setUrlParams(
         Schema.Struct({ ids: Schema.Array(AttachmentIdFromString) })
       )
-      .addSuccess(AttachmentPreviewPage)
+      .addSuccess(AttachmentPage)
       .addError(InputError, { status: 400 })
   )
   .add(
     HttpApiEndpoint.get("query", "/attachments/query")
       .setUrlParams(AttachmentUrlParams)
-      .addSuccess(AttachmentPreviewPage)
+      .addSuccess(AttachmentPage)
       .addError(InputError, { status: 400 })
   ) {}
 

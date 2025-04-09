@@ -41,10 +41,15 @@ export class FarmapClient extends Effect.Service<FarmapClient>()(
         }).pipe(Effect.runPromise);
       }
 
+      async function myAttachments() {
+        return client.MapAttachments.myAttachments().pipe(Effect.runPromise);
+      }
+
       return {
         attachPhoto,
         getPhotoById,
         signInWithFarcaster,
+        myAttachments,
       } as const;
     }),
   }, 

@@ -1,5 +1,5 @@
 import { Schema } from "effect";
-import { Latitude, Longitude, PositionSchema } from "./MapAttachments.js";
+import { AttachmentSchema, Latitude, Longitude } from "./MapAttachments.js";
 import { UserId } from "./Users.js";
 
 export type AttachmentQueryParams = Schema.Schema.Type<
@@ -22,15 +22,8 @@ export const AttachmentUrlParams = Schema.Struct({
   limit: Schema.optional(Schema.String),
 });
 
-export const AttachmentPreviewSchema = Schema.Struct({
-  id: Schema.Number.pipe(Schema.brand("AttachmentId")),
-  position: PositionSchema,
-  userId: UserId,
-  timestamp: Schema.DateFromString,
-});
-
-export const AttachmentPreviewPage = Schema.Struct({
-  attachments: Schema.Array(AttachmentPreviewSchema),
+export const AttachmentPage = Schema.Struct({
+  attachments: Schema.Array(AttachmentSchema),
   nextCursor: Schema.optional(Schema.String),
   totalCount: Schema.Number,
 });

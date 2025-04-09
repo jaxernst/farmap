@@ -1,20 +1,12 @@
 import { Model } from "@effect/sql";
 import { Schema } from "effect";
 import { UserId } from "./Users.js";
+import { FileTypeSchema, FileUrl } from "./FileStorage.js";
 
 export type AttachmentId = typeof AttachmentId.Type;
 export const AttachmentId = Schema.Number.pipe(Schema.brand("AttachmentId"));
 export const AttachmentIdFromString = Schema.NumberFromString.pipe(
   Schema.compose(AttachmentId)
-);
-
-export type Blob = Schema.Schema.Type<typeof BlobSchema>;
-export const BlobSchema = Schema.parseJson(
-  Schema.Struct({
-    tag: Schema.String,
-    mimeType: Schema.String,
-    data: Schema.String,
-  })
 );
 
 export const Latitude = Schema.Number.pipe(Schema.brand("Latitude"));
@@ -30,7 +22,8 @@ export type Attachment = Schema.Schema.Type<typeof AttachmentSchema>;
 export const AttachmentSchema = Schema.Struct({
   id: AttachmentId,
   position: PositionSchema,
-  object: BlobSchema,
+  fileUrl: FileUrl,
+  fileType: FileTypeSchema,
 });
 
 export class MapAttachmentModel extends Model.Class<MapAttachmentModel>(
@@ -39,7 +32,8 @@ export class MapAttachmentModel extends Model.Class<MapAttachmentModel>(
   id: Model.Generated(AttachmentId),
   latitude: Latitude,
   longitude: Longitude,
-  data: BlobSchema,
+  fileUrl: FileUrl,
+  fileType: FileTypeSchema,
   userId: UserId,
   createdAt: Model.DateTimeInsert,
   updatedAt: Model.DateTimeUpdate,
@@ -48,6 +42,7 @@ export class MapAttachmentModel extends Model.Class<MapAttachmentModel>(
     AttachmentSchema.make({
       id: row.id,
       position: { lat: row.latitude, long: row.longitude },
-      object: row.data,
+      fileUrl: row.fileUrl,
+      fileType: row.fileType,
     });
 }
