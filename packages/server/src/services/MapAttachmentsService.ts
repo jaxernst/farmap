@@ -5,7 +5,7 @@ import {
   MapAttachmentModel,
 } from "@farmap/domain/MapAttachments";
 import { Option, Effect } from "effect";
-import { AttachmentsRepo } from "./Repo.js";
+import { AttachmentsRepo } from "../Repo.js";
 import { AttachmentNotFound } from "@farmap/domain/Api";
 import { UserId } from "@farmap/domain/Users";
 import { AttachmentQueryParams } from "@farmap/domain/Query";

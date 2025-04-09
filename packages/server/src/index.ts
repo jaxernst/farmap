@@ -1,15 +1,16 @@
 import { HttpApiBuilder, HttpMiddleware } from "@effect/platform";
 import { Effect, Layer } from "effect";
-import { ApiLive } from "./ApiLive.js";
-import { MapAttachmentService } from "./MapAttachmentsService.js";
+import { ApiLive } from "./api/ApiGroup.js";
+import { MapAttachmentService } from "./services/MapAttachmentsService.js";
 import { BunHttpServer, BunRuntime } from "@effect/platform-bun";
 import { Db } from "./Storage.js";
-import { AuthLive, AuthService } from "./AuthService.js";
-import { UserService } from "./UserService.js";
+import { AuthMiddlewareLive } from "./AuthMiddleware.js";
+import { UserService } from "./services/UserService.js";
+import { AuthService } from "./services/AuthService.js";
 
 const ServerLive = HttpApiBuilder.serve(HttpMiddleware.logger).pipe(
   Layer.provide(ApiLive),
-  Layer.provide(AuthLive),
+  Layer.provide(AuthMiddlewareLive),
   Layer.provide(AuthService.Default),
   Layer.provide(UserService.Default),
   Layer.provide(MapAttachmentService.Default),

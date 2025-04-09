@@ -56,8 +56,8 @@
 
 		for (const id of photoIds) {
 			(async () => {
-				// const photo = await farmapApi.getPhotoById(id);
-				// mapStore.addPhotoMarker(photo.position.lat, photo.position.long, photo.object);
+				const photo = await farmapApi.getPhotoById(id);
+				mapStore.addPhotoMarker(photo.position.lat, photo.position.long, photo.object);
 			})();
 		}
 	});
@@ -80,10 +80,10 @@
 
 <div class="fixed bottom-2 left-0 z-[1000] flex w-full items-center justify-center gap-2">
 	{#if uploadedPhoto}
-		<button class="action-button select-button" on:click={handleSelectLocation}>
+		<button class="action-button select-button" onclick={handleSelectLocation}>
 			Select Location
 		</button>
-		<button class="action-button cancel-button" on:click={resetUpload}> Cancel </button>
+		<button class="action-button cancel-button" onclick={resetUpload}> Cancel </button>
 	{:else}
 		<PhotoUpload onPhotoUpload={handleUploadImage} />
 	{/if}

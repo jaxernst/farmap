@@ -1,43 +1,11 @@
 import { HttpApiBuilder } from "@effect/platform";
-import { Effect, Layer, Schema } from "effect";
-import { MapAttachmentService } from "./MapAttachmentsService.js";
-import { Authentication, FarMapApi, InputError } from "@farmap/domain/Api";
+import { Effect, Schema } from "effect";
+import { MapAttachmentService } from "../services/MapAttachmentsService.js";
+import { FarMapApi, InputError } from "@farmap/domain/Api";
 import { AttachmentQueryParams } from "@farmap/domain/Query";
 import { User } from "@farmap/domain/Users";
-import { AuthService } from "./AuthService.js";
-import { UserService } from "./UserService.js";
 
-const AuthApiLive = HttpApiBuilder.group(FarMapApi, "Auth", (handlers) =>
-  Effect.gen(function* () {
-    const auth = yield* AuthService;
-    const userService = yield* UserService;
-
-    return handlers
-      .handle("signInWithFarcaster", ({ payload }) =>
-        Effect.gen(function* () {
-          const fid = yield* auth.verifyFarcasterCredential(payload);
-          const user = yield* userService.getOrCreateByFid(fid);
-          const token = yield* auth.createSession(user.id);
-          return token;
-        }).pipe(
-          Effect.tap((token) =>
-            HttpApiBuilder.securitySetCookie(
-              Authentication.security.cookie,
-              token
-            )
-          )
-        )
-      )
-      .handle("signOut", ({ payload: { token } }) =>
-        Effect.gen(function* () {
-          // yield* auth.signOut(token);
-          return {};
-        })
-      );
-  })
-);
-
-const MapAttachmentsApiLive = HttpApiBuilder.group(
+export const MapAttachmentsApiLive = HttpApiBuilder.group(
   FarMapApi,
   "MapAttachments",
   (handlers) =>
@@ -81,9 +49,4 @@ const MapAttachmentsApiLive = HttpApiBuilder.group(
           )
         );
     })
-);
-
-export const ApiLive = HttpApiBuilder.api(FarMapApi).pipe(
-  Layer.provide(MapAttachmentsApiLive),
-  Layer.provide(AuthApiLive)
 );

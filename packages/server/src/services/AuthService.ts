@@ -1,14 +1,5 @@
-import {
-  Effect,
-  Random,
-  Schedule,
-  Duration,
-  Option,
-  Ref,
-  DateTime,
-  Layer,
-} from "effect";
-import { SessionsRepo } from "./Repo.js";
+import { Effect, Duration, Option, DateTime } from "effect";
+import { SessionsRepo } from "../Repo.js";
 import {
   FarcasterCredential,
   SessionModel,
@@ -19,58 +10,10 @@ import {
 } from "@farmap/domain/Auth";
 import { UserId } from "@farmap/domain/Users";
 import { v4 as uuidv4 } from "uuid";
-import { Authentication } from "@farmap/domain/Api";
-import { Unauthorized } from "@effect/platform/HttpApiError";
-
-export const AuthLive = Layer.effect(
-  Authentication,
-  Effect.gen(function* () {
-    const authService = yield* AuthService;
-
-    return Authentication.of({
-      cookie: (sessionToken) =>
-        authService.getSession(sessionToken as SessionToken).pipe(
-          Effect.catchAll((error) => {
-            console.log("Error", error);
-            return Effect.fail(error);
-          })
-        ),
-    });
-  })
-);
 
 export class AuthService extends Effect.Service<AuthService>()("api/Auth", {
   effect: Effect.gen(function* () {
     const sessionsRepo = yield* SessionsRepo;
-    const nonceRef = yield* Ref.make(new Map<string, DateTime.Utc>());
-
-    // Store nonces in memory with TTL
-    const nonceStore = new Map<string, number>();
-
-    const generateNonce = (expiry = Duration.minutes(10)) =>
-      Effect.gen(function* () {
-        const uuid = uuidv4();
-        const now = yield* DateTime.now;
-        const expiresAt = DateTime.addDuration(now, expiry);
-        yield* Ref.update(nonceRef, (map) => map.set(uuid, expiresAt));
-        return { nonce: uuid };
-      });
-
-    // Verify the nonce exists and is valid
-    const verifyNonce = (nonce: string) =>
-      Effect.sync(() => {
-        const expiry = nonceStore.get(nonce);
-        if (!expiry) {
-          return false;
-        }
-        if (Date.now() > expiry) {
-          nonceStore.delete(nonce);
-          return false;
-        }
-        // Delete after use
-        nonceStore.delete(nonce);
-        return true;
-      });
 
     const verifyFarcasterCredential = (credential: FarcasterCredential) =>
       Effect.gen(function* () {

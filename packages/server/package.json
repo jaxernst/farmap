@@ -25,8 +25,14 @@
     "@effect/platform-bun": "^0.60.10",
     "@effect/platform-node": "latest",
     "@effect/sql-sqlite-bun": "^0.34.6",
+    "@types/staticmaps": "^1.12.5",
     "effect": "latest",
+    "sharp": "^0.33.2",
+    "staticmaps": "^1.13.1",
     "uuid": "^11.1.0"
+  },
+  "devDependencies": {
+    "@types/sharp": "^0.32.0"
   },
   "effect": {
     "generateExports": {

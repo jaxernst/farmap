@@ -1,5 +1,5 @@
 import { Effect } from "effect";
-import { UsersRepo } from "./Repo.js";
+import { UsersRepo } from "../Repo.js";
 import { UserModel } from "@farmap/domain/Users";
 
 export class UserService extends Effect.Service<UserService>()("api/User", {

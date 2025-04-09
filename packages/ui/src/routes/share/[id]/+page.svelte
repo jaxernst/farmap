@@ -49,7 +49,7 @@
 		<div class="loading">Loading...</div>
 	{:else if attachment}
 		<div class="photo-container">
-			<img src={imageUrl} alt="Map photo" class="main-photo" />
+			<img src={imageUrl} alt="Map" class="main-photo" />
 			<div class="mini-map-container">
 				{#if attachment.position}
 					<MiniMap lat={Number(attachment.position.lat)} long={Number(attachment.position.long)} />
