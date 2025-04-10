@@ -1,16 +1,8 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { farmapApi } from '$lib/services/farmap-api';
-	import { onMount } from 'svelte';
-	import { error } from '@sveltejs/kit';
-	import MiniMap from '$lib/components/MiniMap.svelte';
-	import type { Attachment } from '@farmap/domain';
 
 	let imageUrl = $derived(page.data.socialPreview);
 	let attachment = $derived(page.data.attachment);
-
-	let loading = $state(false);
-	$inspect(page);
 </script>
 
 <svelte:head>
@@ -51,13 +43,6 @@
 		font-family: sans-serif;
 	}
 
-	.loading,
-	.error {
-		text-align: center;
-		padding: 2rem;
-		font-size: 1.5rem;
-	}
-
 	.photo-container {
 		position: relative;
 		width: 100%;
@@ -69,18 +54,6 @@
 	.main-photo {
 		width: 100%;
 		display: block;
-	}
-
-	.mini-map-container {
-		position: absolute;
-		top: 16px;
-		right: 16px;
-		width: 150px;
-		height: 150px;
-		border-radius: 8px;
-		overflow: hidden;
-		border: 3px solid white;
-		box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
 	}
 
 	.info {
