@@ -44,6 +44,11 @@ export interface FileStorage {
   getFileMetadata(id: FileId): Effect.Effect<FileMetadata, FileNotFound>;
   deleteFile(id: FileId): Effect.Effect<void, FileNotFound>;
   toFileUrl(id: FileId): FileUrl;
+  uploadFile(
+    fileId: FileId,
+    buffer: Buffer,
+    contentType: string
+  ): Effect.Effect<void, FileNotFound>;
 }
 
 export class FileStore extends Context.Tag("FileStore")<

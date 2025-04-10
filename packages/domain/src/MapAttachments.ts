@@ -24,6 +24,7 @@ export const AttachmentSchema = Schema.Struct({
   position: PositionSchema,
   fileUrl: FileUrl,
   fileType: FileTypeSchema,
+  previewUrl: Schema.optional(FileUrl),
 });
 
 export class MapAttachmentModel extends Model.Class<MapAttachmentModel>(
@@ -34,6 +35,7 @@ export class MapAttachmentModel extends Model.Class<MapAttachmentModel>(
   longitude: Longitude,
   fileUrl: FileUrl,
   fileType: FileTypeSchema,
+  previewUrl: Schema.NullOr(FileUrl),
   userId: UserId,
   createdAt: Model.DateTimeInsert,
   updatedAt: Model.DateTimeUpdate,
@@ -44,5 +46,6 @@ export class MapAttachmentModel extends Model.Class<MapAttachmentModel>(
       position: { lat: row.latitude, long: row.longitude },
       fileUrl: row.fileUrl,
       fileType: row.fileType,
+      previewUrl: row.previewUrl ?? undefined,
     });
 }

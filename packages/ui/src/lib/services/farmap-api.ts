@@ -74,11 +74,16 @@ export class FarmapClient extends Effect.Service<FarmapClient>()(
         return client.MapAttachments.myAttachments().pipe(Effect.runPromise);
       }
 
+      async function getSocialPreview(id: number) {
+        return client.MapAttachments.getSocialPreview({ path: { id: AttachmentId.make(id) } }).pipe(Effect.runPromise);
+      }
+
       return {
         attachPhoto,
         getPhotoById,
         signInWithFarcaster,
         myAttachments,
+        getSocialPreview,
       } as const;
     }),
   }, 

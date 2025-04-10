@@ -1,14 +1,14 @@
 import type L from 'leaflet';
-import { type Blob } from '@farmap/domain';
+import { mount, unmount } from 'svelte';
 import PhotoPopup from './components/PhotoPopup.svelte';
-import { mount } from 'svelte';
+import { makeRemoteId } from '@effect/experimental/EventJournal';
 
 class LeafletMapStore {
     private L: typeof import('leaflet') | null = null;
 
     map: L.Map | null = $state(null);
     currentLocation: L.LatLng | null = $state(null);
-    markers: L.Marker[] = $state([]);
+    markers: Array<{ id: string, marker: L.Marker }> = $state([]);
     clickMarker: L.Marker | null = $state(null);
 
     private async ensureLeaflet() {
@@ -55,51 +55,54 @@ class LeafletMapStore {
     }
 
     // Add a marker with a photo popup
-    async addPhotoMarker(lat: number, lng: number, dataUrl: string) {
+    async addPhotoMarker(id: string, lat: number, lng: number, dataUrl: string) {
         if (!this.map) return null;
 
         const L = await this.ensureLeaflet();
         
-        // Create a DOM element to mount our Svelte component
-        const popupEl = document.createElement('div');
-        
-        // Create the marker and attach it to the map
-        const marker = L.marker([lat, lng]).addTo(this.map);
-        
-        // Create a popup
-        const popup = L.popup({
-            className: 'custom-popup',
-            autoPan: true,
-            closeButton: true,
-            autoClose: false,
-            closeOnClick: false
-        });
-        
-        // Bind the popup to the marker
-        marker.bindPopup(popup);
-        
-        // Mount the Svelte component when popup opens
-        marker.on('popupopen', () => {
-            // Mount the Svelte component
-            mount(PhotoPopup, {
-                target: popupEl,
-                props: {
-                    imageUrl: dataUrl
-                }
-            });
-            
-            // Get the popup content container and append our component
-            const container = popup.getElement();
-            if (container) {
-                container.appendChild(popupEl);
+        const popupContainer = document.createElement('div');
+        mount(PhotoPopup, {
+            target: popupContainer,
+            props: {
+                imageUrl: dataUrl,
+                attachmentId: id,
+                onDelete: () => this.removePhotoMarker(id)
             }
         });
+
+        const marker = L.marker([lat, lng])
+            .addTo(this.map)
+            .bindPopup(
+                popupContainer,
+                {
+                    className: 'custom-popup',
+                    autoPan: true,
+                    closeButton: true,
+                    autoClose: false,
+                    closeOnClick: false
+                }
+            ).openPopup();
+
+        this.markers = [...this.markers, { id, marker }];
+        return id;
+    }
+
+    // Remove a photo marker by ID
+    removePhotoMarker(id: string) {
+        if (!this.map) return;
+
+        console.log('removing marker', { id });
         
-        // Open the popup immediately
-        marker.openPopup();
-        
-        this.markers = [...this.markers, marker];
-        return marker;
+        const markerToRemove = this.markers.find(m => m.id === id);
+        if (markerToRemove) {
+            // Remove the marker from the map
+            markerToRemove.marker.remove();
+                        this.markers = this.markers.filter(m => m.id !== id);
+            
+            console.log(`Marker ${id} removed successfully`);
+        } else {
+            console.warn(`No marker found with ID: ${id}`);
+        }
     }
 
     async requestLocation() {
@@ -110,7 +113,7 @@ class LeafletMapStore {
 
     // Clear all markers
     clearMarkers() {
-        this.markers.forEach(marker => marker.remove());
+        this.markers.forEach(({ marker }) => marker.remove());
         this.markers = [];
     }
 

@@ -1,10 +1,12 @@
 import { HttpApiBuilder } from "@effect/platform";
-import { Effect, Schema } from "effect";
+import { Effect, pipe, Schema } from "effect";
 import { MapAttachmentService } from "../services/MapAttachmentsService.js";
-import { FarMapApi, InputError } from "@farmap/domain/Api";
+import { AttachmentNotFound, FarMapApi, InputError } from "@farmap/domain/Api";
 import { AttachmentQueryParams } from "@farmap/domain/Query";
 import { User } from "@farmap/domain/Users";
 import { FileStore } from "@farmap/domain/FileStorage";
+import { SocialPreviewService } from "../services/SocialPreviewService.js";
+import { MapAttachmentModel } from "@farmap/domain/MapAttachments";
 
 export const MapAttachmentsApiLive = HttpApiBuilder.group(
   FarMapApi,
@@ -12,6 +14,7 @@ export const MapAttachmentsApiLive = HttpApiBuilder.group(
   (handlers) =>
     Effect.gen(function* () {
       const map = yield* MapAttachmentService;
+      const mapPreviews = yield* SocialPreviewService;
       const fileStorage = yield* FileStore;
 
       return handlers
@@ -47,6 +50,19 @@ export const MapAttachmentsApiLive = HttpApiBuilder.group(
               attachments,
               totalCount: attachments.length,
             }))
+          )
+        )
+        .handle("getSocialPreview", ({ path: { id } }) =>
+          mapPreviews.getOrGenerateSocialPreview(id).pipe(
+            Effect.map(({ url, attachment }) => ({
+              url,
+              attachment: MapAttachmentModel.toAttachmentSchema(attachment),
+            })),
+            Effect.catchTags({
+              FileNotFound: () => Effect.fail(new AttachmentNotFound({ id })),
+              FileFetchError: (error) =>
+                pipe(Effect.logError(error), Effect.die),
+            })
           )
         )
         .handle("query", ({ urlParams }) =>

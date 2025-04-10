@@ -116,6 +116,12 @@ export class MapAttachmentsApi extends HttpApiGroup.make("MapAttachments")
       .addError(InputError, { status: 400 })
   )
   .add(
+    HttpApiEndpoint.get("getSocialPreview", "/attachments/social-preview/:id")
+      .setPath(Schema.Struct({ id: AttachmentIdFromString }))
+      .addSuccess(Schema.Struct({ url: FileUrl, attachment: AttachmentSchema }))
+      .addError(AttachmentNotFound, { status: 404 })
+  )
+  .add(
     HttpApiEndpoint.get("query", "/attachments/query")
       .setUrlParams(AttachmentUrlParams)
       .addSuccess(AttachmentPage)

@@ -21,6 +21,7 @@ const sqlInit = Effect.gen(function* () {
       longitude REAL NOT NULL,
       fileUrl TEXT NOT NULL,
       fileType TEXT NOT NULL,
+      previewUrl TEXT,
       userId INTEGER NOT NULL,
       createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP

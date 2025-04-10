@@ -34,6 +34,7 @@ export class MapAttachmentService extends Effect.Service<MapAttachmentService>()
               fileUrl: fileStorage.toFileUrl(fileId),
               fileType,
               userId: userId,
+              previewUrl: null,
             })
           );
 

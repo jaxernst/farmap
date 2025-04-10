@@ -158,12 +158,31 @@ const S3FileStoreService = Layer.effect(
         return true;
       });
 
+    const uploadFile = (
+      fileId: FileId,
+      buffer: Buffer,
+      contentType: string
+    ): Effect.Effect<void, FileNotFound> =>
+      Effect.gen(function* (_) {
+        const bucketName = config.bucketName;
+
+        const command = new PutObjectCommand({
+          Bucket: bucketName,
+          Key: fileId,
+          Body: buffer,
+          ContentType: contentType,
+        });
+
+        yield* Effect.promise(() => s3Client.send(command));
+      });
+
     return {
       getUploadUrl,
       confirmUpload,
       getFileMetadata,
       deleteFile,
       toFileUrl,
+      uploadFile,
       checkFileExists,
     };
   })

@@ -12,6 +12,8 @@
 		file: File;
 	} | null = $state(null);
 
+	let uploadingPhoto = $state(false);
+
 	async function handleUploadImage(upload: {
 		filename: string;
 		contentType: string;
@@ -31,6 +33,8 @@
 			return;
 		}
 
+		uploadingPhoto = true;
+
 		try {
 			const { id } = await farmapApi.attachPhoto(
 				{
@@ -48,18 +52,46 @@
 
 			// Create a URL for the uploaded image to display on the map
 			const imageUrl = URL.createObjectURL(uploadedPhoto.file);
-			mapStore.addPhotoMarker(clickMarkerPosition.lat, clickMarkerPosition.lng, imageUrl);
+			mapStore.addPhotoMarker(
+				id.toString(),
+				clickMarkerPosition.lat,
+				clickMarkerPosition.lng,
+				imageUrl
+			);
 
 			// Reset state to allow for new uploads
 			uploadedPhoto = null;
 		} catch (error) {
 			console.error('Error saving photo:', error);
 			alert('Failed to save photo. Please try again.');
+		} finally {
+			uploadingPhoto = false;
 		}
 	}
 
 	function resetUpload() {
 		uploadedPhoto = null;
+	}
+
+	// Function to handle photo deletion
+	async function handleDeletePhoto(photoId: string) {
+		try {
+			// Mock API call to delete photo
+			console.log(`Deleting photo with ID: ${photoId}`);
+
+			// Remove from local storage
+			const photoIds = JSON.parse(localStorage.getItem('farmap-attached-ids') || '[]');
+			const updatedIds = photoIds.filter((id) => id !== photoId);
+			localStorage.setItem('farmap-attached-ids', JSON.stringify(updatedIds));
+
+			// Remove from map
+			mapStore.removePhotoMarker(photoId);
+
+			console.log(`Photo ${photoId} successfully deleted`);
+		} catch (error) {
+			console.error('Error deleting photo:', error);
+			alert('Failed to delete photo. Please try again.');
+		}
 	}
 
 	$effect(() => {
@@ -69,8 +101,12 @@
 		for (const id of photoIds) {
 			(async () => {
 				const photo = await farmapApi.getPhotoById(id);
-				console.log('photo', photo);
-				mapStore.addPhotoMarker(photo.position.lat, photo.position.long, photo.fileUrl);
+				mapStore.addPhotoMarker(
+					id.toString(),
+					photo.position.lat,
+					photo.position.long,
+					photo.fileUrl
+				);
 			})();
 		}
 	});
@@ -92,7 +128,11 @@
 </div>
 
 <div class="fixed bottom-2 left-0 z-[1000] flex w-full items-center justify-center gap-2">
-	{#if uploadedPhoto}
+	{#if uploadingPhoto}
+		<button class="action-button select-button disabled:cursor-not-allowed" disabled
+			>Uploading...</button
+		>
+	{:else if uploadedPhoto}
 		<button class="action-button select-button" onclick={handleSelectLocation}>
 			Select Location
 		</button>

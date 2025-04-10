@@ -8,6 +8,7 @@ import { AuthMiddlewareLive } from "./AuthMiddleware.js";
 import { UserService } from "./services/UserService.js";
 import { AuthService } from "./services/AuthService.js";
 import { S3FileStoreServiceLive } from "./services/S3FileStoreService.js";
+import { SocialPreviewService } from "./services/SocialPreviewService.js";
 
 const ServerLive = HttpApiBuilder.serve(HttpMiddleware.logger).pipe(
   Layer.provide(ApiLive),
@@ -15,6 +16,7 @@ const ServerLive = HttpApiBuilder.serve(HttpMiddleware.logger).pipe(
   Layer.provide(AuthService.Default),
   Layer.provide(UserService.Default),
   Layer.provide(MapAttachmentService.Default),
+  Layer.provide(SocialPreviewService.Default),
   Layer.provide(S3FileStoreServiceLive),
   Layer.provide(Db.Live),
   Layer.provide(BunHttpServer.layer({ port: 3001 }))

@@ -1,33 +1,16 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { farmapApi } from '$lib/services/farmap-api';
 	import { onMount } from 'svelte';
 	import { error } from '@sveltejs/kit';
 	import MiniMap from '$lib/components/MiniMap.svelte';
 	import type { Attachment } from '@farmap/domain';
 
-	let attachment: Attachment | null = $state(null);
-	let loading = $state(true);
-	let imageUrl = $state('');
+	let imageUrl = $derived(page.data.socialPreview);
+	let attachment = $derived(page.data.attachment);
 
-	$inspect($page);
-
-	onMount(async () => {
-		try {
-			const id = parseInt($page.params.id);
-			if (isNaN(id)) {
-				throw error(400, 'Invalid ID');
-			}
-
-			attachment = await farmapApi.getPhotoById(id);
-			imageUrl = `data:${attachment.object.mimeType};base64,${attachment.object.data}`;
-			loading = false;
-		} catch (e) {
-			console.error('Error loading photo:', e);
-			loading = false;
-			throw error(404, 'Photo not found');
-		}
-	});
+	let loading = $state(false);
+	$inspect(page);
 </script>
 
 <svelte:head>
@@ -35,39 +18,29 @@
 		<title>Photo on FarMap</title>
 		<meta property="og:title" content="Photo on FarMap" />
 		<meta property="og:description" content="View this location on FarMap" />
-		<meta property="og:image" content={`/api/og-image/${$page.params.id}`} />
+		<meta property="og:image" content={imageUrl} />
 		<meta property="og:image:width" content="1200" />
 		<meta property="og:image:height" content="630" />
 		<meta property="og:type" content="website" />
-		<meta property="og:url" content={`${$page.url.origin}/share/${$page.params.id}`} />
+		<meta property="og:url" content={`${page.url.origin}/share/${page.params.id}`} />
 		<meta name="twitter:card" content="summary_large_image" />
 	{/if}
 </svelte:head>
 
 <div class="container">
-	{#if loading}
-		<div class="loading">Loading...</div>
-	{:else if attachment}
-		<div class="photo-container">
-			<img src={imageUrl} alt="Map" class="main-photo" />
-			<div class="mini-map-container">
-				{#if attachment.position}
-					<MiniMap lat={Number(attachment.position.lat)} long={Number(attachment.position.long)} />
-				{/if}
-			</div>
-		</div>
-		<div class="info">
-			<h1>Location Photo</h1>
-			<p>
-				Coordinates: {Number(attachment.position.lat).toFixed(6)}, {Number(
-					attachment.position.long
-				).toFixed(6)}
-			</p>
-			<a href="/" class="view-button">View on Map</a>
-		</div>
-	{:else}
-		<div class="error">Photo not found</div>
-	{/if}
+	<div class="photo-container">
+		<img src={imageUrl} alt="Map" class="main-photo" />
+	</div>
+
+	<div class="info">
+		<h1>Location Photo</h1>
+		<p>
+			Coordinates: {Number(attachment?.position.lat).toFixed(6)}°N,
+			{Number(attachment?.position.long).toFixed(6)}°E
+		</p>
+		<a href="/" class="view-button">View on Map</a>
+		<a href={attachment.fileUrl} class="view-button-secondary">View Original</a>
+	</div>
 </div>
 
 <style>
@@ -132,6 +105,15 @@
 		text-decoration: none;
 		border-radius: 4px;
 		font-weight: bold;
+		transition: background-color 0.3s;
+	}
+
+	.view-button-secondary {
+		color: #4caf50;
+		padding: 10px 20px;
+		text-decoration: none;
+		border-radius: 4px;
+		font-weight: semibold;
 		transition: background-color 0.3s;
 	}
 

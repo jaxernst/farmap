@@ -8,6 +8,7 @@ import {
 import { UserId, UserModel } from "@farmap/domain/Users";
 import { AttachmentSchema } from "@farmap/domain/MapAttachments";
 import { SessionModel } from "@farmap/domain/Auth";
+import { FileUrl } from "@farmap/domain/FileStorage";
 
 export class AttachmentsRepo extends Effect.Service<AttachmentsRepo>()(
   "repo/MapAttachments",
@@ -47,11 +48,17 @@ export class AttachmentsRepo extends Effect.Service<AttachmentsRepo>()(
       const findByLocationSquare = (location: Position, distance: number) =>
         new Error("Not Implemented");
 
+      const updatePreviewUrl = (id: AttachmentId, previewUrl: FileUrl) =>
+        sql`UPDATE attachments SET previewUrl = ${previewUrl} WHERE id = ${id}`.pipe(
+          Effect.orDie
+        );
+
       return {
         ...repo,
         findByIds,
         findByLocationSquare,
         findByUserId,
+        updatePreviewUrl,
       };
     }),
   }
