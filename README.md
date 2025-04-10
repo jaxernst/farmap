@@ -23,7 +23,7 @@ pnpm tsx ./path/to/the/file.ts
 
 ## Operations
 
-** Run dev server **
+**Run dev server**
 ```sh
 bun run --cwd packages/server dev
 ```
