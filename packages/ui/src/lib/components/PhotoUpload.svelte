@@ -1,11 +1,13 @@
 <script lang="ts">
-	import { mapStore } from '$lib/Map.svelte';
-	import { type Blob, type Position } from '@farmap/domain';
-
 	let {
 		onPhotoUpload
 	}: {
-		onPhotoUpload?: (blob: Blob) => void;
+		onPhotoUpload?: (upload: {
+			filename: string;
+			contentType: string;
+			size: number;
+			file: File;
+		}) => void;
 	} = $props();
 
 	async function handlePhotoUpload(event: Event) {
@@ -14,30 +16,14 @@
 
 		const file = input.files[0];
 
-		const reader = new FileReader();
+		const upload = {
+			filename: file.name,
+			contentType: file.type,
+			size: file.size,
+			file: file
+		};
 
-		try {
-			// Read the file as a data URL
-			const dataUrl = await new Promise<string>((resolve, reject) => {
-				reader.onload = () => resolve(reader.result as string);
-				reader.onerror = () => reject(reader.error);
-				reader.readAsDataURL(file);
-			});
-
-			// Extract the base64 data and mime type from the dataURL
-			const [header, base64Data] = dataUrl.split(',');
-			const mimeType = header.match(/data:(.*?);/)?.[1] || file.type;
-
-			const blobData = {
-				tag: file.name.split('.').pop() || 'unknown', // file extension as tag
-				mimeType,
-				data: base64Data
-			};
-
-			onPhotoUpload?.(blobData);
-		} catch (error) {
-			console.error('Error reading file:', error);
-		}
+		onPhotoUpload?.(upload);
 	}
 </script>
 

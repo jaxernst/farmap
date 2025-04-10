@@ -17,7 +17,7 @@ export const MapAttachmentsApiLive = HttpApiBuilder.group(
       return handlers
         .handle("createUploadUrl", ({ payload }) =>
           fileStorage.getUploadUrl(payload).pipe(
-            Effect.map((url) => ({ url })),
+            Effect.map(({ signedUrl, fileId }) => ({ signedUrl, fileId })),
             Effect.orDie
           )
         )

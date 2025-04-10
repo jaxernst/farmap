@@ -21,8 +21,8 @@ export class UserAlreadyExists extends Schema.TaggedError<UserAlreadyExists>()(
 export class UserModel extends Model.Class<UserModel>("users/UserModel")({
   id: Model.Generated(UserId),
   fid: Schema.Number,
-  displayName: Schema.optional(Schema.String),
-  displayImage: Schema.optional(Schema.String),
+  displayName: Schema.NullOr(Schema.String),
+  displayImage: Schema.NullOr(Schema.String),
   createdAt: Model.DateTimeInsert,
   updatedAt: Model.DateTimeUpdate,
 }) {}

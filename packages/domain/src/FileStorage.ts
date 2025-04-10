@@ -37,7 +37,9 @@ export class FileNotFound extends Schema.TaggedError<FileNotFound>()(
 ) {}
 
 export interface FileStorage {
-  getUploadUrl(request: FileUploadRequest): Effect.Effect<FileUrl>;
+  getUploadUrl(
+    request: FileUploadRequest
+  ): Effect.Effect<{ signedUrl: FileUrl; fileId: FileId }>;
   confirmUpload(id: FileId): Effect.Effect<void, FileNotFound>;
   getFileMetadata(id: FileId): Effect.Effect<FileMetadata, FileNotFound>;
   deleteFile(id: FileId): Effect.Effect<void, FileNotFound>;

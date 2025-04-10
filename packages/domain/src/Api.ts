@@ -18,6 +18,7 @@ import {
   FileTypeSchema,
   FileUploadRequestSchema,
   FileId,
+  FileUrl,
   FileNotFound,
 } from "./FileStorage.js";
 import {
@@ -76,8 +77,9 @@ export class MapAttachmentsApi extends HttpApiGroup.make("MapAttachments")
   .add(
     HttpApiEndpoint.post("createUploadUrl", "/attachments/file")
       .setPayload(FileUploadRequestSchema)
-      .addSuccess(Schema.Struct({ url: Schema.String }))
+      .addSuccess(Schema.Struct({ signedUrl: FileUrl, fileId: FileId }))
       .addError(InputError, { status: 400 })
+      .addError(FileNotFound, { status: 400 })
   )
   .add(
     HttpApiEndpoint.post("attachPhoto", "/attachments")

@@ -52,10 +52,8 @@ class LeafletMapStore {
     }
 
     // Add a marker with a photo popup
-    async addPhotoMarker(lat: number, lng: number, photo: Blob) {
+    async addPhotoMarker(lat: number, lng: number, dataUrl: string) {
         if (!this.map) return null;
-
-        const dataUrl = `data:${photo.mimeType};base64,${photo.data}`;
 
         const L = await this.ensureLeaflet();
         const marker = L.marker([lat, lng])

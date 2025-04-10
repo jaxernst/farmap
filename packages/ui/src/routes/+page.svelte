@@ -3,13 +3,23 @@
 	import PhotoUpload from '$lib/components/PhotoUpload.svelte';
 	import { farmapApi } from '$lib/services/farmap-api';
 	import { mapStore } from '$lib/Map.svelte';
-	import { type Blob, Latitude, Longitude } from '@farmap/domain';
+	import { Latitude, Longitude } from '@farmap/domain';
 
-	let uploadedPhoto: Blob | null = $state(null);
+	let uploadedPhoto: {
+		filename: string;
+		contentType: string;
+		size: number;
+		file: File;
+	} | null = $state(null);
 
-	async function handleUploadImage(blob: Blob) {
-		// Just store the uploaded photo temporarily
-		uploadedPhoto = blob;
+	async function handleUploadImage(upload: {
+		filename: string;
+		contentType: string;
+		size: number;
+		file: File;
+	}) {
+		// Store the uploaded photo temporarily
+		uploadedPhoto = upload;
 	}
 
 	async function handleSelectLocation() {
@@ -30,13 +40,15 @@
 				uploadedPhoto
 			);
 
-			// save Id to local storage list
-			const photoIds = JSON.parse(localStorage.getItem('photoIds') || '[]');
-			localStorage.setItem('photoIds', JSON.stringify([...photoIds, id]));
+			// cache Ids to local storage list
+			const photoIds = JSON.parse(localStorage.getItem('farmap-attached-ids') || '[]');
+			localStorage.setItem('farmap-attached-ids', JSON.stringify([...photoIds, id]));
 
 			await farmapApi.getPhotoById(id);
 
-			mapStore.addPhotoMarker(clickMarkerPosition.lat, clickMarkerPosition.lng, uploadedPhoto);
+			// Create a URL for the uploaded image to display on the map
+			const imageUrl = URL.createObjectURL(uploadedPhoto.file);
+			mapStore.addPhotoMarker(clickMarkerPosition.lat, clickMarkerPosition.lng, imageUrl);
 
 			// Reset state to allow for new uploads
 			uploadedPhoto = null;
@@ -51,13 +63,14 @@
 	}
 
 	$effect(() => {
-		const photoIds = JSON.parse(localStorage.getItem('photoIds') || '[]');
+		const photoIds = JSON.parse(localStorage.getItem('farmap-attached-ids') || '[]');
 		if (photoIds.length === 0) return;
 
 		for (const id of photoIds) {
 			(async () => {
 				const photo = await farmapApi.getPhotoById(id);
-				mapStore.addPhotoMarker(photo.position.lat, photo.position.long, photo.object);
+				console.log('photo', photo);
+				mapStore.addPhotoMarker(photo.position.lat, photo.position.long, photo.fileUrl);
 			})();
 		}
 	});
