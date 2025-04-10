@@ -17,7 +17,8 @@ export class UserService extends Effect.Service<UserService>()("api/User", {
           return yield* repo.insert(
             UserModel.insert.make({
               fid,
-              displayName: undefined,
+              displayName: null,
+              displayImage: null,
             })
           );
         }

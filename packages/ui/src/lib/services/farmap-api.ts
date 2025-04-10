@@ -26,7 +26,6 @@ export class FarmapClient extends Effect.Service<FarmapClient>()(
 
       const attachPhoto = async (position: Position, upload: Upload) => 
         Effect.gen(function* () {
-          // 1. Get presigned URL for upload
           const { signedUrl, fileId } = yield* client.MapAttachments.createUploadUrl({ 
             payload: {
               filename: upload.filename,
@@ -35,10 +34,9 @@ export class FarmapClient extends Effect.Service<FarmapClient>()(
             } 
           });
           
-          // 2. Upload file to S3 using the presigned URL
           const uploadSuccess = yield* Effect.tryPromise({
             try: () => uploadFileToS3(signedUrl, upload.file),
-            catch: () => new Error("Failed to upload to signed URL")
+            catch: (e) => new Error("Failed to upload to signed URL", { cause: e })
           });
 
           
@@ -46,7 +44,6 @@ export class FarmapClient extends Effect.Service<FarmapClient>()(
             return yield* Effect.fail(new Error('Failed to upload file to S3'));
           }
           
-          // 3. Confirm upload and attach to map
           return yield* client.MapAttachments.attachPhoto({ 
             payload: { 
               position, 
@@ -114,9 +111,6 @@ export const uploadFileToS3 = async (
   presignedUrl: string, 
   file: File
 ): Promise<boolean> => {
-  try {
-    console.log('Attempting to upload to presigned URL:', presignedUrl);
-    
     const response = await fetch(presignedUrl, {
       method: 'PUT',
       headers: {
@@ -127,20 +121,8 @@ export const uploadFileToS3 = async (
     });
     
     if (!response.ok) {
-      console.error('S3 upload failed with status:', response.status);
-      console.error('Response details:', await response.text().catch(() => 'Unable to get response text'));
-      return false;
+      throw new Error(`S3 upload failed with status: ${response.status}`);
     }
     
     return true;
-  } catch (error) {
-    console.error('Error uploading file to S3:', error);
-    // Log more details about the error if possible
-    if (error instanceof Error) {
-      console.error('Error name:', error.name);
-      console.error('Error message:', error.message);
-      console.error('Error stack:', error.stack);
-    }
-    throw new Error('Failed to upload file');
-  }
 }
