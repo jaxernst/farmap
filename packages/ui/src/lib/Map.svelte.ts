@@ -1,5 +1,8 @@
 import type L from 'leaflet';
 import { type Blob } from '@farmap/domain';
+import PhotoPopup from './components/PhotoPopup.svelte';
+import { mount } from 'svelte';
+
 class LeafletMapStore {
     private L: typeof import('leaflet') | null = null;
 
@@ -56,23 +59,45 @@ class LeafletMapStore {
         if (!this.map) return null;
 
         const L = await this.ensureLeaflet();
-        const marker = L.marker([lat, lng])
-            .addTo(this.map)
-            .bindPopup(
-                `
-                <div class="rounded-2xl overflow-hidden" style="width: 200px;">
-                    <img src="${dataUrl}" class="w-full h-full object-cover" />
-                </div>
-                `,
-                {
-                    className: 'custom-popup',
-                    autoPan: true,
-                    closeButton: true,
-                    autoClose: false,
-                    closeOnClick: false
+        
+        // Create a DOM element to mount our Svelte component
+        const popupEl = document.createElement('div');
+        
+        // Create the marker and attach it to the map
+        const marker = L.marker([lat, lng]).addTo(this.map);
+        
+        // Create a popup
+        const popup = L.popup({
+            className: 'custom-popup',
+            autoPan: true,
+            closeButton: true,
+            autoClose: false,
+            closeOnClick: false
+        });
+        
+        // Bind the popup to the marker
+        marker.bindPopup(popup);
+        
+        // Mount the Svelte component when popup opens
+        marker.on('popupopen', () => {
+            // Mount the Svelte component
+            mount(PhotoPopup, {
+                target: popupEl,
+                props: {
+                    imageUrl: dataUrl
                 }
-            ).openPopup();
-
+            });
+            
+            // Get the popup content container and append our component
+            const container = popup.getElement();
+            if (container) {
+                container.appendChild(popupEl);
+            }
+        });
+        
+        // Open the popup immediately
+        marker.openPopup();
+        
         this.markers = [...this.markers, marker];
         return marker;
     }
