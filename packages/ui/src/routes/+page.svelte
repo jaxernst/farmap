@@ -93,8 +93,12 @@
 	});
 </script>
 
-<Map />
+<svelte:head>
+	<title>Far Map</title>
+	<meta name="description" content="Upload everywhere" />
+</svelte:head>
 
+<Map />
 <TitleOverlay />
 
 <!-- Uplod controls -->
