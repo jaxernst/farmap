@@ -1,11 +1,11 @@
 import { makeFarmapClient } from "./farmap-api";
 import { NodeHttpClient } from "@effect/platform-node";
-const baseUrl = process.env.NEXT_PUBLIC_FARMAP_API_URL;
+import { PUBLIC_API_URL } from "$env/static/public";
 
-if (!baseUrl) {
-  throw new Error("NEXT_PUBLIC_FARMAP_API_URL is not set");
+if (!PUBLIC_API_URL) {
+  throw new Error("PUBLIC_API_URL is not set");
 }
 
 export const makeServerClient = () => {
-  return makeFarmapClient(baseUrl, NodeHttpClient.layer);
+  return makeFarmapClient(PUBLIC_API_URL, NodeHttpClient.layer);
 };

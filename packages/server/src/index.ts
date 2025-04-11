@@ -1,5 +1,5 @@
-import { HttpApiBuilder, HttpMiddleware } from "@effect/platform";
-import { Effect, Layer } from "effect";
+import { HttpApiBuilder, HttpMiddleware, HttpServer } from "@effect/platform";
+import { Layer, Logger, LogLevel } from "effect";
 import { ApiLive } from "./api/ApiGroup.js";
 import { MapAttachmentService } from "./services/MapAttachmentsService.js";
 import { BunHttpServer, BunRuntime } from "@effect/platform-bun";
@@ -19,10 +19,9 @@ const ServerLive = HttpApiBuilder.serve(HttpMiddleware.logger).pipe(
   Layer.provide(SocialPreviewService.Default),
   Layer.provide(S3FileStoreServiceLive),
   Layer.provide(Db.Live),
-  Layer.provide(BunHttpServer.layer({ port: 3001 }))
+  HttpServer.withLogAddress,
+  Layer.provide(BunHttpServer.layer({ port: 3001 })),
+  Layer.provide(Logger.minimumLogLevel(LogLevel.Debug))
 );
 
-Layer.launch(ServerLive).pipe(
-  Effect.tap(() => console.log("Server started on port 3001")),
-  BunRuntime.runMain
-);
+Layer.launch(ServerLive).pipe(BunRuntime.runMain);

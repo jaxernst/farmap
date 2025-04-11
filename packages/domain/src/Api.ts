@@ -95,7 +95,7 @@ export class MapAttachmentsApi extends HttpApiGroup.make("MapAttachments")
       .addError(FileNotFound, { status: 400 })
   )
   .add(
-    HttpApiEndpoint.get("myAttachments", "/attachments/my").addSuccess(
+    HttpApiEndpoint.get("myAttachments", "/attachments/me").addSuccess(
       AttachmentPage
     )
   )
