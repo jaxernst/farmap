@@ -28,4 +28,4 @@ export const load: PageServerLoad = async ({ params }): Promise<{ socialPreview:
     console.error('Error fetching social preview:', err);
     throw error(500, 'Failed to fetch social preview data');
   }
-};
+  };

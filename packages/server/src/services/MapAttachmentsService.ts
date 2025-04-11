@@ -9,6 +9,7 @@ import { AttachmentNotFound } from "@farmap/domain/Api";
 import { UserId } from "@farmap/domain/Users";
 import { AttachmentQueryParams } from "@farmap/domain/Query";
 import { FileId, FileStore, FileType } from "@farmap/domain/FileStorage";
+import { Unauthorized } from "@effect/platform/HttpApiError";
 
 export class MapAttachmentService extends Effect.Service<MapAttachmentService>()(
   "api/MapAttachment",
@@ -24,7 +25,6 @@ export class MapAttachmentService extends Effect.Service<MapAttachmentService>()
         fileType: FileType
       ) =>
         Effect.gen(function* () {
-          console.log("attaching to map", userId, position, fileId, fileType);
           yield* fileStorage.confirmUpload(fileId);
 
           const res = yield* repo.insert(
@@ -41,6 +41,14 @@ export class MapAttachmentService extends Effect.Service<MapAttachmentService>()
           return {
             id: AttachmentId.make(res.id),
           };
+        });
+
+      const deleteUserAttachment = (userId: UserId, id: AttachmentId) =>
+        Effect.gen(function* () {
+          const row = yield* repo.findById(id);
+          if (Option.isNone(row)) return yield* new AttachmentNotFound({ id });
+          if (row.value.userId !== userId) return yield* new Unauthorized();
+          yield* repo.delete(id);
         });
 
       const getById = (id: AttachmentId) =>
@@ -68,6 +76,7 @@ export class MapAttachmentService extends Effect.Service<MapAttachmentService>()
 
       return {
         attachToMap,
+        deleteUserAttachment,
         getById,
         getByIds,
         query,

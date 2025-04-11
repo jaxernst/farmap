@@ -66,8 +66,12 @@ export class FarmapClient extends Effect.Service<FarmapClient>()(
       const getSocialPreview = (id: number) =>
         client.MapAttachments.getSocialPreview({ path: { id: AttachmentId.make(id) } })
 
+      const deleteAttachment = (id: number) =>
+        client.MapAttachments.deleteAttachment({ path: { id: AttachmentId.make(id) } })
+
       return {
         attachPhoto,
+        deleteAttachment,
         getPhotoById,
         signInWithFarcaster,
         myAttachments,

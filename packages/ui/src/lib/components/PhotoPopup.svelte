@@ -1,5 +1,8 @@
 <script lang="ts">
 	import { mapStore } from '$lib/Map.svelte';
+	import { farmapApi } from '$lib/services/farmap-api';
+	import { AttachmentId } from '@farmap/domain';
+	import { Effect } from 'effect';
 
 	export let imageUrl: string;
 	export let attachmentId: string;
@@ -12,7 +15,8 @@
 		try {
 			// API call to delete photo
 			console.log(`Deleting photo with ID: ${attachmentId}`);
-			mapStore.removePhotoMarker(attachmentId);
+			Effect.runPromise(farmapApi.deleteAttachment(AttachmentId.make(parseInt(attachmentId))));
+			mapStore.removePhotoMarker(attachmentId.toString());
 			onDelete();
 		} catch (error) {
 			console.error('Error deleting photo:', error);

@@ -22,10 +22,9 @@ export class AuthService extends Effect.Service<AuthService>()("api/Auth", {
 
     const createSession = (userId: UserId, expiry = Duration.hours(24)) =>
       Effect.gen(function* () {
-        console.log("createSession", userId);
         const token = sessionTokenFromString(uuidv4());
         const expiresAt = DateTime.addDuration(yield* DateTime.now, expiry);
-        const result = yield* sessionsRepo.insert(
+        yield* sessionsRepo.insert(
           SessionModel.insert.make({
             token,
             userId,
@@ -33,8 +32,6 @@ export class AuthService extends Effect.Service<AuthService>()("api/Auth", {
           })
         );
 
-        console.log("createSession", token);
-        console.log("result", result);
         return token;
       });
 
@@ -46,7 +43,6 @@ export class AuthService extends Effect.Service<AuthService>()("api/Auth", {
         }
 
         const session = sessionResult.value;
-        console.log("isPast", yield* DateTime.isPast(session.expiresAt));
         if (yield* DateTime.isPast(session.expiresAt)) {
           return yield* new SessionExpired();
         }

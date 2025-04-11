@@ -14,7 +14,7 @@ export const AuthMiddlewareLive = Layer.effect(
       cookie: (sessionToken) =>
         authService.getSession(sessionToken as SessionToken).pipe(
           Effect.catchAll((error) => {
-            console.log("Error", error);
+            Effect.logError(error);
             return Effect.fail(error);
           })
         ),

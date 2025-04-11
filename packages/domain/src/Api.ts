@@ -27,6 +27,7 @@ import {
   SessionNotFound,
   SessionExpired,
 } from "./Auth.js";
+import { Unauthorized } from "@effect/platform/HttpApiError";
 
 export class InputError extends Schema.TaggedError<InputError>()("InputError", {
   message: Schema.String,
@@ -99,6 +100,18 @@ export class MapAttachmentsApi extends HttpApiGroup.make("MapAttachments")
       AttachmentPage
     )
   )
+  .add(
+    HttpApiEndpoint.del("deleteAttachment", "/attachments/:id")
+      .addSuccess(Schema.Struct({ ok: Schema.Boolean }), { status: 201 })
+      .setPath(Schema.Struct({ id: AttachmentIdFromString }))
+      .addError(AttachmentNotFound, { status: 404 })
+      .addError(Unauthorized, { status: 401 })
+  )
+  // .add(
+  //   HttpApiEndpoint.get("friendsAttachments", "/attachments/friends")
+  //     .addSuccess(AttachmentPage)
+  //     .addError(InputError, { status: 400 })
+  // )
   .middlewareEndpoints(Authentication)
   // unauthenticated
   .add(

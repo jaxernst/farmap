@@ -43,6 +43,12 @@ export const MapAttachmentsApiLive = HttpApiBuilder.group(
             )
           )
         )
+        .handle("deleteAttachment", ({ path: { id } }) =>
+          User.pipe(
+            Effect.andThen((user) => map.deleteUserAttachment(user, id)),
+            Effect.map(() => ({ ok: true }))
+          )
+        )
         .handle("getById", ({ path: { id } }) => map.getById(id))
         .handle("getByIds", ({ urlParams: { ids } }) =>
           map.getByIds(ids).pipe(

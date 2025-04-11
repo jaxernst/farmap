@@ -8,12 +8,10 @@ export class UserService extends Effect.Service<UserService>()("api/User", {
 
     const getOrCreateByFid = (fid: number) =>
       Effect.gen(function* () {
-        console.log("getting user");
         const user = yield* repo.getByFarcasterId(fid);
-        console.log("user", user);
+        Effect.log("Got user from fid", { fid, user });
 
         if (!user.length) {
-          console.log("inserting user");
           return yield* repo.insert(
             UserModel.insert.make({
               fid,
