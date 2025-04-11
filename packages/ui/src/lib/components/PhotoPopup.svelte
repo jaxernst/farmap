@@ -1,13 +1,24 @@
 <script lang="ts">
+	import { mapStore } from '$lib/Map.svelte';
+
 	export let imageUrl: string;
 	export let attachmentId: string;
 	export let open = true;
 	export let onDelete: () => void = () => {};
 
-	const _onDelete = (e: MouseEvent) => {
-		e.stopPropagation();
+	async function handleDeletePhoto() {
 		confirm('Are you sure you want to delete this photo?') && onDelete();
-	};
+
+		try {
+			// API call to delete photo
+			console.log(`Deleting photo with ID: ${attachmentId}`);
+			mapStore.removePhotoMarker(attachmentId);
+			onDelete();
+		} catch (error) {
+			console.error('Error deleting photo:', error);
+			alert('Failed to delete photo. Please try again.');
+		}
+	}
 
 	const handleShare = (e: MouseEvent) => {
 		e.preventDefault();
@@ -17,26 +28,21 @@
 		url.pathname = `/share/${attachmentId}`;
 		navigator.clipboard.writeText(url.toString());
 
-		// Set inner text to "Copied!"
 		const button = e.target as HTMLButtonElement;
 		button.innerText = 'Copied!';
 
-		// Reset inner text after 2 seconds
 		setTimeout(() => {
 			button.innerText = 'Share';
 		}, 2000);
 	};
 
-	// Function to bring popup to front on hover
 	const bringToFront = (event: MouseEvent) => {
 		const popup = (event.currentTarget as HTMLElement).closest('.leaflet-popup');
 		if (popup) {
-			// Set a high z-index to bring this popup to front
 			(popup as HTMLElement).style.zIndex = '1000';
 		}
 	};
 
-	// Reset z-index when mouse leaves
 	const resetZIndex = (event: MouseEvent) => {
 		const popup = (event.currentTarget as HTMLElement).closest('.leaflet-popup');
 		if (popup) {
@@ -57,7 +63,7 @@
 	>
 		<!-- Delete button in top left -->
 		<button
-			onclick={_onDelete}
+			onclick={handleDeletePhoto}
 			class="absolute top-1.5 left-1.5 z-10 rounded-full bg-red-500/70 p-1 text-white opacity-100 transition-opacity duration-200 group-hover:opacity-100 hover:bg-red-600 sm:opacity-0"
 			aria-label="Delete photo"
 		>

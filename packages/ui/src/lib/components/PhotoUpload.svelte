@@ -32,7 +32,7 @@
 	<input
 		type="file"
 		id="photo-upload"
-		accept="image/png, image/jpeg, image/jpg, image/webp"
+		accept="image/png, image/jpeg, image/jpg, image/webp, image/avif, image/heic, image/heif"
 		onchange={handlePhotoUpload}
 		style="display: none;"
 	/>
