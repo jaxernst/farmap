@@ -1,8 +1,6 @@
 import { error } from '@sveltejs/kit';
-import { createCanvas, loadImage, type CanvasRenderingContext2D } from 'canvas';
 import type { PageServerLoad } from './$types';
-import { makeFarmapClient } from '$lib/services/farmap-api';
-import { NodeHttpClient } from '@effect/platform-node';
+import { makeServerClient } from '$lib/services/farmap-api.server';
 import type { Attachment } from '@farmap/domain';
 import { Effect, pipe } from 'effect';
 
@@ -14,8 +12,7 @@ export const load: PageServerLoad = async ({ params }): Promise<{ socialPreview:
       throw error(400, 'Invalid ID parameter');
     }
     
-    // Create server-side FarmapClient using the NodeHttpClient
-    const farmapApi = makeFarmapClient('http://localhost:3001', NodeHttpClient.layer);
+    const farmapApi = makeServerClient();
     
     return await Effect.runPromise(
       pipe(

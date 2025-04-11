@@ -1,10 +1,10 @@
 import type L from 'leaflet';
-import { mount, unmount } from 'svelte';
+import { mount } from 'svelte';
 import PhotoPopup from './components/PhotoPopup.svelte';
-import { makeRemoteId } from '@effect/experimental/EventJournal';
 
 class LeafletMapStore {
     private L: typeof import('leaflet') | null = null;
+    private noLabelTileLayer: string = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}{r}.png';
 
     map: L.Map | null = $state(null);
     currentLocation: L.LatLng | null = $state(null);
@@ -19,7 +19,6 @@ class LeafletMapStore {
     }
    
 
-    // Initialize the map
     async initializeMap(elementId: string, center: L.LatLngExpression = [51.505, -0.09], zoom = 13) {
         const L = await this.ensureLeaflet();
         
@@ -30,7 +29,7 @@ class LeafletMapStore {
 
         // Add default tile layer
         L.tileLayer(
-            'https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}{r}.png',
+            this.noLabelTileLayer,
             {
                 subdomains: 'abcd',
                 maxZoom: 19,
@@ -38,7 +37,6 @@ class LeafletMapStore {
             }
         ).addTo(this.map);
 
-        // Setup location tracking
         this.requestLocation();
         
         this.map.on('locationfound', (e: L.LocationEvent) => {
@@ -46,7 +44,6 @@ class LeafletMapStore {
             this.currentLocation = e.latlng;
         });
 
-        // Add click handler for placing marker
         this.map.on('click', (e: L.LeafletMouseEvent) => {
             this.placeClickMarker(e.latlng);
         });
@@ -54,7 +51,6 @@ class LeafletMapStore {
         return this.map;
     }
 
-    // Add a marker with a photo popup
     async addPhotoMarker(id: string, lat: number, lng: number, dataUrl: string) {
         if (!this.map) return null;
 
@@ -87,7 +83,6 @@ class LeafletMapStore {
         return id;
     }
 
-    // Remove a photo marker by ID
     removePhotoMarker(id: string) {
         if (!this.map) return;
 
@@ -111,20 +106,17 @@ class LeafletMapStore {
     }
 
 
-    // Clear all markers
     clearMarkers() {
         this.markers.forEach(({ marker }) => marker.remove());
         this.markers = [];
     }
 
-    // Pan to specific location
     panTo(lat: number, lng: number, zoom?: number) {
         if (!this.map) return;
         
         this.map.setView([lat, lng], zoom);
     }
 
-    // Place a click marker at the specified location
     async placeClickMarker(latlng: L.LatLng) {
         if (!this.map) return;
 
@@ -146,11 +138,9 @@ class LeafletMapStore {
             .addTo(this.map);
     }
 
-    // Get the current click marker position
     getClickMarkerPosition(): L.LatLng | null {
         return this.clickMarker?.getLatLng() || null;
     }
 }
 
-// Export a singleton instance
 export const mapStore = new LeafletMapStore();
