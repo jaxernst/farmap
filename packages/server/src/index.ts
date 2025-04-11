@@ -3,7 +3,7 @@ import { Effect, Layer } from "effect";
 import { ApiLive } from "./api/ApiGroup.js";
 import { MapAttachmentService } from "./services/MapAttachmentsService.js";
 import { BunHttpServer, BunRuntime } from "@effect/platform-bun";
-import { Db } from "./Storage.js";
+import { Db } from "./Sql.js";
 import { AuthMiddlewareLive } from "./AuthMiddleware.js";
 import { UserService } from "./services/UserService.js";
 import { AuthService } from "./services/AuthService.js";
