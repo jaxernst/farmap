@@ -2,39 +2,70 @@
 	import Map from '$lib/components/Map.svelte';
 	import { farmapApi } from '$lib/services/farmap-api';
 	import { mapStore } from '$lib/Map.svelte';
-	import { Effect, pipe } from 'effect';
+	import { Effect } from 'effect';
 	import TitleOverlay from '$lib/components/TitleOverlay.svelte';
 	import ControlsOverlay from '$lib/components/ControlsOverlay.svelte';
 	import { sdk } from '@farcaster/frame-sdk/src';
 
-	// Sign in with farcaster, get attachments, render them on the map
+	let signedIn = $state(false);
+
+	const signIn = () =>
+		Effect.gen(function* () {
+			const nonce = yield* farmapApi.auth.getNonce();
+			const signInResult = yield* Effect.tryPromise({
+				try: () => sdk.actions.signIn({ nonce }),
+				catch: (e) => {
+					return new Error('Farcaster sign in failed', { cause: e });
+				}
+			});
+
+			yield* farmapApi.auth.signInWithFarcaster({
+				_devdomain: window.location.hostname,
+				nonce,
+				...signInResult
+			});
+			signedIn = true;
+		});
+
+	const initAttachments = () =>
+		farmapApi.myAttachments().pipe(
+			Effect.andThen(({ attachments }) =>
+				attachments.map((attachment) => {
+					mapStore.addPhotoMarker(
+						attachment.id.toString(),
+						attachment.position.lat,
+						attachment.position.long,
+						attachment.fileUrl
+					);
+				})
+			)
+		);
+
 	$effect(() => {
 		sdk.actions.ready({ disableNativeGestures: true });
 
 		Effect.runPromise(
-			pipe(
-				farmapApi.signInWithFarcaster(12163),
-				Effect.andThen(farmapApi.myAttachments),
-				Effect.andThen(({ attachments }) =>
-					attachments.map((attachment) => {
-						mapStore.addPhotoMarker(
-							attachment.id.toString(),
-							attachment.position.lat,
-							attachment.position.long,
-							attachment.fileUrl
-						);
-					})
-				)
-			)
+			Effect.gen(function* () {
+				const user = yield* farmapApi.auth.getCurrentUser();
+				if (user === null) {
+					yield* signIn();
+				}
+
+				console.log('user', user);
+				yield* initAttachments();
+			})
 		);
 	});
 </script>
 
 <svelte:head>
-	<title>Far Map</title>
+	<title>FarMap</title>
 	<meta name="description" content="Upload everywhere" />
 </svelte:head>
 
 <TitleOverlay />
 <Map />
-<ControlsOverlay />
+
+{#if signedIn}
+	<ControlsOverlay />
+{/if}

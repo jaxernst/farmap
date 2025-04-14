@@ -13,7 +13,7 @@ import {
   PositionSchema,
 } from "./MapAttachments.js";
 import { AttachmentUrlParams, AttachmentPage } from "./Query.js";
-import { UserNotFound, UserModel, User } from "./Users.js";
+import { UserNotFound, UserModel, User, UserId } from "./Users.js";
 import {
   FileTypeSchema,
   FileUploadRequestSchema,
@@ -22,10 +22,10 @@ import {
   FileNotFound,
 } from "./FileStorage.js";
 import {
-  FarcasterCredential,
   SessionToken,
   SessionNotFound,
   SessionExpired,
+  FarcasterCredential,
 } from "./Auth.js";
 import { Unauthorized } from "@effect/platform/HttpApiError";
 
@@ -57,9 +57,18 @@ export class Authentication extends HttpApiMiddleware.Tag<Authentication>()(
 export class AuthApi extends HttpApiGroup.make("Auth")
   .prefix("/auth")
   .add(
+    HttpApiEndpoint.get("getCurrentUser", "/me")
+      .addSuccess(Schema.Struct({ userId: UserId, fid: Schema.Number }))
+      .addError(Schema.Union(SessionNotFound, SessionExpired))
+  )
+  .middlewareEndpoints(Authentication)
+  // unauthenticated
+  .add(HttpApiEndpoint.get("nonce", "/nonce").addSuccess(Schema.String))
+  .add(
     HttpApiEndpoint.post("signInWithFarcaster", "/siwf")
       .setPayload(FarcasterCredential)
       .addSuccess(SessionToken)
+      .addError(InputError)
   )
   .add(
     HttpApiEndpoint.post("signOut", "/signout")

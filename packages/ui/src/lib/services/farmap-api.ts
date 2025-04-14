@@ -4,7 +4,7 @@ import { Effect, Layer, pipe, Context } from 'effect';
 import { type Position, AttachmentId, FarMapApi } from '@farmap/domain';
 import { HttpClient, mapRequest } from '@effect/platform/HttpClient';
 import { uploadToPresignedUrl } from './s3-api';
-import { PUBLIC_API_URL } from '$env/static/public';
+import type { FarcasterCredential } from '@farmap/domain/build/dts/Auth';
 
 type Upload = {
 	filename: string;
@@ -53,15 +53,14 @@ export class FarmapClient extends Effect.Service<FarmapClient>()('ui/FarmapClien
 		const getPhotoById = (id: number) =>
 			client.MapAttachments.getById({ path: { id: AttachmentId.make(id) } });
 
-		const signInWithFarcaster = (fid: number) =>
+		const getNonce = client.Auth.nonce;
+
+		const getCurrentUser = () =>
+			client.Auth.getCurrentUser().pipe(Effect.catchAll(() => Effect.succeed(null)));
+
+		const signInWithFarcaster = (credential: FarcasterCredential) =>
 			client.Auth.signInWithFarcaster({
-				payload: {
-					fid,
-					message: 'Sign in with Farcaster',
-					timestamp: Date.now(),
-					signature: '',
-					username: ''
-				}
+				payload: credential
 			});
 
 		const myAttachments = () => client.MapAttachments.myAttachments();
@@ -76,9 +75,14 @@ export class FarmapClient extends Effect.Service<FarmapClient>()('ui/FarmapClien
 			attachPhoto,
 			deleteAttachment,
 			getPhotoById,
-			signInWithFarcaster,
 			myAttachments,
-			getSocialPreview
+			getSocialPreview,
+
+			auth: {
+				getNonce,
+				getCurrentUser,
+				signInWithFarcaster
+			}
 		} as const;
 	})
 }) {}

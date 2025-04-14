@@ -27,6 +27,7 @@
     "@effect/platform-bun": "^0.60.10",
     "@effect/platform-node": "latest",
     "@effect/sql-sqlite-bun": "^0.34.6",
+    "@farcaster/auth-client": "^0.3.0",
     "@types/staticmaps": "^1.12.5",
     "effect": "latest",
     "sharp": "^0.33.2",

@@ -24,8 +24,11 @@ export class UserService extends Effect.Service<UserService>()("api/User", {
         return user[0];
       });
 
+    const getById = repo.findById;
+
     return {
       getOrCreateByFid,
+      getById,
     };
   }),
   dependencies: [UsersRepo.Default],

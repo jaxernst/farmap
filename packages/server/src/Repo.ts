@@ -9,6 +9,8 @@ import { UserId, UserModel } from "@farmap/domain/Users";
 import { AttachmentSchema } from "@farmap/domain/MapAttachments";
 import { SessionModel } from "@farmap/domain/Auth";
 import { FileUrl } from "@farmap/domain/FileStorage";
+import { DateTime } from "effect";
+import { InputError } from "../../domain/src/Api.js";
 
 export class AttachmentsRepo extends Effect.Service<AttachmentsRepo>()(
   "repo/MapAttachments",
@@ -104,3 +106,36 @@ export class SessionsRepo extends Effect.Service<SessionsRepo>()(
     }),
   }
 ) {}
+
+export class NoncesRepo extends Effect.Service<NoncesRepo>()("repo/Nonces", {
+  effect: Effect.gen(function* () {
+    const sql = yield* SqlClient.SqlClient;
+
+    const createNonce = (expiresAt: DateTime.DateTime) =>
+      Effect.gen(function* () {
+        const nonce = Math.random().toString(36).substring(2, 10);
+        yield* sql`INSERT INTO nonces (nonce, expiresAt) VALUES (${nonce}, ${expiresAt.epochMillis})`;
+        return nonce;
+      }).pipe(Effect.orDie);
+
+    const verifyNonce = (nonce: string) =>
+      Effect.gen(function* () {
+        const now = yield* DateTime.now;
+        const result =
+          yield* sql`SELECT * FROM nonces WHERE nonce = ${nonce} AND expiresAt > ${now.epochMillis}`;
+
+        if (result.length === 0) {
+          return yield* new InputError({ message: "Invalid or expired nonce" });
+        }
+
+        // Delete the nonce after verification
+        yield* sql`DELETE FROM nonces WHERE nonce = ${nonce}`;
+        return true;
+      }).pipe(Effect.catchTag("SqlError", (e) => Effect.die(e)));
+
+    return {
+      createNonce,
+      verifyNonce,
+    };
+  }),
+}) {}

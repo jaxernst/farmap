@@ -3,11 +3,10 @@ import { UserId } from "./Users.js";
 import { Model } from "@effect/sql";
 
 export const FarcasterCredential = Schema.Struct({
+  _devdomain: Schema.optional(Schema.String),
+  nonce: Schema.String,
   message: Schema.String,
   signature: Schema.String,
-  fid: Schema.Number,
-  username: Schema.String,
-  timestamp: Schema.Number,
 });
 
 export type FarcasterCredential = Schema.Schema.Type<
