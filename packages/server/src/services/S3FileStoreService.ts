@@ -154,8 +154,12 @@ const S3FileStoreService = Layer.effect(
           Key: id,
         });
 
-        yield* Effect.promise(() => s3Client.send(command));
-        return true;
+        return yield* Effect.promise(() =>
+          s3Client
+            .send(command)
+            .then(() => true)
+            .catch(() => false)
+        );
       });
 
     const uploadFile = (

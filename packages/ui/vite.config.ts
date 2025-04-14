@@ -2,7 +2,7 @@ import tailwindcss from '@tailwindcss/vite';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
 
-const PUBLIC_API_URL = "https://localhost:3001"
+const PUBLIC_API_URL = "http://localhost:3001"
 
 export default defineConfig({
 	plugins: [tailwindcss(), sveltekit()],
