@@ -61,6 +61,9 @@ export class AuthApi extends HttpApiGroup.make("Auth")
       .addSuccess(Schema.Struct({ userId: UserId, fid: Schema.Number }))
       .addError(Schema.Union(SessionNotFound, SessionExpired))
   )
+  .add(
+    HttpApiEndpoint.post("signOut", "/signout").addSuccess(Schema.Struct({}))
+  )
   .middlewareEndpoints(Authentication)
   // unauthenticated
   .add(HttpApiEndpoint.get("nonce", "/nonce").addSuccess(Schema.String))
@@ -69,11 +72,6 @@ export class AuthApi extends HttpApiGroup.make("Auth")
       .setPayload(FarcasterCredential)
       .addSuccess(SessionToken)
       .addError(InputError)
-  )
-  .add(
-    HttpApiEndpoint.post("signOut", "/signout")
-      .setPayload(Schema.Struct({ token: SessionToken }))
-      .addSuccess(Schema.Struct({}))
   ) {}
 
 export class UsersApi extends HttpApiGroup.make("Users").add(

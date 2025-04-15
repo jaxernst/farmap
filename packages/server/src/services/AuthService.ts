@@ -59,7 +59,6 @@ export class AuthService extends Effect.Service<AuthService>()("api/Auth", {
             message: `Sign in message failed to verify: ${result.error}`,
           });
         }
-
         return result.fid;
       });
 
@@ -94,14 +93,15 @@ export class AuthService extends Effect.Service<AuthService>()("api/Auth", {
       });
 
     // Sign out - delete session
-    const signOut = sessionsRepo.delete;
+    const deleteSession = (userId: UserId) =>
+      sessionsRepo.deleteByUserId(userId);
 
     return {
       generateNonce,
       verifyFarcasterCredential,
       createSession,
       getSession,
-      signOut,
+      deleteSession,
     };
   }),
   dependencies: [SessionsRepo.Default, NoncesRepo.Default],

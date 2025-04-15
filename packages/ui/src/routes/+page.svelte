@@ -47,11 +47,9 @@
 		Effect.runPromise(
 			Effect.gen(function* () {
 				const user = yield* farmapApi.auth.getCurrentUser();
-				if (user === null) {
-					yield* signIn();
-				}
+				if (user === null) yield* signIn();
 
-				console.log('user', user);
+				signedIn = true;
 				yield* initAttachments();
 			})
 		);

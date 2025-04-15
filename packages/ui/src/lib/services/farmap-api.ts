@@ -63,6 +63,8 @@ export class FarmapClient extends Effect.Service<FarmapClient>()('ui/FarmapClien
 				payload: credential
 			});
 
+		const signOut = client.Auth.signOut;
+
 		const myAttachments = () => client.MapAttachments.myAttachments();
 
 		const getSocialPreview = (id: number) =>
@@ -81,7 +83,8 @@ export class FarmapClient extends Effect.Service<FarmapClient>()('ui/FarmapClien
 			auth: {
 				getNonce,
 				getCurrentUser,
-				signInWithFarcaster
+				signInWithFarcaster,
+				signOut
 			}
 		} as const;
 	})

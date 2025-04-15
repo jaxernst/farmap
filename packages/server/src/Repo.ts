@@ -94,14 +94,20 @@ export class SessionsRepo extends Effect.Service<SessionsRepo>()(
   "repo/Sessions",
   {
     effect: Effect.gen(function* () {
+      const sql = yield* SqlClient.SqlClient;
+
       const repo = yield* Model.makeRepository(SessionModel, {
         tableName: "sessions",
         spanPrefix: "Sessions",
         idColumn: "token",
       });
 
+      const deleteByUserId = (userId: UserId) =>
+        sql`DELETE FROM sessions WHERE userId = ${userId}`.pipe(Effect.orDie);
+
       return {
         ...repo,
+        deleteByUserId,
       };
     }),
   }

@@ -1,5 +1,5 @@
 import { HttpApiBuilder } from "@effect/platform";
-import { Effect, Option } from "effect";
+import { Duration, Effect, Option } from "effect";
 import { Authentication, FarMapApi } from "@farmap/domain/Api";
 import { AuthService } from "../services/AuthService.js";
 import { UserService } from "../services/UserService.js";
@@ -35,16 +35,23 @@ export const AuthApiLive = HttpApiBuilder.group(FarMapApi, "Auth", (handlers) =>
           Effect.tap((token) =>
             HttpApiBuilder.securitySetCookie(
               Authentication.security.cookie,
-              token
+              token,
+              {
+                sameSite: "none",
+                secure: true,
+                httpOnly: true,
+                path: "/",
+                maxAge: Duration.hours(24),
+              }
             )
           )
         )
       )
-      .handle("signOut", ({ payload: { token } }) =>
-        Effect.gen(function* () {
-          // yield* auth.signOut(token);
-          return {};
-        })
+      .handle("signOut", () =>
+        User.pipe(
+          Effect.andThen((userId) => auth.deleteSession(userId)),
+          Effect.map(() => ({ ok: true }))
+        )
       );
   })
 );
