@@ -1,4 +1,4 @@
-import { Effect, Schema } from "effect";
+import { Effect } from "effect";
 import StaticMaps from "staticmaps";
 import sharp from "sharp";
 import { AttachmentId } from "@farmap/domain/MapAttachments";
@@ -34,7 +34,6 @@ export const generateMapImage = ({
       zoomRange: { min: 1, max: 17 },
     });
 
-    // Add a marker at the location
     const coord: [number, number] = [long, lat];
     const marker = {
       coord,
@@ -43,11 +42,7 @@ export const generateMapImage = ({
     } as const;
 
     map.addCircle(marker);
-
-    // Render the map
     await map.render([long, lat], zoom);
-
-    // Get the buffer
     return map.image.buffer("image/png");
   });
 
@@ -61,16 +56,15 @@ export const generateSocialPreview = ({
   long: number;
 }) =>
   Effect.gen(function* () {
-    // Generate a larger map for better visibility
     const mapBuffer = yield* generateMapImage({
       lat,
       long,
       width: 250,
       height: 250,
-      zoom: 13,
+      zoom: 9,
     });
 
-    // Add rounded corners to the map and make it semi-transparent
+    // Map with rounded corners
     const roundedMapBuffer = yield* Effect.promise(() =>
       sharp(mapBuffer)
         .composite([
@@ -86,11 +80,9 @@ export const generateSocialPreview = ({
         .toBuffer()
     );
 
-    // Set fixed dimensions for OG image (1200x630 is standard)
     const canvasWidth = 1200;
     const canvasHeight = 630;
 
-    // Resize and center the photo to fit the OG image dimensions
     const resizedPhotoBuffer = yield* Effect.promise(() =>
       sharp(photoBuffer)
         .resize({
@@ -117,14 +109,6 @@ export const generateSocialPreview = ({
 
     return finalImage;
   });
-
-export class FileFetchError extends Schema.TaggedError<FileFetchError>()(
-  "FileFetchError",
-  {
-    id: FileId,
-    message: Schema.String,
-  }
-) {}
 
 export class SocialPreviewService extends Effect.Service<SocialPreviewService>()(
   "api/SocialPreview",
@@ -157,35 +141,22 @@ export class SocialPreviewService extends Effect.Service<SocialPreviewService>()
           // Get the file from storage
           const fileUrl = attachment.fileUrl;
           const fileId = fileUrl.split("/").pop() as FileId;
-          const fileMetadata = yield* fileStorage.getFileMetadata(fileId);
 
-          // Download the file
-          const fileResponse = yield* Effect.tryPromise({
-            try: () => fetch(fileMetadata.url),
-            catch: (error) =>
-              new FileFetchError({
-                id: fileId,
-                message: (error as any).toString(),
-              }),
-          });
+          // Currently assuming all files are images
+          // const fileMetadata = yield* fileStorage.getFileMetadata(fileId);
 
-          const photoBuffer = yield* Effect.promise(() =>
-            fileResponse.arrayBuffer().then((buffer) => Buffer.from(buffer))
-          );
-
-          // Generate the social preview
+          const photoBuffer = yield* fileStorage.getFile(fileId);
           const previewImageBuffer = yield* generateSocialPreview({
             photoBuffer,
             lat: attachment.latitude,
             long: attachment.longitude,
           });
 
-          // Generate a unique file ID for the preview
+          // Upload the preview image directly to storage
           const previewFileId = FileId.make(
             `preview-${attachmentId}-${Date.now()}`
           );
 
-          // Upload the preview image directly to storage
           yield* fileStorage.uploadFile(
             previewFileId,
             previewImageBuffer,

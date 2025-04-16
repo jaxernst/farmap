@@ -3,6 +3,7 @@ import {
   PutObjectCommand,
   DeleteObjectCommand,
   HeadObjectCommand,
+  GetObjectCommand,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { Effect, Context, Layer, Config } from "effect";
@@ -13,10 +14,11 @@ import {
   FileId,
   FileMetadata,
   FileNotFound,
+  FileFetchError,
 } from "@farmap/domain/FileStorage";
 import { FileStore } from "@farmap/domain/FileStorage";
 
-export class S3Config extends Context.Tag("S3ConfigService")<
+export class S3Config extends Context.Tag("S3Config")<
   S3Config,
   {
     bucketName: string;
@@ -162,11 +164,7 @@ const S3FileStoreService = Layer.effect(
         );
       });
 
-    const uploadFile = (
-      fileId: FileId,
-      buffer: Buffer,
-      contentType: string
-    ): Effect.Effect<void, FileNotFound> =>
+    const uploadFile = (fileId: FileId, buffer: Buffer, contentType: string) =>
       Effect.gen(function* (_) {
         const bucketName = config.bucketName;
 
@@ -180,6 +178,39 @@ const S3FileStoreService = Layer.effect(
         yield* Effect.promise(() => s3Client.send(command));
       });
 
+    const getFile = (fileId: FileId) =>
+      Effect.gen(function* () {
+        const bucketName = config.bucketName;
+        const command = new GetObjectCommand({
+          Bucket: bucketName,
+          Key: fileId,
+        });
+
+        const response = yield* Effect.promise(() =>
+          s3Client.send(command)
+        ).pipe(
+          Effect.catchAll((error) =>
+            Effect.fail(
+              new FileFetchError({
+                id: fileId,
+                message: "Failed to fetch file",
+                cause: error,
+              })
+            )
+          )
+        );
+
+        if (!response.Body) {
+          return yield* Effect.fail(
+            new FileFetchError({ id: fileId, message: "No body in response" })
+          );
+        }
+
+        return yield* Effect.promise(response.Body.transformToByteArray).pipe(
+          Effect.map((a) => Buffer.from(a))
+        );
+      });
+
     return {
       getUploadUrl,
       confirmUpload,
@@ -188,6 +219,7 @@ const S3FileStoreService = Layer.effect(
       toFileUrl,
       uploadFile,
       checkFileExists,
+      getFile,
     };
   })
 );

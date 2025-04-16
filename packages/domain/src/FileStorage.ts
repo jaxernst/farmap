@@ -36,19 +36,31 @@ export class FileNotFound extends Schema.TaggedError<FileNotFound>()(
   }
 ) {}
 
+export class FileFetchError extends Schema.TaggedError<FileFetchError>()(
+  "FileFetchError",
+  {
+    id: FileId,
+    message: Schema.String,
+    cause: Schema.optional(Schema.Unknown),
+  }
+) {}
+
 export interface FileStorage {
   getUploadUrl(
     request: FileUploadRequest
   ): Effect.Effect<{ signedUrl: FileUrl; fileId: FileId }>;
   confirmUpload(id: FileId): Effect.Effect<void, FileNotFound>;
-  getFileMetadata(id: FileId): Effect.Effect<FileMetadata, FileNotFound>;
+  getFileMetadata(
+    id: FileId
+  ): Effect.Effect<FileMetadata, FileNotFound | FileFetchError>;
+  getFile(id: FileId): Effect.Effect<Buffer, FileFetchError | FileNotFound>;
   deleteFile(id: FileId): Effect.Effect<void, FileNotFound>;
   toFileUrl(id: FileId): FileUrl;
   uploadFile(
     fileId: FileId,
     buffer: Buffer,
     contentType: string
-  ): Effect.Effect<void, FileNotFound>;
+  ): Effect.Effect<void>;
 }
 
 export class FileStore extends Context.Tag("FileStore")<
