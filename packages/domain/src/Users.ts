@@ -1,5 +1,6 @@
 import { Model } from "@effect/sql";
 import { Context, Schema } from "effect";
+import { Fid } from "./Farcaster.js";
 
 export type UserId = typeof UserId.Type;
 export const UserId = Schema.Number.pipe(Schema.brand("UserId"));
@@ -20,7 +21,7 @@ export class UserAlreadyExists extends Schema.TaggedError<UserAlreadyExists>()(
 
 export class UserModel extends Model.Class<UserModel>("users/UserModel")({
   id: Model.Generated(UserId),
-  fid: Schema.Number,
+  fid: Fid,
   displayName: Schema.NullOr(Schema.String),
   displayImage: Schema.NullOr(Schema.String),
   createdAt: Model.DateTimeInsert,
