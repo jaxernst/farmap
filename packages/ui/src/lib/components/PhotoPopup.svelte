@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import { mapStore } from '$lib/Map.svelte';
 	import { farmapApi } from '$lib/services/farmap-api';
 	import { AttachmentId } from '@farmap/domain';
@@ -90,30 +91,18 @@
 		<img src={imageUrl} class="h-full w-full object-cover" alt="" />
 		<div class="absolute inset-0 -z-10 bg-white/60"></div>
 
-		<!-- Share button - slides in from bottom on desktop hover, always visible on mobile -->
-		<div
-			class="absolute right-0 bottom-0 left-0 transform bg-purple-500/80 py-1 text-white transition-transform duration-300 ease-in-out sm:py-2
-                    md:translate-y-full md:group-hover:translate-y-0"
-		>
+		<div class="absolute right-0 bottom-2 left-0 flex justify-center gap-2">
 			<button
 				onclick={handleShare}
-				class="flex h-full w-full cursor-pointer items-center justify-center space-x-1"
+				class="rounded-full bg-purple-500 px-4 py-1 text-xs text-white hover:bg-purple-600 sm:text-sm"
 			>
-				<svg
-					xmlns="http://www.w3.org/2000/svg"
-					class="h-3 w-3"
-					fill="none"
-					viewBox="0 0 24 24"
-					stroke="currentColor"
-				>
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
-					/>
-				</svg>
-				<span class="text-xs sm:text-sm">Share</span>
+				Share
+			</button>
+			<button
+				onclick={() => goto(`/share/${attachmentId}`)}
+				class="rounded-full bg-white/60 px-4 py-1 text-xs font-semibold text-purple-500 sm:text-sm"
+			>
+				Open
 			</button>
 		</div>
 	</div>
