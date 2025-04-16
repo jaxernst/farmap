@@ -1,8 +1,11 @@
+import * as dotenv from "dotenv";
+dotenv.config();
+
 import { HttpApiBuilder, HttpMiddleware, HttpServer } from "@effect/platform";
 import { Layer, Logger, LogLevel } from "effect";
 import { ApiLive } from "./api/ApiGroup.js";
 import { MapAttachmentService } from "./services/MapAttachmentsService.js";
-import { BunHttpServer, BunRuntime, BunSocket } from "@effect/platform-bun";
+import { NodeHttpServer, NodeRuntime, NodeSocket } from "@effect/platform-node";
 import { Db } from "./Sql.js";
 import { AuthMiddlewareLive } from "./AuthMiddleware.js";
 import { UserService } from "./services/UserService.js";
@@ -11,9 +14,10 @@ import { S3FileStoreServiceLive } from "./services/S3FileStoreService.js";
 import { SocialPreviewService } from "./services/SocialPreviewService.js";
 import { DevTools } from "@effect/experimental";
 import { FarcasterServiceLive } from "./services/PinataFarcasterService.js";
+import { createServer } from "http";
 
 const DevToolsLive = DevTools.layerWebSocket().pipe(
-  Layer.provide(BunSocket.layerWebSocketConstructor)
+  Layer.provide(NodeSocket.layerWebSocketConstructor)
 );
 
 const ServerLive = HttpApiBuilder.serve(HttpMiddleware.logger).pipe(
@@ -27,9 +31,9 @@ const ServerLive = HttpApiBuilder.serve(HttpMiddleware.logger).pipe(
   Layer.provide(FarcasterServiceLive),
   Layer.provide(Db.Live),
   HttpServer.withLogAddress,
-  Layer.provide(BunHttpServer.layer({ port: 3001 })),
+  Layer.provide(NodeHttpServer.layer(createServer, { port: 3001 })),
   Layer.provide(Logger.minimumLogLevel(LogLevel.Debug)),
   Layer.provide(DevToolsLive)
 );
 
-Layer.launch(ServerLive).pipe(BunRuntime.runMain);
+Layer.launch(ServerLive).pipe(NodeRuntime.runMain);

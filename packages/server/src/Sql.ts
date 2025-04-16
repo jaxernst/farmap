@@ -1,5 +1,5 @@
 import { Context, Layer } from "effect";
-import { SqliteClient, SqliteMigrator } from "@effect/sql-sqlite-bun";
+import { SqliteClient, SqliteMigrator } from "@effect/sql-sqlite-node";
 import { SqlClient } from "@effect/sql";
 import { fileURLToPath } from "url";
 

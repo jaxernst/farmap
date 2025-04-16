@@ -10,6 +10,7 @@ import {
 } from "@farmap/domain/Farcaster";
 import { HttpClient } from "@effect/platform/HttpClient";
 import { HubError } from "@farmap/domain/Farcaster";
+import { NodeHttpClient } from "@effect/platform-node";
 
 export class PinataConfig extends Context.Tag("PinataConfig")<
   PinataConfig,
@@ -156,4 +157,4 @@ export const FarcasterServiceLive = Layer.effect(
       getFollowing,
     };
   })
-).pipe(Layer.provide(PinataLiveConfig));
+).pipe(Layer.provide(PinataLiveConfig), Layer.provide(NodeHttpClient.layer));
