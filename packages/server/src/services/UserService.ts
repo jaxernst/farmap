@@ -8,14 +8,14 @@ export class UserService extends Effect.Service<UserService>()("api/User", {
     const repo = yield* UsersRepo;
     const farcasterService = yield* FarcasterService;
 
-    const getProfileData = (user: UserModel) =>
+    const getProfileData = (fid: Fid) =>
       Effect.gen(function* () {
-        const [displayName, pfp] = yield* Effect.all([
-          farcasterService.getUserData("DISPLAY_NAME", user.fid),
-          farcasterService.getUserData("PFP", user.fid),
+        const [displayName, displayImage] = yield* Effect.all([
+          farcasterService.getUserData("DISPLAY_NAME", fid),
+          farcasterService.getUserData("PFP", fid),
         ]);
 
-        return { displayName, pfp };
+        return { displayName, displayImage };
       });
 
     const getOrCreateByFid = (fid: Fid) =>
@@ -23,9 +23,13 @@ export class UserService extends Effect.Service<UserService>()("api/User", {
         const user = yield* repo.getByFarcasterId(fid);
         Effect.log("Got user from fid", { fid, user });
 
-        const profileData = getProfileData(user);
-
         if (!user.length) {
+          const profileData = getProfileData(fid).pipe(
+            Effect.catchTag("HubError", () =>
+              Effect.succeed({ displayName: null, displayImage: null })
+            )
+          );
+
           return yield* repo.insert(
             UserModel.insert.make({
               fid,
@@ -34,6 +38,7 @@ export class UserService extends Effect.Service<UserService>()("api/User", {
           );
         }
 
+        // Asynchronously refresh the external profile data
         Effect.fork(refreshProfileData(user[0]));
 
         return user[0];
@@ -41,7 +46,7 @@ export class UserService extends Effect.Service<UserService>()("api/User", {
 
     const refreshProfileData = (user: UserModel) =>
       Effect.gen(function* () {
-        const profileData = yield* getProfileData(user);
+        const profileData = yield* getProfileData(user.fid);
         return yield* repo.update(
           UserModel.update.make({
             id: user.id,
