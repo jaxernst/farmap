@@ -3,6 +3,7 @@
 
 	let imageUrl = $derived(page.data.socialPreview);
 	let attachment = $derived(page.data.attachment);
+	let showOriginal = $state(false);
 </script>
 
 <svelte:head>
@@ -19,7 +20,7 @@
 	{/if}
 </svelte:head>
 
-<div class="container">
+<div class="container bg-white">
 	<div class="photo-container">
 		<img src={imageUrl} alt="Map" class="main-photo" />
 	</div>
@@ -30,9 +31,15 @@
 			Coordinates: {Number(attachment?.position.lat).toFixed(6)}°N,
 			{Number(attachment?.position.long).toFixed(6)}°E
 		</p>
-		<a href="/" class="view-button">View on Map</a>
-		<a href={attachment.fileUrl} class="view-button-secondary">View Original</a>
+		<a href={`/?toAttachment=${attachment.id}`} class="view-button">View on Map</a>
+		<button class="view-button-secondary" onclick={() => (showOriginal = !showOriginal)}>
+			{showOriginal ? 'Hide Original' : 'View Original'}
+		</button>
 	</div>
+
+	{#if showOriginal}
+		<img src={attachment.fileUrl} class="mt-20" alt="Original" />
+	{/if}
 </div>
 
 <style>
@@ -82,6 +89,9 @@
 	}
 
 	.view-button-secondary {
+		background: none;
+		border: none;
+		cursor: pointer;
 		color: #4caf50;
 		padding: 10px 20px;
 		text-decoration: none;

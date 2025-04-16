@@ -126,7 +126,17 @@ class LeafletMapStore {
 	panTo(lat: number, lng: number, zoom?: number) {
 		if (!this.map) return;
 
+		console.log('set view', { lat, lng, zoom });
 		this.map.setView([lat, lng], zoom);
+	}
+
+	panToAttachment(attachmentId: string) {
+		if (!this.map) return;
+		const attachment = this.markers.find((m) => m.id === attachmentId);
+		if (attachment) {
+			attachment.marker.openPopup();
+			this.panTo(attachment.marker.getLatLng().lat, attachment.marker.getLatLng().lng);
+		}
 	}
 
 	async placeClickMarker(latlng: L.LatLng) {

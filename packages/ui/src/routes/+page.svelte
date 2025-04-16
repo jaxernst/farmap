@@ -4,12 +4,22 @@
 	import ControlsOverlay from '$lib/components/ControlsOverlay.svelte';
 	import { sdk } from '@farcaster/frame-sdk/src';
 	import { userStore } from '$lib/User.svelte';
+	import { page } from '$app/state';
+	import { mapStore } from '../lib/Map.svelte';
+
+	const focusAttachment = page.url.searchParams.get('toAttachment');
+	console.log(page.url.searchParams.toString());
 
 	$effect(() => {
-		sdk.actions.ready({ disableNativeGestures: true });
-		userStore.signIn().then((user) => {
-			userStore.initAttachments();
-		});
+		(async () => {
+			sdk.actions.ready({ disableNativeGestures: true });
+			await userStore.signIn();
+			await userStore.initAttachments();
+
+			if (focusAttachment) {
+				mapStore.panToAttachment(focusAttachment);
+			}
+		})();
 	});
 </script>
 

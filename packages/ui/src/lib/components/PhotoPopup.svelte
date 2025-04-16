@@ -94,23 +94,16 @@
 		<div class="absolute right-0 bottom-2 left-0 flex justify-center gap-2">
 			<button
 				onclick={handleShare}
-				class="rounded-full bg-purple-500 px-4 py-1 text-xs text-white hover:bg-purple-600 sm:text-sm"
+				class="rounded-full bg-purple-500 px-4 py-1 text-xs font-semibold text-white hover:bg-purple-600 sm:text-sm"
 			>
 				Share
 			</button>
 			<button
 				onclick={() => goto(`/share/${attachmentId}`)}
-				class="rounded-full bg-white/60 px-4 py-1 text-xs font-semibold text-purple-500 sm:text-sm"
+				class="rounded-full bg-white/75 px-4 py-1 text-xs font-semibold text-purple-500 sm:text-sm"
 			>
 				Open
 			</button>
 		</div>
 	</div>
 {/if}
-
-<style>
-	/* Add any specific styling for your popup */
-	div {
-		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-	}
-</style>
