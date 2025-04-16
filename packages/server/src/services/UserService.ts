@@ -11,8 +11,8 @@ export class UserService extends Effect.Service<UserService>()("api/User", {
     const getProfileData = (fid: Fid) =>
       Effect.gen(function* () {
         const [displayName, displayImage] = yield* Effect.all([
-          farcasterService.getUserData("DISPLAY_NAME", fid),
-          farcasterService.getUserData("PFP", fid),
+          farcasterService.getUserData("USER_DATA_TYPE_DISPLAY", fid),
+          farcasterService.getUserData("USER_DATA_TYPE_PFP", fid),
         ]);
 
         return { displayName, displayImage };
@@ -21,13 +21,12 @@ export class UserService extends Effect.Service<UserService>()("api/User", {
     const getOrCreateByFid = (fid: Fid) =>
       Effect.gen(function* () {
         const user = yield* repo.getByFarcasterId(fid);
-        Effect.log("Got user from fid", { fid, user });
 
         if (!user.length) {
           const profileData = getProfileData(fid).pipe(
-            Effect.catchTag("HubError", () =>
-              Effect.succeed({ displayName: null, displayImage: null })
-            )
+            Effect.catchTag("HubError", (e) => {
+              return Effect.succeed({ displayName: null, displayImage: null });
+            })
           );
 
           return yield* repo.insert(
@@ -46,7 +45,9 @@ export class UserService extends Effect.Service<UserService>()("api/User", {
 
     const refreshProfileData = (user: UserModel) =>
       Effect.gen(function* () {
+        console.log("Refreshing profile data", { fid: user.fid });
         const profileData = yield* getProfileData(user.fid);
+        console.log("Refreshed profile data", { profileData });
         return yield* repo.update(
           UserModel.update.make({
             id: user.id,

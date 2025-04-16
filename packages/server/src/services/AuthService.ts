@@ -12,7 +12,8 @@ import { UserId } from "@farmap/domain/Users";
 import { v4 as uuidv4 } from "uuid";
 import { createAppClient } from "@farcaster/auth-client";
 import { viemConnector } from "@farcaster/auth-client";
-import { InputError } from "../../../domain/src/Api.js";
+import { InputError } from "@farmap/domain/Api";
+import { Fid } from "@farmap/domain/Farcaster";
 
 export class AuthService extends Effect.Service<AuthService>()("api/Auth", {
   effect: Effect.gen(function* () {
@@ -59,7 +60,7 @@ export class AuthService extends Effect.Service<AuthService>()("api/Auth", {
             message: `Sign in message failed to verify: ${result.error}`,
           });
         }
-        return result.fid;
+        return Fid.make(result.fid);
       });
 
     const createSession = (userId: UserId, expiry = Duration.hours(24)) =>

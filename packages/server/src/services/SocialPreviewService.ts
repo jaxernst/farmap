@@ -10,17 +10,17 @@ import { Option } from "effect";
 export interface MapImageOptions {
   lat: number;
   long: number;
-  zoom?: number;
-  width?: number;
-  height?: number;
+  zoom: number;
+  width: number;
+  height: number;
 }
 
 export const generateMapImage = ({
   lat,
   long,
-  zoom = 13,
-  width = 150,
-  height = 150,
+  zoom,
+  width,
+  height,
 }: MapImageOptions) =>
   Effect.promise(async () => {
     const map = new StaticMaps({
@@ -28,9 +28,8 @@ export const generateMapImage = ({
       height,
       paddingX: 0,
       paddingY: 0,
-      tileUrl:
-        "https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}{r}.png",
-      tileSubdomains: ["a", "b", "c", "d"],
+      tileUrl: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+      tileSubdomains: ["a", "b", "c"],
       zoomRange: { min: 1, max: 17 },
     });
 
@@ -50,18 +49,22 @@ export const generateSocialPreview = ({
   photoBuffer,
   lat,
   long,
+  mapZoom = 10,
+  mapSize = 280,
 }: {
   photoBuffer: Buffer;
   lat: number;
   long: number;
+  mapZoom?: number;
+  mapSize?: number;
 }) =>
   Effect.gen(function* () {
     const mapBuffer = yield* generateMapImage({
       lat,
       long,
-      width: 250,
-      height: 250,
-      zoom: 9,
+      width: mapSize,
+      height: mapSize,
+      zoom: mapZoom,
     });
 
     // Map with rounded corners
@@ -100,7 +103,7 @@ export const generateSocialPreview = ({
           {
             input: roundedMapBuffer,
             top: 15,
-            left: canvasWidth - 265,
+            left: canvasWidth - mapSize - 15,
           },
         ])
         .jpeg({ quality: 80 })

@@ -3,144 +3,155 @@ import { mount } from 'svelte';
 import PhotoPopup from './components/PhotoPopup.svelte';
 
 class LeafletMapStore {
-    private L: typeof import('leaflet') | null = null;
-    private noLabelTileLayer: string = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}{r}.png';
+	private L: typeof import('leaflet') | null = null;
+	private noLabelTileLayer: string =
+		'https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}{r}.png';
 
-    map: L.Map | null = $state(null);
-    currentLocation: L.LatLng | null = $state(null);
-    markers: Array<{ id: string, marker: L.Marker }> = $state([]);
-    clickMarker: L.Marker | null = $state(null);
+	map: L.Map | null = $state(null);
+	currentLocation: L.LatLng | null = $state(null);
+	markers: Array<{ id: string; marker: L.Marker }> = $state([]);
+	clickMarker: L.Marker | null = $state(null);
 
-    private async ensureLeaflet() {
-      if (!this.L) {
-        this.L = await import('leaflet');
-      }
-      return this.L
-    }
-   
+	private async ensureLeaflet() {
+		if (!this.L) {
+			this.L = await import('leaflet');
+		}
+		return this.L;
+	}
 
-    async initializeMap(elementId: string, center: L.LatLngExpression = [51.505, -0.09], zoom = 13) {
-        const L = await this.ensureLeaflet();
-        
-        this.map = L.map(elementId, {
-            center,
-            zoom
-        });
+	async initializeMap(elementId: string, center: L.LatLngExpression = [51.505, -0.09], zoom = 13) {
+		const L = await this.ensureLeaflet();
 
-        // Add default tile layer
-        L.tileLayer(
-            this.noLabelTileLayer,
-            {
-                subdomains: 'abcd',
-                maxZoom: 19,
-                minZoom: 3
-            }
-        ).addTo(this.map);
+		this.map = L.map(elementId, {
+			center,
+			zoom
+		});
 
-        this.requestLocation();
-        
-        this.map.on('locationfound', (e: L.LocationEvent) => {
-            console.log('locationfound', { e });
-            this.currentLocation = e.latlng;
-        });
+		// Add default tile layer
+		L.tileLayer(this.noLabelTileLayer, {
+			subdomains: 'abcd',
+			maxZoom: 19,
+			minZoom: 3
+		}).addTo(this.map);
 
-        this.map.on('click', (e: L.LeafletMouseEvent) => {
-            this.placeClickMarker(e.latlng);
-        });
+		this.requestLocation();
 
-        return this.map;
-    }
+		this.map.on('locationfound', (e: L.LocationEvent) => {
+			console.log('locationfound', { e });
+			this.currentLocation = e.latlng;
+		});
 
-    async addPhotoMarker(id: string, lat: number, lng: number, dataUrl: string) {
-        if (!this.map) return null;
+		this.map.on('click', (e: L.LeafletMouseEvent) => {
+			this.placeClickMarker(e.latlng);
+		});
 
-        const L = await this.ensureLeaflet();
-        
-        const popupContainer = document.createElement('div');
-        mount(PhotoPopup, {
-            target: popupContainer,
-            props: {
-                imageUrl: dataUrl,
-                attachmentId: id,
-                onDelete: () => this.removePhotoMarker(id)
-            }
-        });
+		return this.map;
+	}
 
-        const marker = L.marker([lat, lng])
-            .addTo(this.map)
-            .bindPopup(
-                popupContainer,
-                {
-                    className: 'custom-popup',
-                    autoPan: true,
-                    closeButton: true,
-                    autoClose: false,
-                    closeOnClick: false
-                }
-            ).openPopup();
+	async addPhotoMarker(
+		id: string,
+		lat: number,
+		lng: number,
+		dataUrl: string,
+		markerIconUrl?: string | null
+	) {
+		if (!this.map) return null;
 
-        this.markers = [...this.markers, { id, marker }];
-        return id;
-    }
+		const L = await this.ensureLeaflet();
 
-    removePhotoMarker(id: string) {
-        if (!this.map) return;
+		const popupContainer = document.createElement('div');
+		mount(PhotoPopup, {
+			target: popupContainer,
+			props: {
+				imageUrl: dataUrl,
+				attachmentId: id,
+				onDelete: () => this.removePhotoMarker(id)
+			}
+		});
 
-        console.log('removing marker', { id });
-        
-        const markerToRemove = this.markers.find(m => m.id === id);
-        if (markerToRemove) {
-            // Remove the marker from the map
-            markerToRemove.marker.remove();
-                        this.markers = this.markers.filter(m => m.id !== id);
-            
-            console.log(`Marker ${id} removed successfully`);
-        } else {
-            console.warn(`No marker found with ID: ${id}`);
-        }
-    }
+		// Create custom div icon if markerIconUrl is provided
+		const markerOptions: L.MarkerOptions = {};
+		if (markerIconUrl) {
+			markerOptions.icon = L.divIcon({
+				className: 'custom-photo-marker',
+				html: ` <img src="${markerIconUrl}" alt="" class="rounded-full w-[32px] h-[32px]" /> `,
+				iconSize: [32, 32],
+				iconAnchor: [16, 16],
+				popupAnchor: [0, -16]
+			});
+		}
 
-    async requestLocation() {
-        if (!this.map) return;
-        this.map.locate({ setView: true, maxZoom: 16 });
-    }
+		const marker = L.marker([lat, lng], markerOptions)
+			.addTo(this.map)
+			.bindPopup(popupContainer, {
+				className: 'custom-popup',
+				autoPan: true,
+				closeButton: true,
+				autoClose: false,
+				closeOnClick: false
+			})
+			.openPopup();
 
+		this.markers = [...this.markers, { id, marker }];
+		return id;
+	}
 
-    clearMarkers() {
-        this.markers.forEach(({ marker }) => marker.remove());
-        this.markers = [];
-    }
+	removePhotoMarker(id: string) {
+		if (!this.map) return;
 
-    panTo(lat: number, lng: number, zoom?: number) {
-        if (!this.map) return;
-        
-        this.map.setView([lat, lng], zoom);
-    }
+		console.log('removing marker', { id });
 
-    async placeClickMarker(latlng: L.LatLng) {
-        if (!this.map) return;
+		const markerToRemove = this.markers.find((m) => m.id === id);
+		if (markerToRemove) {
+			// Remove the marker from the map
+			markerToRemove.marker.remove();
+			this.markers = this.markers.filter((m) => m.id !== id);
 
-        const L = await this.ensureLeaflet();
-        
-        // Remove existing click marker if any
-        if (this.clickMarker) {
-            this.clickMarker.remove();
-        }
+			console.log(`Marker ${id} removed successfully`);
+		} else {
+			console.warn(`No marker found with ID: ${id}`);
+		}
+	}
 
-        // Create new click marker with a ring icon
-        const ringIcon = L.divIcon({
-            className: 'click-marker',
-            html: '<div class="ring"></div>',
-            iconSize: [20, 20]
-        });
+	async requestLocation() {
+		if (!this.map) return;
+		this.map.locate({ setView: true, maxZoom: 16 });
+	}
 
-        this.clickMarker = L.marker(latlng, { icon: ringIcon })
-            .addTo(this.map);
-    }
+	clearMarkers() {
+		this.markers.forEach(({ marker }) => marker.remove());
+		this.markers = [];
+	}
 
-    getClickMarkerPosition(): L.LatLng | null {
-        return this.clickMarker?.getLatLng() || null;
-    }
+	panTo(lat: number, lng: number, zoom?: number) {
+		if (!this.map) return;
+
+		this.map.setView([lat, lng], zoom);
+	}
+
+	async placeClickMarker(latlng: L.LatLng) {
+		if (!this.map) return;
+
+		const L = await this.ensureLeaflet();
+
+		// Remove existing click marker if any
+		if (this.clickMarker) {
+			this.clickMarker.remove();
+		}
+
+		// Create new click marker with a ring icon
+		const ringIcon = L.divIcon({
+			className: 'click-marker',
+			html: '<div class="ring"></div>',
+			iconSize: [20, 20]
+		});
+
+		this.clickMarker = L.marker(latlng, { icon: ringIcon }).addTo(this.map);
+	}
+
+	getClickMarkerPosition(): L.LatLng | null {
+		return this.clickMarker?.getLatLng() || null;
+	}
 }
 
 export const mapStore = new LeafletMapStore();

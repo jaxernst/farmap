@@ -4,6 +4,7 @@
 	import PhotoUpload from './PhotoUpload.svelte';
 	import { Effect, pipe } from 'effect';
 	import { Latitude, Longitude } from '@farmap/domain';
+	import { userStore } from '../User.svelte';
 
 	let uploadedPhoto: {
 		filename: string;
@@ -62,7 +63,8 @@
 			result.id.toString(),
 			clickMarkerPosition.lat,
 			clickMarkerPosition.lng,
-			imageUrl
+			imageUrl,
+			userStore.user?.displayImage
 		);
 	}
 

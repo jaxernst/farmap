@@ -5,6 +5,14 @@ import { Fid } from "./Farcaster.js";
 export type UserId = typeof UserId.Type;
 export const UserId = Schema.Number.pipe(Schema.brand("UserId"));
 
+export type UserPreview = typeof UserPreview.Type;
+export const UserPreview = Schema.Struct({
+  userId: UserId,
+  fid: Schema.Number,
+  displayName: Schema.NullOr(Schema.String),
+  displayImage: Schema.NullOr(Schema.String),
+});
+
 export class UserNotFound extends Schema.TaggedError<UserNotFound>()(
   "UserNotFound",
   {

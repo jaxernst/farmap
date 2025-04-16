@@ -19,7 +19,12 @@ export const AuthApiLive = HttpApiBuilder.group(FarMapApi, "Auth", (handlers) =>
             Option.match(user, {
               onNone: () => Effect.fail(new SessionNotFound()),
               onSome: (user) =>
-                Effect.succeed({ fid: user.fid, userId: user.id }),
+                Effect.succeed({
+                  fid: user.fid,
+                  userId: user.id,
+                  displayName: user.displayName,
+                  displayImage: user.displayImage,
+                }),
             })
           )
         )
@@ -30,9 +35,16 @@ export const AuthApiLive = HttpApiBuilder.group(FarMapApi, "Auth", (handlers) =>
           const fid = yield* auth.verifyFarcasterCredential(payload);
           const user = yield* userService.getOrCreateByFid(fid);
           const token = yield* auth.createSession(user.id);
-          return token;
+
+          return {
+            fid: user.fid,
+            userId: user.id,
+            displayName: user.displayName,
+            displayImage: user.displayImage,
+            token,
+          };
         }).pipe(
-          Effect.tap((token) =>
+          Effect.tap(({ token }) =>
             HttpApiBuilder.securitySetCookie(
               Authentication.security.cookie,
               token,

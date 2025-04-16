@@ -13,7 +13,7 @@ import {
   PositionSchema,
 } from "./MapAttachments.js";
 import { AttachmentUrlParams, AttachmentPage } from "./Query.js";
-import { UserNotFound, UserModel, User, UserId } from "./Users.js";
+import { UserNotFound, UserModel, User, UserPreview } from "./Users.js";
 import {
   FileTypeSchema,
   FileUploadRequestSchema,
@@ -22,7 +22,6 @@ import {
   FileNotFound,
 } from "./FileStorage.js";
 import {
-  SessionToken,
   SessionNotFound,
   SessionExpired,
   FarcasterCredential,
@@ -58,7 +57,7 @@ export class AuthApi extends HttpApiGroup.make("Auth")
   .prefix("/auth")
   .add(
     HttpApiEndpoint.get("getCurrentUser", "/me")
-      .addSuccess(Schema.Struct({ userId: UserId, fid: Schema.Number }))
+      .addSuccess(UserPreview)
       .addError(Schema.Union(SessionNotFound, SessionExpired))
   )
   .add(
@@ -70,7 +69,7 @@ export class AuthApi extends HttpApiGroup.make("Auth")
   .add(
     HttpApiEndpoint.post("signInWithFarcaster", "/siwf")
       .setPayload(FarcasterCredential)
-      .addSuccess(SessionToken)
+      .addSuccess(UserPreview)
       .addError(InputError)
   ) {}
 

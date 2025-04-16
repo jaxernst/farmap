@@ -99,7 +99,7 @@ export const FarcasterServiceLive = Layer.effect(
           UserDataMessage as unknown as Schema.Schema<UserDataMessage> // Weird inference issue - skill issue probably
         );
 
-        if (userData.data.userDataBody.type !== userDataTypeToValue[dataType]) {
+        if (userData.data.userDataBody.type !== dataType) {
           return yield* Effect.fail(
             new HubError({
               message: `Expected user data type ${dataType}`,

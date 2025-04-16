@@ -14,12 +14,12 @@ export enum UserDataTypeValue {
   GITHUB = 9,
 }
 
-export type UserDataType = "PFP" | "DISPLAY_NAME"; // Only supporting these two for now
+export type UserDataType = "USER_DATA_TYPE_PFP" | "USER_DATA_TYPE_DISPLAY"; // Only supporting these two for now
 
 // Map from string type to integer value for Hub queries
 export const userDataTypeToValue: Record<UserDataType, UserDataTypeValue> = {
-  PFP: UserDataTypeValue.PFP,
-  DISPLAY_NAME: UserDataTypeValue.DISPLAY_NAME,
+  USER_DATA_TYPE_PFP: UserDataTypeValue.PFP,
+  USER_DATA_TYPE_DISPLAY: UserDataTypeValue.DISPLAY_NAME,
 };
 
 export type PfpUrl = typeof PfpUrl.Type;
@@ -29,18 +29,18 @@ export type DisplayName = typeof DisplayName.Type;
 export const DisplayName = Schema.String;
 
 export type UserDataTypeToValueType = {
-  PFP: PfpUrl;
-  DISPLAY_NAME: DisplayName;
+  USER_DATA_TYPE_PFP: PfpUrl;
+  USER_DATA_TYPE_DISPLAY: DisplayName;
 };
 
 export type UserDataBody = typeof UserDataBody.Type;
 export const UserDataBody = Schema.Union(
   Schema.Struct({
-    type: Schema.Literal(UserDataTypeValue.PFP),
+    type: Schema.Literal("USER_DATA_TYPE_PFP"),
     value: PfpUrl,
   }),
   Schema.Struct({
-    type: Schema.Literal(UserDataTypeValue.DISPLAY_NAME),
+    type: Schema.Literal("USER_DATA_TYPE_DISPLAY"),
     value: DisplayName,
   })
 );
