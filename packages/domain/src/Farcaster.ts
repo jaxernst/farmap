@@ -105,8 +105,8 @@ export class HubError extends Schema.TaggedError<HubError>()("HubError", {
   cause: Schema.optional(Schema.Unknown),
 }) {}
 
-export class FarcasterService extends Context.Tag("FarcasterService")<
-  FarcasterService,
+export class Farcaster extends Context.Tag("Farcaster")<
+  Farcaster,
   {
     getUserData: <T extends UserDataType>(
       dataType: T,

@@ -22,6 +22,6 @@ export class Db extends Context.Tag("InitializedDatabase")<
   Db,
   SqlClient.SqlClient
 >() {
-  static readonly Live = Layer.provideMerge(MigratorLive, sqliteClientLive);
+  static readonly SqliteLive = Layer.provideMerge(MigratorLive, sqliteClientLive);
   static readonly Test = Layer.provideMerge(MigratorLive, sqliteClientTest);
 }

@@ -1,12 +1,12 @@
 import { Effect } from "effect";
 import { UsersRepo } from "../Repo.js";
 import { UserModel } from "@farmap/domain/Users";
-import { FarcasterService, Fid } from "@farmap/domain/Farcaster";
+import { Farcaster, Fid } from "@farmap/domain/Farcaster";
 
 export class UserService extends Effect.Service<UserService>()("api/User", {
   effect: Effect.gen(function* () {
     const repo = yield* UsersRepo;
-    const farcasterService = yield* FarcasterService;
+    const farcasterService = yield* Farcaster;
 
     const getProfileData = (fid: Fid) =>
       Effect.gen(function* () {

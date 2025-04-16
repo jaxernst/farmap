@@ -30,7 +30,7 @@ export class S3Config extends Context.Tag("S3Config")<
   }
 >() {}
 
-const S3LiveConfig = Layer.effect(
+const S3ConfigLive = Layer.effect(
   S3Config,
   Effect.gen(function* (_) {
     return S3Config.of({
@@ -43,8 +43,7 @@ const S3LiveConfig = Layer.effect(
   })
 );
 
-const S3FileStoreService = Layer.effect(
-  FileStore,
+const makeS3FileStore = () =>
   Effect.gen(function* () {
     const config = yield* S3Config;
     const s3Client = new S3Client({
@@ -221,10 +220,11 @@ const S3FileStoreService = Layer.effect(
       checkFileExists,
       getFile,
     };
-  })
-);
+  });
 
-export const S3FileStoreServiceLive = Layer.provide(
-  S3FileStoreService,
-  S3LiveConfig
-);
+const S3FileStore = Layer.effect(FileStore, makeS3FileStore());
+
+export class FileStoreService extends FileStore {
+  static readonly S3Live = Layer.provide(S3FileStore, S3ConfigLive);
+  // static readonly Test = Layer.effect(FileStore, Effect.succeed({}))
+}

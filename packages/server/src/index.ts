@@ -10,10 +10,10 @@ import { Db } from "./Sql.js";
 import { AuthMiddlewareLive } from "./AuthMiddleware.js";
 import { UserService } from "./services/UserService.js";
 import { AuthService } from "./services/AuthService.js";
-import { S3FileStoreServiceLive } from "./services/S3FileStoreService.js";
+import { FileStoreService } from "./services/FileStoreService.js";
 import { SocialPreviewService } from "./services/SocialPreviewService.js";
 import { DevTools } from "@effect/experimental";
-import { FarcasterServiceLive } from "./services/PinataFarcasterService.js";
+import { FarcasterService } from "./services/FarcasterService.js";
 import { createServer } from "http";
 
 const DevToolsLive = DevTools.layerWebSocket().pipe(
@@ -27,9 +27,9 @@ const ServerLive = HttpApiBuilder.serve(HttpMiddleware.logger).pipe(
   Layer.provide(UserService.Default),
   Layer.provide(MapAttachmentService.Default),
   Layer.provide(SocialPreviewService.Default),
-  Layer.provide(S3FileStoreServiceLive),
-  Layer.provide(FarcasterServiceLive),
-  Layer.provide(Db.Live),
+  Layer.provide(FileStoreService.S3Live),
+  Layer.provide(FarcasterService.PinataLive),
+  Layer.provide(Db.SqliteLive),
   HttpServer.withLogAddress,
   Layer.provide(NodeHttpServer.layer(createServer, { port: 3001 })),
   Layer.provide(Logger.minimumLogLevel(LogLevel.Debug)),
