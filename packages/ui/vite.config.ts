@@ -8,6 +8,13 @@ export default defineConfig(({ mode }) => {
 	return {
 		plugins: [tailwindcss(), sveltekit()],
 		server: {
+			proxy: {
+				'/api': {
+					target: 'https://adequate-adaptation-production.up.railway.app',
+					changeOrigin: true,
+					rewrite: (path) => path.replace(/^\/api/, '')
+				}
+			},
 			allowedHosts: true
 		}
 	};
