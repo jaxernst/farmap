@@ -22,12 +22,7 @@ const DevToolsLive = DevTools.layerWebSocket().pipe(
 );
 
 // Create CORS middleware correctly
-const corsMiddleware = HttpApiBuilder.middlewareCors({
-  allowedOrigins: ["*"],
-  allowedMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-  allowedHeaders: ["Content-Type", "Authorization", "traceparent"],
-  exposedHeaders: ["Content-Length"],
-});
+const corsMiddleware = HttpApiBuilder.middlewareCors();
 
 const ServerLive = HttpApiBuilder.serve(HttpMiddleware.logger).pipe(
   Layer.provide(corsMiddleware),
