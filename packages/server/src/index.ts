@@ -21,7 +21,16 @@ const DevToolsLive = DevTools.layerWebSocket().pipe(
   Layer.provide(NodeSocket.layerWebSocketConstructor)
 );
 
+// Create CORS middleware correctly
+const corsMiddleware = HttpApiBuilder.middlewareCors({
+  allowedOrigins: ["http://localhost:5173", "https://farmap.vercel.app"],
+  allowedMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  exposedHeaders: ["Content-Length"],
+});
+
 const ServerLive = HttpApiBuilder.serve(HttpMiddleware.logger).pipe(
+  Layer.provide(corsMiddleware),
   Layer.provide(ApiLive),
   Layer.provide(AuthMiddlewareLive),
   Layer.provide(AuthService.Default),
@@ -34,15 +43,7 @@ const ServerLive = HttpApiBuilder.serve(HttpMiddleware.logger).pipe(
   HttpServer.withLogAddress,
   Layer.provide(NodeHttpServer.layer(createServer, { port: 3001 })),
   Layer.provide(Logger.minimumLogLevel(LogLevel.Debug)),
-  Layer.provide(DevToolsLive),
-  HttpApiBuilder.middlewareCors({
-    allowedOrigins: ["http://localhost:5173", "https://farmap.vercel.app"],
-    allowedMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-    exposedHeaders: ["Content-Length"],
-    credentials: true,
-    maxAge: 86400,
-  })
+  Layer.provide(DevToolsLive)
 );
 
 Layer.launch(ServerLive).pipe(NodeRuntime.runMain);
