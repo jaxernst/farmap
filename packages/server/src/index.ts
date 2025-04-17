@@ -1,20 +1,26 @@
 import * as dotenv from "dotenv";
-dotenv.config();
 
-import { HttpApiBuilder, HttpMiddleware, HttpServer } from "@effect/platform";
-import { Layer, Logger, LogLevel } from "effect";
-import { ApiLive } from "./api/ApiGroup.js";
-import { MapAttachmentService } from "./services/MapAttachmentsService.js";
-import { NodeHttpServer, NodeRuntime, NodeSocket } from "@effect/platform-node";
-import { Db } from "./Sql.js";
-import { AuthMiddlewareLive } from "./AuthMiddleware.js";
-import { UserService } from "./services/UserService.js";
-import { AuthService } from "./services/AuthService.js";
-import { FileStoreService } from "./services/FileStoreService.js";
-import { SocialPreviewService } from "./services/SocialPreviewService.js";
 import { DevTools } from "@effect/experimental";
-import { FarcasterService } from "./services/FarcasterService.js";
+import {
+  HttpApiBuilder,
+  HttpMiddleware,
+  HttpServer,
+  Router,
+} from "@effect/platform";
+import { NodeHttpServer, NodeRuntime, NodeSocket } from "@effect/platform-node";
+import { Layer, Logger, LogLevel } from "effect";
 import { createServer } from "http";
+import { ApiLive } from "./api/ApiGroup.js";
+import { AuthMiddlewareLive } from "./AuthMiddleware.js";
+import { AuthService } from "./services/AuthService.js";
+import { FarcasterService } from "./services/FarcasterService.js";
+import { FileStoreService } from "./services/FileStoreService.js";
+import { MapAttachmentService } from "./services/MapAttachmentsService.js";
+import { SocialPreviewService } from "./services/SocialPreviewService.js";
+import { UserService } from "./services/UserService.js";
+import { Db } from "./Sql.js";
+
+dotenv.config();
 
 const DevToolsLive = DevTools.layerWebSocket().pipe(
   Layer.provide(NodeSocket.layerWebSocketConstructor)
@@ -33,7 +39,15 @@ const ServerLive = HttpApiBuilder.serve(HttpMiddleware.logger).pipe(
   HttpServer.withLogAddress,
   Layer.provide(NodeHttpServer.layer(createServer, { port: 3001 })),
   Layer.provide(Logger.minimumLogLevel(LogLevel.Debug)),
-  Layer.provide(DevToolsLive)
+  Layer.provide(DevToolsLive),
+  Router.middleware.cors({
+    origin: ["http://localhost:5173", "https://farmap.vercel.app"],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    exposedHeaders: ["Content-Length"],
+    credentials: true,
+    maxAge: 86400,
+  })
 );
 
 Layer.launch(ServerLive).pipe(NodeRuntime.runMain);

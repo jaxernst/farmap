@@ -106,5 +106,5 @@ export function makeFarmapClient(baseURL: string, layer: Layer.Layer<HttpClient>
 	);
 }
 
-const farmapPublicClient = makeFarmapClient('/api', BrowserClient);
+const farmapPublicClient = makeFarmapClient(PUBLIC_API_URL, BrowserClient);
 export { farmapPublicClient as farmapApi };
