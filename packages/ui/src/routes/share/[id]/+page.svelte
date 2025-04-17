@@ -4,6 +4,21 @@
 	let imageUrl = $derived(page.data.socialPreview);
 	let attachment = $derived(page.data.attachment);
 	let showOriginal = $state(false);
+
+	const frame = {
+		version: 'next',
+		imageUrl: 'https://farmap.vercel.app/',
+		button: {
+			title: 'View on FarMap',
+			action: {
+				type: 'launch_frame',
+				url: 'https://farmap.vercel.app/attachments/' + attachment.id,
+				name: 'FarMap',
+				splashImageUrl: 'https://farmap.vercel.app/pin-icon.avif',
+				splashBackgroundColor: '#f5f5f5'
+			}
+		}
+	};
 </script>
 
 <svelte:head>
@@ -17,6 +32,7 @@
 		<meta property="og:type" content="website" />
 		<meta property="og:url" content={`${page.url.origin}/share/${page.params.id}`} />
 		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="fc:frame" content={JSON.stringify(frame)} />
 	{/if}
 </svelte:head>
 
