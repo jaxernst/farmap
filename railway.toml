@@ -1,6 +1,0 @@
-[build]
-builder = "NIXPACKS"
-installCommand = "pnpm install --no-frozen-lockfile"
-
-[deploy]
-startCommand = "tsx src/index.ts"  # Adjust this to your entry point
