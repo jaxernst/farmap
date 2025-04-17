@@ -1,10 +1,12 @@
+import { PUBLIC_API_URL } from '$env/static/public';
 import { HttpApiClient } from '@effect/platform';
 import { BrowserHttpClient } from '@effect/platform-browser';
-import { Effect, Layer, pipe, Context } from 'effect';
-import { type Position, AttachmentId, FarMapApi } from '@farmap/domain';
-import { HttpClient, mapRequest } from '@effect/platform/HttpClient';
-import { uploadToPresignedUrl } from './s3-api';
+import type { HttpClient } from '@effect/platform/HttpClient';
+import { mapRequest } from '@effect/platform/HttpClient';
+import { AttachmentId, FarMapApi, type Position } from '@farmap/domain';
 import type { FarcasterCredential } from '@farmap/domain/Auth';
+import { Context, Effect, Layer, pipe } from 'effect';
+import { uploadToPresignedUrl } from './s3-api';
 
 type Upload = {
 	filename: string;
@@ -31,7 +33,7 @@ export class FarmapClient extends Effect.Service<FarmapClient>()('ui/FarmapClien
 
 		const attachPhoto = (position: Position, upload: Upload) =>
 			Effect.gen(function* () {
-				const { signedUrl, fileId } = yield* client.MapAttachments.createUploadUrl({
+				const { fileId, signedUrl } = yield* client.MapAttachments.createUploadUrl({
 					payload: {
 						filename: upload.filename,
 						contentType: upload.contentType,
@@ -104,5 +106,5 @@ export function makeFarmapClient(baseURL: string, layer: Layer.Layer<HttpClient>
 	);
 }
 
-const farmapPublicClient = makeFarmapClient('/api', BrowserClient);
+const farmapPublicClient = makeFarmapClient(PUBLIC_API_URL, BrowserClient);
 export { farmapPublicClient as farmapApi };

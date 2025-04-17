@@ -1,6 +1,6 @@
-import { defineConfig, loadEnv } from 'vite';
-import tailwindcss from '@tailwindcss/vite';
 import { sveltekit } from '@sveltejs/kit/vite';
+import tailwindcss from '@tailwindcss/vite';
+import { defineConfig, loadEnv } from 'vite';
 
 export default defineConfig(({ mode }) => {
 	const env = loadEnv(mode, process.cwd(), '');
@@ -8,13 +8,6 @@ export default defineConfig(({ mode }) => {
 	return {
 		plugins: [tailwindcss(), sveltekit()],
 		server: {
-			proxy: {
-				'/api': {
-					target: env.PUBLIC_API_URL,
-					changeOrigin: true,
-					rewrite: (path) => path.replace(/^\/api/, '')
-				}
-			},
 			allowedHosts: true
 		}
 	};
