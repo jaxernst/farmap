@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
 	import { mapStore } from '$lib/Map.svelte';
 	import { farmapApi } from '$lib/services/farmap-api';
+	import sdk from '@farcaster/frame-sdk/src';
 	import { AttachmentId } from '@farmap/domain';
 	import { Effect } from 'effect';
 
@@ -25,20 +25,27 @@
 		}
 	}
 
-	const handleShare = (e: MouseEvent) => {
+	const handleShare = async (e: MouseEvent) => {
 		e.preventDefault();
 		e.stopPropagation();
 
-		const url = new URL(window.location.href);
-		url.pathname = `/share/${attachmentId}`;
-		navigator.clipboard.writeText(url.toString());
+		if (await sdk.context) {
+			sdk.actions.composeCast({
+				text: `Check out this photo on FarMap: ${window.location.href} `,
+				embeds: [`https://null-previously-wages-grows.trycloudflare.com/share/${attachmentId}`]
+			});
+		} else {
+			const url = new URL(window.location.href);
+			url.pathname = `/share/${attachmentId}`;
+			navigator.clipboard.writeText(url.toString());
 
-		const button = e.target as HTMLButtonElement;
-		button.innerText = 'Copied!';
+			const button = e.target as HTMLButtonElement;
+			button.innerText = 'Copied!';
 
-		setTimeout(() => {
-			button.innerText = 'Share';
-		}, 2000);
+			setTimeout(() => {
+				button.innerText = 'Share';
+			}, 2000);
+		}
 	};
 
 	const bringToFront = (event: MouseEvent) => {
@@ -98,12 +105,12 @@
 			>
 				Share
 			</button>
-			<button
+			<!-- <button
 				onclick={() => goto(`/share/${attachmentId}`)}
 				class="rounded-full bg-white/75 px-4 py-1 text-xs font-semibold text-purple-500 sm:text-sm"
 			>
 				Open
-			</button>
+			</button> -->
 		</div>
 	</div>
 {/if}

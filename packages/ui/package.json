@@ -16,7 +16,8 @@
 	"devDependencies": {
 		"@effect/platform": "latest",
 		"@effect/platform-browser": "latest",
-		"@farcaster/frame-sdk": "0.0.32",
+		"@effect/platform-node": "latest",
+		"@farcaster/frame-sdk": "0.0.34",
 		"@farmap/domain": "workspace:*",
 		"@sveltejs/adapter-auto": "^4.0.0",
 		"@sveltejs/kit": "^2.16.0",

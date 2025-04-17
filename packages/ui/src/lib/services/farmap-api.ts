@@ -4,7 +4,7 @@ import { Effect, Layer, pipe, Context } from 'effect';
 import { type Position, AttachmentId, FarMapApi } from '@farmap/domain';
 import { HttpClient, mapRequest } from '@effect/platform/HttpClient';
 import { uploadToPresignedUrl } from './s3-api';
-import type { FarcasterCredential } from '@farmap/domain/build/dts/Auth';
+import type { FarcasterCredential } from '@farmap/domain/Auth';
 
 type Upload = {
 	filename: string;
