@@ -1,24 +1,25 @@
-import { Schema, Effect, Context } from "effect";
+import type { Effect } from "effect"
+import { Context, Schema } from "effect"
 
-export type FileId = typeof FileId.Type;
-export const FileId = Schema.String.pipe(Schema.brand("FileId"));
+export type FileId = typeof FileId.Type
+export const FileId = Schema.String.pipe(Schema.brand("FileId"))
 
-export type FileUrl = typeof FileUrl.Type;
-export const FileUrl = Schema.String.pipe(Schema.brand("FileUrl"));
+export type FileUrl = typeof FileUrl.Type
+export const FileUrl = Schema.String.pipe(Schema.brand("FileUrl"))
 
-export type FileType = Schema.Schema.Type<typeof FileTypeSchema>;
-export const FileTypeSchema = Schema.Literal("image");
+export type FileType = Schema.Schema.Type<typeof FileTypeSchema>
+export const FileTypeSchema = Schema.Literal("image")
 
 export type FileUploadRequest = Schema.Schema.Type<
   typeof FileUploadRequestSchema
->;
+>
 export const FileUploadRequestSchema = Schema.Struct({
   filename: Schema.String,
   contentType: Schema.String,
-  size: Schema.Number,
-});
+  size: Schema.Number
+})
 
-export type FileMetadata = Schema.Schema.Type<typeof FileMetadataSchema>;
+export type FileMetadata = Schema.Schema.Type<typeof FileMetadataSchema>
 export const FileMetadataSchema = Schema.Struct({
   id: FileId,
   filename: Schema.String,
@@ -26,13 +27,13 @@ export const FileMetadataSchema = Schema.Struct({
   size: Schema.Number,
   url: FileUrl,
   createdAt: Schema.Date,
-  updatedAt: Schema.Date,
-});
+  updatedAt: Schema.Date
+})
 
 export class FileNotFound extends Schema.TaggedError<FileNotFound>()(
   "FileNotFound",
   {
-    id: FileId,
+    id: FileId
   }
 ) {}
 
@@ -41,26 +42,26 @@ export class FileFetchError extends Schema.TaggedError<FileFetchError>()(
   {
     id: FileId,
     message: Schema.String,
-    cause: Schema.optional(Schema.Unknown),
+    cause: Schema.optional(Schema.Unknown)
   }
 ) {}
 
 export interface FileStorage {
   getUploadUrl(
     request: FileUploadRequest
-  ): Effect.Effect<{ signedUrl: FileUrl; fileId: FileId }>;
-  confirmUpload(id: FileId): Effect.Effect<void, FileNotFound>;
+  ): Effect.Effect<{ signedUrl: FileUrl; fileId: FileId }>
+  confirmUpload(id: FileId): Effect.Effect<void, FileNotFound>
   getFileMetadata(
     id: FileId
-  ): Effect.Effect<FileMetadata, FileNotFound | FileFetchError>;
-  getFile(id: FileId): Effect.Effect<Buffer, FileFetchError | FileNotFound>;
-  deleteFile(id: FileId): Effect.Effect<void, FileNotFound>;
-  toFileUrl(id: FileId): FileUrl;
+  ): Effect.Effect<FileMetadata, FileNotFound | FileFetchError>
+  getFile(id: FileId): Effect.Effect<Buffer, FileFetchError | FileNotFound>
+  deleteFile(id: FileId): Effect.Effect<void, FileNotFound>
+  toFileUrl(id: FileId): FileUrl
   uploadFile(
     fileId: FileId,
     buffer: Buffer,
     contentType: string
-  ): Effect.Effect<void>;
+  ): Effect.Effect<void>
 }
 
 export class FileStore extends Context.Tag("FileStore")<

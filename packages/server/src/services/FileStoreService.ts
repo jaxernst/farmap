@@ -1,108 +1,101 @@
 import {
-  S3Client,
-  PutObjectCommand,
   DeleteObjectCommand,
-  HeadObjectCommand,
   GetObjectCommand,
-} from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { Effect, Context, Layer, Config } from "effect";
-import { v4 as uuidv4 } from "uuid";
-import {
-  FileUploadRequest,
-  FileUrl,
-  FileId,
-  FileMetadata,
-  FileNotFound,
-  FileFetchError,
-} from "@farmap/domain/FileStorage";
-import { FileStore } from "@farmap/domain/FileStorage";
+  HeadObjectCommand,
+  PutObjectCommand,
+  S3Client
+} from "@aws-sdk/client-s3"
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
+import type { FileId, FileMetadata, FileUploadRequest, FileUrl } from "@farmap/domain/FileStorage"
+import { FileFetchError, FileNotFound, FileStore } from "@farmap/domain/FileStorage"
+import { Config, Context, Effect, Layer } from "effect"
+import { v4 as uuidv4 } from "uuid"
 
 export class S3Config extends Context.Tag("S3Config")<
   S3Config,
   {
-    bucketName: string;
-    region: string;
-    accessKeyId: string;
-    secretAccessKey: string;
-    uploadUrlExpirationSeconds: number;
-    endpoint?: string;
+    bucketName: string
+    region: string
+    accessKeyId: string
+    secretAccessKey: string
+    uploadUrlExpirationSeconds: number
+    endpoint?: string
   }
 >() {}
 
 const S3ConfigLive = Layer.effect(
   S3Config,
-  Effect.gen(function* (_) {
+  Effect.gen(function*() {
     return S3Config.of({
       bucketName: yield* Config.string("S3_BUCKET_NAME"),
       region: yield* Config.string("S3_REGION"),
       accessKeyId: yield* Config.string("S3_ACCESS_KEY_ID"),
       secretAccessKey: yield* Config.string("S3_SECRET_ACCESS_KEY"),
-      uploadUrlExpirationSeconds: 10 * 60,
-    });
+      uploadUrlExpirationSeconds: 10 * 60
+    })
   })
-);
+)
 
 const makeS3FileStore = () =>
-  Effect.gen(function* () {
-    const config = yield* S3Config;
+  Effect.gen(function*() {
+    const config = yield* S3Config
     const s3Client = new S3Client({
       region: config.region,
       credentials: {
         accessKeyId: config.accessKeyId,
-        secretAccessKey: config.secretAccessKey,
-      },
-    });
+        secretAccessKey: config.secretAccessKey
+      }
+    })
 
     const getUploadUrl = (
       request: FileUploadRequest
     ): Effect.Effect<{ signedUrl: FileUrl; fileId: FileId }> =>
-      Effect.gen(function* (_) {
-        const fileId = uuidv4() as FileId;
+      Effect.gen(function*() {
+        const fileId = uuidv4() as FileId
         const command = new PutObjectCommand({
           Bucket: config.bucketName,
           Key: fileId,
-          ContentType: request.contentType,
-        });
+          ContentType: request.contentType
+        })
 
         const signedUrl = yield* Effect.promise(() =>
           getSignedUrl(s3Client, command, {
-            expiresIn: config.uploadUrlExpirationSeconds,
+            expiresIn: config.uploadUrlExpirationSeconds
           })
-        );
+        )
 
         return {
           signedUrl: signedUrl as FileUrl,
-          fileId,
-        };
-      });
+          fileId
+        }
+      })
 
     const confirmUpload = (id: FileId): Effect.Effect<void, FileNotFound> =>
-      Effect.gen(function* (_) {
-        const exists = yield* checkFileExists(id);
+      Effect.gen(function*() {
+        const exists = yield* checkFileExists(id)
 
         if (!exists) {
-          return yield* Effect.fail(new FileNotFound({ id }));
+          return yield* Effect.fail(new FileNotFound({ id }))
         }
 
-        return;
-      });
+        return
+      })
 
     const getFileMetadata = (
       id: FileId
     ): Effect.Effect<FileMetadata, FileNotFound> =>
-      Effect.gen(function* () {
-        const bucketName = config.bucketName;
+      Effect.gen(function*() {
+        const bucketName = config.bucketName
 
         const command = new HeadObjectCommand({
           Bucket: bucketName,
-          Key: id,
-        });
+          Key: id
+        })
 
-        const response = yield* Effect.promise(() => s3Client.send(command));
+        const response = yield* Effect.promise(() => s3Client.send(command))
 
         if (!response) {
-          return yield* new FileNotFound({ id });
+          return yield* new FileNotFound({ id })
         }
 
         return {
@@ -112,103 +105,101 @@ const makeS3FileStore = () =>
           size: response.ContentLength || 0,
           url: toFileUrl(id),
           createdAt: response.LastModified || new Date(),
-          updatedAt: response.LastModified || new Date(),
-        };
-      });
+          updatedAt: response.LastModified || new Date()
+        }
+      })
 
     const deleteFile = (id: FileId): Effect.Effect<void, FileNotFound> =>
-      Effect.gen(function* (_) {
-        const bucketName = config.bucketName;
-        const exists = yield* checkFileExists(id);
+      Effect.gen(function*() {
+        const bucketName = config.bucketName
+        const exists = yield* checkFileExists(id)
 
         if (!exists) {
-          return yield* Effect.fail(new FileNotFound({ id }));
+          return yield* Effect.fail(new FileNotFound({ id }))
         }
 
         const command = new DeleteObjectCommand({
           Bucket: bucketName,
-          Key: id,
-        });
+          Key: id
+        })
 
-        yield* Effect.promise(() => s3Client.send(command));
-        return;
-      });
+        yield* Effect.promise(() => s3Client.send(command))
+        return
+      })
 
     const toFileUrl = (id: FileId): FileUrl => {
-      const bucketName = config.bucketName;
-      const region = config.region;
-      const customEndpoint = s3Client.config.endpoint;
+      const bucketName = config.bucketName
+      const region = config.region
+      const customEndpoint = s3Client.config.endpoint
 
       if (customEndpoint) {
-        return `${customEndpoint}/${bucketName}/${id}` as FileUrl;
+        return `${customEndpoint}/${bucketName}/${id}` as FileUrl
       } else {
-        return `https://${bucketName}.s3.${region}.amazonaws.com/${id}` as FileUrl;
+        return `https://${bucketName}.s3.${region}.amazonaws.com/${id}` as FileUrl
       }
-    };
+    }
 
     const checkFileExists = (id: FileId): Effect.Effect<boolean> =>
-      Effect.gen(function* () {
-        const bucketName = config.bucketName;
+      Effect.gen(function*() {
+        const bucketName = config.bucketName
 
         const command = new HeadObjectCommand({
           Bucket: bucketName,
-          Key: id,
-        });
+          Key: id
+        })
 
         return yield* Effect.promise(() =>
           s3Client
             .send(command)
             .then(() => true)
             .catch(() => false)
-        );
-      });
+        )
+      })
 
     const uploadFile = (fileId: FileId, buffer: Buffer, contentType: string) =>
-      Effect.gen(function* (_) {
-        const bucketName = config.bucketName;
+      Effect.gen(function*() {
+        const bucketName = config.bucketName
 
         const command = new PutObjectCommand({
           Bucket: bucketName,
           Key: fileId,
           Body: buffer,
-          ContentType: contentType,
-        });
+          ContentType: contentType
+        })
 
-        yield* Effect.promise(() => s3Client.send(command));
-      });
+        yield* Effect.promise(() => s3Client.send(command))
+      })
 
     const getFile = (fileId: FileId) =>
-      Effect.gen(function* () {
-        const bucketName = config.bucketName;
+      Effect.gen(function*() {
+        const bucketName = config.bucketName
         const command = new GetObjectCommand({
           Bucket: bucketName,
-          Key: fileId,
-        });
+          Key: fileId
+        })
 
-        const response = yield* Effect.promise(() =>
-          s3Client.send(command)
-        ).pipe(
+        const response = yield* Effect.promise(() => s3Client.send(command)).pipe(
           Effect.catchAll((error) =>
             Effect.fail(
               new FileFetchError({
                 id: fileId,
                 message: "Failed to fetch file",
-                cause: error,
+                cause: error
               })
             )
           )
-        );
+        )
 
         if (!response.Body) {
           return yield* Effect.fail(
             new FileFetchError({ id: fileId, message: "No body in response" })
-          );
+          )
         }
 
         return yield* Effect.promise(response.Body.transformToByteArray).pipe(
           Effect.map((a) => Buffer.from(a))
-        );
-      });
+        )
+      })
 
     return {
       getUploadUrl,
@@ -218,13 +209,13 @@ const makeS3FileStore = () =>
       toFileUrl,
       uploadFile,
       checkFileExists,
-      getFile,
-    };
-  });
+      getFile
+    }
+  })
 
-const S3FileStore = Layer.effect(FileStore, makeS3FileStore());
+const S3FileStore = Layer.effect(FileStore, makeS3FileStore())
 
 export class FileStoreService extends FileStore {
-  static readonly S3Live = Layer.provide(S3FileStore, S3ConfigLive);
+  static readonly S3Live = Layer.provide(S3FileStore, S3ConfigLive)
   // static readonly Test = Layer.effect(FileStore, Effect.succeed({}))
 }

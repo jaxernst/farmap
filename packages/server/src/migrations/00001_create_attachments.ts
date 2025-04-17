@@ -1,8 +1,8 @@
-import { SqlClient } from "@effect/sql";
-import { Effect } from "effect";
+import { SqlClient } from "@effect/sql"
+import { Effect } from "effect"
 
-export default Effect.gen(function* () {
-  const sql = yield* SqlClient.SqlClient;
+export default Effect.gen(function*() {
+  const sql = yield* SqlClient.SqlClient
 
   yield* sql`
     CREATE TABLE IF NOT EXISTS attachments (
@@ -16,7 +16,7 @@ export default Effect.gen(function* () {
       createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
-  `;
+  `
 
-  yield* Effect.logInfo("00001_create_attachments migration applied");
-});
+  yield* Effect.logInfo("00001_create_attachments migration applied")
+})

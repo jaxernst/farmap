@@ -1,8 +1,8 @@
-import { SqlClient } from "@effect/sql";
-import { Effect } from "effect";
+import { SqlClient } from "@effect/sql"
+import { Effect } from "effect"
 
-export default Effect.gen(function* () {
-  const sql = yield* SqlClient.SqlClient;
+export default Effect.gen(function*() {
+  const sql = yield* SqlClient.SqlClient
 
   yield* sql`
   CREATE TABLE IF NOT EXISTS nonces (
@@ -10,7 +10,7 @@ export default Effect.gen(function* () {
     expiresAt TIMESTAMP NOT NULL,
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   )
-`;
+`
 
-  yield* Effect.logInfo("00004_create_nonces migration applied");
-});
+  yield* Effect.logInfo("00004_create_nonces migration applied")
+})

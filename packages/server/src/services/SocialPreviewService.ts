@@ -1,26 +1,25 @@
-import { Effect } from "effect";
-import StaticMaps from "staticmaps";
-import sharp from "sharp";
-import { AttachmentId } from "@farmap/domain/MapAttachments";
-import { AttachmentNotFound } from "@farmap/domain/Api";
-import { FileStore, FileId } from "@farmap/domain/FileStorage";
-import { AttachmentsRepo } from "../Repo.js";
-import { Option } from "effect";
+import { AttachmentNotFound } from "@farmap/domain/Api"
+import { FileId, FileStore } from "@farmap/domain/FileStorage"
+import type { AttachmentId } from "@farmap/domain/MapAttachments"
+import { Effect, Option } from "effect"
+import sharp from "sharp"
+import StaticMaps from "staticmaps"
+import { AttachmentsRepo } from "../Repo.js"
 
 export interface MapImageOptions {
-  lat: number;
-  long: number;
-  zoom: number;
-  width: number;
-  height: number;
+  lat: number
+  long: number
+  zoom: number
+  width: number
+  height: number
 }
 
 export const generateMapImage = ({
+  height,
   lat,
   long,
-  zoom,
   width,
-  height,
+  zoom
 }: MapImageOptions) =>
   Effect.promise(async () => {
     const map = new StaticMaps({
@@ -30,42 +29,42 @@ export const generateMapImage = ({
       paddingY: 0,
       tileUrl: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
       tileSubdomains: ["a", "b", "c"],
-      zoomRange: { min: 1, max: 17 },
-    });
+      zoomRange: { min: 1, max: 17 }
+    })
 
-    const coord: [number, number] = [long, lat];
+    const coord: [number, number] = [long, lat]
     const marker = {
       coord,
       color: "#4caf50",
-      radius: 10,
-    } as const;
+      radius: 10
+    } as const
 
-    map.addCircle(marker);
-    await map.render([long, lat], zoom);
-    return map.image.buffer("image/png");
-  });
+    map.addCircle(marker)
+    await map.render([long, lat], zoom)
+    return map.image.buffer("image/png")
+  })
 
 export const generateSocialPreview = ({
-  photoBuffer,
   lat,
   long,
-  mapZoom = 10,
   mapSize = 280,
+  mapZoom = 10,
+  photoBuffer
 }: {
-  photoBuffer: Buffer;
-  lat: number;
-  long: number;
-  mapZoom?: number;
-  mapSize?: number;
+  photoBuffer: Buffer
+  lat: number
+  long: number
+  mapZoom?: number
+  mapSize?: number
 }) =>
-  Effect.gen(function* () {
+  Effect.gen(function*() {
     const mapBuffer = yield* generateMapImage({
       lat,
       long,
       width: mapSize,
       height: mapSize,
-      zoom: mapZoom,
-    });
+      zoom: mapZoom
+    })
 
     // Map with rounded corners
     const roundedMapBuffer = yield* Effect.promise(() =>
@@ -75,16 +74,16 @@ export const generateSocialPreview = ({
             input: Buffer.from(
               `<svg><rect x="0" y="0" width="250" height="250" rx="20" ry="20"/></svg>`
             ),
-            blend: "dest-in",
-          },
+            blend: "dest-in"
+          }
         ])
         .ensureAlpha()
         .linear(1, 0.5)
         .toBuffer()
-    );
+    )
 
-    const canvasWidth = 1200;
-    const canvasHeight = 630;
+    const canvasWidth = 1200
+    const canvasHeight = 630
 
     const resizedPhotoBuffer = yield* Effect.promise(() =>
       sharp(photoBuffer)
@@ -92,10 +91,10 @@ export const generateSocialPreview = ({
           width: canvasWidth,
           height: canvasHeight,
           fit: "cover",
-          position: "center",
+          position: "center"
         })
         .toBuffer()
-    );
+    )
 
     const finalImage = yield* Effect.promise(() =>
       sharp(resizedPhotoBuffer)
@@ -103,82 +102,81 @@ export const generateSocialPreview = ({
           {
             input: roundedMapBuffer,
             top: 15,
-            left: canvasWidth - mapSize - 15,
-          },
+            left: canvasWidth - mapSize - 15
+          }
         ])
         .jpeg({ quality: 80 })
         .toBuffer()
-    );
+    )
 
-    return finalImage;
-  });
+    return finalImage
+  })
 
 export class SocialPreviewService extends Effect.Service<SocialPreviewService>()(
   "api/SocialPreview",
   {
-    effect: Effect.gen(function* () {
-      const repo = yield* AttachmentsRepo;
-      const fileStorage = yield* FileStore;
+    effect: Effect.gen(function*() {
+      const repo = yield* AttachmentsRepo
+      const fileStorage = yield* FileStore
 
       const getOrGenerateSocialPreview = (attachmentId: AttachmentId) =>
-        Effect.gen(function* () {
+        Effect.gen(function*() {
           // Get the attachment from the repository
           const attachment = yield* repo.findById(attachmentId).pipe(
             Effect.flatMap(
               Option.match({
                 onSome: Effect.succeed,
-                onNone: () =>
-                  Effect.fail(new AttachmentNotFound({ id: attachmentId })),
+                onNone: () => Effect.fail(new AttachmentNotFound({ id: attachmentId }))
               })
             )
-          );
+          )
 
           // Check if previewUrl already exists
           if (attachment.previewUrl) {
             return {
               url: attachment.previewUrl,
-              attachment,
-            };
+              attachment
+            }
           }
 
           // Get the file from storage
-          const fileUrl = attachment.fileUrl;
-          const fileId = fileUrl.split("/").pop() as FileId;
+          const fileUrl = attachment.fileUrl
+          const fileId = fileUrl.split("/").pop() as FileId
 
           // Currently assuming all files are images
           // const fileMetadata = yield* fileStorage.getFileMetadata(fileId);
 
-          const photoBuffer = yield* fileStorage.getFile(fileId);
+          const photoBuffer = yield* fileStorage.getFile(fileId)
           const previewImageBuffer = yield* generateSocialPreview({
             photoBuffer,
             lat: attachment.latitude,
-            long: attachment.longitude,
-          });
+            long: attachment.longitude
+          })
 
           // Upload the preview image directly to storage
           const previewFileId = FileId.make(
             `preview-${attachmentId}-${Date.now()}`
-          );
+          )
 
           yield* fileStorage.uploadFile(
             previewFileId,
             previewImageBuffer,
             "image/jpeg"
-          );
+          )
 
-          const previewUrl = fileStorage.toFileUrl(previewFileId);
-          yield* repo.updatePreviewUrl(attachmentId, previewUrl);
+          const previewUrl = fileStorage.toFileUrl(previewFileId)
+          yield* repo.updatePreviewUrl(attachmentId, previewUrl)
 
           return {
             url: previewUrl,
-            attachment,
-          };
-        });
+            attachment
+          }
+        })
 
       return {
-        getOrGenerateSocialPreview,
-      };
+        getOrGenerateSocialPreview
+      }
     }),
-    dependencies: [AttachmentsRepo.Default],
+    dependencies: [AttachmentsRepo.Default]
   }
 ) {}

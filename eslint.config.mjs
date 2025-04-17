@@ -19,7 +19,7 @@ const compat = new FlatCompat({
 
 export default [
   {
-    ignores: ["**/dist", "**/build", "**/docs", "**/*.md"]
+    ignores: ["**/dist", "**/build", "**/docs", "**/*.md", "**/node_modules", "**/.svelte-kit"]
   },
   ...compat.extends(
     "eslint:recommended",

@@ -1,15 +1,15 @@
-import { HttpApiBuilder } from "@effect/platform";
-import { Duration, Effect, Option } from "effect";
-import { Authentication, FarMapApi } from "@farmap/domain/Api";
-import { AuthService } from "../services/AuthService.js";
-import { UserService } from "../services/UserService.js";
-import { User } from "../../../domain/src/Users.js";
-import { SessionNotFound } from "../../../domain/src/Auth.js";
+import { HttpApiBuilder } from "@effect/platform"
+import { Authentication, FarMapApi } from "@farmap/domain/Api"
+import { Duration, Effect, Option } from "effect"
+import { SessionNotFound } from "../../../domain/src/Auth.js"
+import { User } from "../../../domain/src/Users.js"
+import { AuthService } from "../services/AuthService.js"
+import { UserService } from "../services/UserService.js"
 
 export const AuthApiLive = HttpApiBuilder.group(FarMapApi, "Auth", (handlers) =>
-  Effect.gen(function* () {
-    const auth = yield* AuthService;
-    const userService = yield* UserService;
+  Effect.gen(function*() {
+    const auth = yield* AuthService
+    const userService = yield* UserService
 
     return handlers
       .handle("getCurrentUser", () =>
@@ -23,26 +23,25 @@ export const AuthApiLive = HttpApiBuilder.group(FarMapApi, "Auth", (handlers) =>
                   fid: user.fid,
                   userId: user.id,
                   displayName: user.displayName,
-                  displayImage: user.displayImage,
-                }),
+                  displayImage: user.displayImage
+                })
             })
           )
-        )
-      )
+        ))
       .handle("nonce", () => auth.generateNonce())
       .handle("signInWithFarcaster", ({ payload }) =>
-        Effect.gen(function* () {
-          const fid = yield* auth.verifyFarcasterCredential(payload);
-          const user = yield* userService.getOrCreateByFid(fid);
-          const token = yield* auth.createSession(user.id);
+        Effect.gen(function*() {
+          const fid = yield* auth.verifyFarcasterCredential(payload)
+          const user = yield* userService.getOrCreateByFid(fid)
+          const token = yield* auth.createSession(user.id)
 
           return {
             fid: user.fid,
             userId: user.id,
             displayName: user.displayName,
             displayImage: user.displayImage,
-            token,
-          };
+            token
+          }
         }).pipe(
           Effect.tap(({ token }) =>
             HttpApiBuilder.securitySetCookie(
@@ -53,17 +52,14 @@ export const AuthApiLive = HttpApiBuilder.group(FarMapApi, "Auth", (handlers) =>
                 secure: true,
                 httpOnly: true,
                 path: "/",
-                maxAge: Duration.hours(24),
+                maxAge: Duration.hours(24)
               }
             )
           )
-        )
-      )
+        ))
       .handle("signOut", () =>
         User.pipe(
           Effect.andThen((userId) => auth.deleteSession(userId)),
           Effect.map(() => ({ ok: true }))
-        )
-      );
-  })
-);
+        ))
+  }))

@@ -8,7 +8,6 @@
 	import { mapStore } from '../lib/Map.svelte';
 
 	const focusAttachment = page.url.searchParams.get('toAttachment');
-	console.log(page.url.searchParams.toString());
 
 	$effect(() => {
 		(async () => {

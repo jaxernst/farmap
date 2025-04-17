@@ -1,41 +1,20 @@
-import {
-  HttpApi,
-  HttpApiEndpoint,
-  HttpApiGroup,
-  HttpApiMiddleware,
-  HttpApiSecurity,
-} from "@effect/platform";
-import { Schema } from "effect";
-import {
-  AttachmentId,
-  AttachmentIdFromString,
-  AttachmentSchema,
-  PositionSchema,
-} from "./MapAttachments.js";
-import { AttachmentUrlParams, AttachmentPage } from "./Query.js";
-import { UserNotFound, UserModel, User, UserPreview } from "./Users.js";
-import {
-  FileTypeSchema,
-  FileUploadRequestSchema,
-  FileId,
-  FileUrl,
-  FileNotFound,
-} from "./FileStorage.js";
-import {
-  SessionNotFound,
-  SessionExpired,
-  FarcasterCredential,
-} from "./Auth.js";
-import { Unauthorized } from "@effect/platform/HttpApiError";
+import { HttpApi, HttpApiEndpoint, HttpApiGroup, HttpApiMiddleware, HttpApiSecurity } from "@effect/platform"
+import { Unauthorized } from "@effect/platform/HttpApiError"
+import { Schema } from "effect"
+import { FarcasterCredential, SessionExpired, SessionNotFound } from "./Auth.js"
+import { FileId, FileNotFound, FileTypeSchema, FileUploadRequestSchema, FileUrl } from "./FileStorage.js"
+import { AttachmentId, AttachmentIdFromString, AttachmentSchema, PositionSchema } from "./MapAttachments.js"
+import { AttachmentPage, AttachmentUrlParams } from "./Query.js"
+import { User, UserModel, UserNotFound, UserPreview } from "./Users.js"
 
 export class InputError extends Schema.TaggedError<InputError>()("InputError", {
-  message: Schema.String,
+  message: Schema.String
 }) {}
 
 export class AttachmentNotFound extends Schema.TaggedError<AttachmentNotFound>()(
   "AttachmentNotFound",
   {
-    id: AttachmentId,
+    id: AttachmentId
   }
 ) {}
 
@@ -47,9 +26,9 @@ export class Authentication extends HttpApiMiddleware.Tag<Authentication>()(
     security: {
       cookie: HttpApiSecurity.apiKey({
         in: "cookie",
-        key: "session",
-      }),
-    },
+        key: "session"
+      })
+    }
   }
 ) {}
 
@@ -71,7 +50,8 @@ export class AuthApi extends HttpApiGroup.make("Auth")
       .setPayload(FarcasterCredential)
       .addSuccess(UserPreview)
       .addError(InputError)
-  ) {}
+  )
+{}
 
 export class UsersApi extends HttpApiGroup.make("Users").add(
   HttpApiEndpoint.get("getById", "/users/:id")
@@ -94,7 +74,7 @@ export class MapAttachmentsApi extends HttpApiGroup.make("MapAttachments")
         Schema.Struct({
           position: PositionSchema,
           fileId: FileId,
-          fileType: FileTypeSchema,
+          fileType: FileTypeSchema
         })
       )
       .addSuccess(Schema.Struct({ id: AttachmentId }))
@@ -145,8 +125,10 @@ export class MapAttachmentsApi extends HttpApiGroup.make("MapAttachments")
       .setUrlParams(AttachmentUrlParams)
       .addSuccess(AttachmentPage)
       .addError(InputError, { status: 400 })
-  ) {}
+  )
+{}
 
 export class FarMapApi extends HttpApi.make("api")
   .add(MapAttachmentsApi)
-  .add(AuthApi) {}
+  .add(AuthApi)
+{}
