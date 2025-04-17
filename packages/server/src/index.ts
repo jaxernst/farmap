@@ -22,11 +22,13 @@ const DevToolsLive = DevTools.layerWebSocket().pipe(
 );
 
 // Create CORS middleware correctly
-const corsMiddleware = HttpApiBuilder.middlewareCors({
+const corsMiddleware = HttpMiddleware.cors({
   allowedOrigins: ["http://localhost:5173", "https://farmap.vercel.app"],
   allowedMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-  allowedHeaders: ["Content-Type", "Authorization"],
+  allowedHeaders: ["Content-Type", "Authorization", "traceparent"],
   exposedHeaders: ["Content-Length"],
+  credentials: true,
+  maxAge: 86400,
 });
 
 const ServerLive = HttpApiBuilder.serve(HttpMiddleware.logger).pipe(
