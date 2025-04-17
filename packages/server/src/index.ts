@@ -1,12 +1,7 @@
 import * as dotenv from "dotenv";
 
 import { DevTools } from "@effect/experimental";
-import {
-  HttpApiBuilder,
-  HttpMiddleware,
-  HttpServer,
-  Router,
-} from "@effect/platform";
+import { HttpApiBuilder, HttpMiddleware, HttpServer } from "@effect/platform";
 import { NodeHttpServer, NodeRuntime, NodeSocket } from "@effect/platform-node";
 import { Layer, Logger, LogLevel } from "effect";
 import { createServer } from "http";
@@ -40,9 +35,9 @@ const ServerLive = HttpApiBuilder.serve(HttpMiddleware.logger).pipe(
   Layer.provide(NodeHttpServer.layer(createServer, { port: 3001 })),
   Layer.provide(Logger.minimumLogLevel(LogLevel.Debug)),
   Layer.provide(DevToolsLive),
-  Router.middleware.cors({
-    origin: ["http://localhost:5173", "https://farmap.vercel.app"],
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+  HttpApiBuilder.middlewareCors({
+    allowedOrigins: ["http://localhost:5173", "https://farmap.vercel.app"],
+    allowedMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization"],
     exposedHeaders: ["Content-Length"],
     credentials: true,
