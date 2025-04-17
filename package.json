@@ -3,6 +3,9 @@
   "private": true,
   "type": "module",
   "packageManager": "pnpm@8.15.4",
+  "engines": {
+    "pnpm": "8.15.4"
+  },
   "workspaces": [
     "packages/*"
   ],
