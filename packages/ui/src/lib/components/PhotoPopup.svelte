@@ -31,8 +31,8 @@
 
 		if (await sdk.context) {
 			sdk.actions.composeCast({
-				text: `Check out this photo on FarMap: ${window.location.href} `,
-				embeds: [`https://null-previously-wages-grows.trycloudflare.com/share/${attachmentId}`]
+				text: `Check out my photo on FarMap`,
+				embeds: [`${window.location.origin}/share/${attachmentId}`]
 			});
 		} else {
 			const url = new URL(window.location.href);
@@ -76,7 +76,7 @@
 		<!-- Delete button in top left -->
 		<button
 			onclick={handleDeletePhoto}
-			class="absolute top-1.5 left-1.5 z-10 rounded-full bg-red-500/70 p-1 text-white opacity-100 transition-opacity duration-200 group-hover:opacity-100 hover:bg-red-600 sm:opacity-0"
+			class="absolute left-1.5 top-1.5 z-10 rounded-full bg-red-500/70 p-1 text-white opacity-100 transition-opacity duration-200 hover:bg-red-600 group-hover:opacity-100 sm:opacity-0"
 			aria-label="Delete photo"
 		>
 			<svg
@@ -98,7 +98,7 @@
 		<img src={imageUrl} class="h-full w-full object-cover" alt="" />
 		<div class="absolute inset-0 -z-10 bg-white/60"></div>
 
-		<div class="absolute right-0 bottom-2 left-0 flex justify-center gap-2">
+		<div class="absolute bottom-2 left-0 right-0 flex justify-center gap-2">
 			<button
 				onclick={handleShare}
 				class="rounded-full bg-purple-500 px-4 py-1 text-xs font-semibold text-white hover:bg-purple-600 sm:text-sm"
