@@ -22,7 +22,7 @@ export class Authentication extends HttpApiMiddleware.Tag<Authentication>()(
   "Auth",
   {
     provides: User,
-    failure: Schema.Union(SessionNotFound, SessionExpired),
+    failure: Unauthorized,
     security: {
       cookie: HttpApiSecurity.apiKey({
         in: "cookie",
