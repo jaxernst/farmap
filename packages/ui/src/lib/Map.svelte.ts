@@ -4,7 +4,7 @@ import PhotoPopup from "./components/PhotoPopup.svelte"
 
 class LeafletMapStore {
   private L: typeof L | null = null
-  private noLabelTileLayer: string = "https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}{r}.png"
+  private noLabelTileLayer: string = "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png"
 
   map: L.Map | null = $state(null)
   currentLocation: L.LatLng | null = $state(null)
