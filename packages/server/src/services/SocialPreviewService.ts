@@ -6,6 +6,11 @@ import sharp from "sharp"
 import StaticMaps from "staticmaps"
 import { AttachmentsRepo } from "../Repo.js"
 
+const PREVIEW_WIDTH = 1200
+const PREVIEW_HEIGHT = 800
+const DEFAULT_MAP_SIZE = 280
+const DEFAULT_MAP_ZOOM = 10
+
 export interface MapImageOptions {
   lat: number
   long: number
@@ -47,8 +52,8 @@ export const generateMapImage = ({
 export const generateSocialPreview = ({
   lat,
   long,
-  mapSize = 280,
-  mapZoom = 10,
+  mapSize = DEFAULT_MAP_SIZE,
+  mapZoom = DEFAULT_MAP_ZOOM,
   photoBuffer
 }: {
   photoBuffer: Buffer
@@ -82,8 +87,8 @@ export const generateSocialPreview = ({
         .toBuffer()
     )
 
-    const canvasWidth = 1200
-    const canvasHeight = 630
+    const canvasWidth = PREVIEW_WIDTH
+    const canvasHeight = PREVIEW_HEIGHT
 
     const resizedPhotoBuffer = yield* Effect.promise(() =>
       sharp(photoBuffer)
