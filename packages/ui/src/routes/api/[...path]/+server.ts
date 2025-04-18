@@ -41,3 +41,22 @@ export const POST: RequestHandler = async ({ params, request }) => {
 
   return newResponse
 }
+
+export const DELETE: RequestHandler = async ({ params, request }) => {
+  const response = await fetch(`${PUBLIC_API_URL}/${params.path}`, {
+    method: request.method,
+    headers: request.headers,
+    credentials: "include"
+  })
+
+  const newResponse = new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText
+  })
+
+  response.headers.forEach((value, key) => {
+    newResponse.headers.set(key, value)
+  })
+
+  return newResponse
+}
