@@ -22,7 +22,11 @@ const DevToolsLive = DevTools.layerWebSocket().pipe(
 )
 
 // Create CORS middleware correctly
-const corsMiddleware = HttpApiBuilder.middlewareCors()
+const corsMiddleware = HttpApiBuilder.middlewareCors({
+  allowedOrigins: ["https://farmap.vercel.app", "http://localhost:5173", "https://warpcast.com"],
+  credentials: true,
+  maxAge: 86400
+})
 
 const ServerLive = HttpApiBuilder.serve(HttpMiddleware.logger).pipe(
   Layer.provide(corsMiddleware),
