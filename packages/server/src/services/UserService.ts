@@ -46,9 +46,7 @@ export class UserService extends Effect.Service<UserService>()("api/User", {
 
     const refreshProfileData = (user: UserModel) =>
       Effect.gen(function*() {
-        console.log("Refreshing profile data", { fid: user.fid })
         const profileData = yield* getProfileData(user.fid)
-        console.log("Refreshed profile data", { profileData })
         return yield* repo.update(
           UserModel.update.make({
             id: user.id,
