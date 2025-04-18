@@ -134,18 +134,12 @@ class LeafletMapStore {
   removePhotoMarker(id: string) {
     if (!this.map) return
 
-    console.log("removing marker", { id })
-
     const markerToRemove = this.markers.find((m) => m.id === id)
     if (markerToRemove) {
       // Remove the marker from the map
       markerToRemove.marker.remove()
       this.markers = this.markers.filter((m) => m.id !== id)
       this.markerData = this.markerData.filter((m) => m.id !== id)
-
-      console.log(`Marker ${id} removed successfully`)
-    } else {
-      console.warn(`No marker found with ID: ${id}`)
     }
   }
 
@@ -161,8 +155,6 @@ class LeafletMapStore {
 
   panTo(lat: number, lng: number, zoom?: number) {
     if (!this.map) return
-
-    console.log("set view", { lat, lng, zoom })
     this.map.setView([lat, lng], zoom)
   }
 
