@@ -32,8 +32,8 @@ export const generateMapImage = ({
       height,
       paddingX: 0,
       paddingY: 0,
-      tileUrl: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-      tileSubdomains: ["a", "b", "c"],
+      tileUrl: "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png",
+      tileSubdomains: ["a", "b", "c", "d"],
       zoomRange: { min: 1, max: 17 }
     })
 
