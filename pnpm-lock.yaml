@@ -148,9 +148,6 @@ importers:
       '@types/staticmaps':
         specifier: ^1.12.5
         version: 1.12.5
-      effect:
-        specifier: latest
-        version: 3.14.10
       sharp:
         specifier: ^0.33.2
         version: 0.33.5

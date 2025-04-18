@@ -29,7 +29,6 @@
     "@effect/sql-sqlite-node": "latest",
     "@farcaster/auth-client": "^0.3.0",
     "@types/staticmaps": "^1.12.5",
-    "effect": "latest",
     "sharp": "^0.33.2",
     "staticmaps": "^1.13.1",
     "uuid": "^11.1.0"
