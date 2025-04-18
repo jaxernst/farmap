@@ -7,14 +7,14 @@
 
 	const frame = {
 		version: 'next',
-		imageUrl: 'https://farmap.vercel.app/',
+		imageUrl: imageUrl,
 		button: {
 			title: 'View on FarMap',
 			action: {
 				type: 'launch_frame',
-				url: 'https://farmap.vercel.app/attachments/' + attachment.id,
+				url: `https://farmap.vercel.app/?toAttachment=${attachment.id}`,
 				name: 'FarMap',
-				splashImageUrl: 'https://farmap.vercel.app/pin-icon.avif',
+				splashImageUrl: 'https://farmap.vercel.app/logo.png',
 				splashBackgroundColor: '#f5f5f5'
 			}
 		}

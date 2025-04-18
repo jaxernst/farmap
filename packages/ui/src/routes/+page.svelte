@@ -30,7 +30,7 @@
 				type: 'launch_frame',
 				url: 'https://farmap.vercel.app/',
 				name: 'FarMap',
-				splashImageUrl: 'https://farmap.vercel.app/pin.png',
+				splashImageUrl: 'https://farmap.vercel.app/logo.png',
 				splashBackgroundColor: '#f5f5f5'
 			}
 		}
