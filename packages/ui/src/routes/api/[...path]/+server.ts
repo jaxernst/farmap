@@ -41,5 +41,3 @@ export const POST: RequestHandler = async ({ params, request }) => {
 
   return newResponse
 }
-
-// Add other HTTP methods as needed (PUT, DELETE, etc.)
