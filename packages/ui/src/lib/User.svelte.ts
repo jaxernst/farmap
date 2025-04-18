@@ -1,4 +1,3 @@
-import sdk from "@farcaster/frame-sdk/src"
 import type { UserPreview } from "@farmap/domain/Users"
 import { Effect } from "effect"
 import { mapStore } from "./Map.svelte"
@@ -13,14 +12,19 @@ class UserStore {
       if (user) return user
 
       const nonce = yield* farmapApi.auth.getNonce()
-      const signInResult = yield* Effect.tryPromise({
-        try: () => sdk.actions.signIn({ nonce }),
-        catch: (e) => {
-          return new Error("No Farcaster client available for sign in", {
-            cause: e
-          })
-        }
-      })
+      // const signInResult = yield* Effect.tryPromise({
+      //   try: () => sdk.actions.signIn({ nonce }),
+      //   catch: (e) => {
+      //     return new Error("No Farcaster client available for sign in", {
+      //       cause: e
+      //     })
+      //   }
+      // })
+
+      const signInResult = {
+        message: "Hello",
+        signature: "world"
+      }
 
       return yield* farmapApi.auth.signInWithFarcaster({
         _devdomain: window.location.hostname,

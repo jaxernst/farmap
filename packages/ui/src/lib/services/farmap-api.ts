@@ -26,8 +26,7 @@ export class FarmapClient extends Effect.Service<FarmapClient>()("ui/FarmapClien
       baseUrl: url as string,
       transformClient: (client) =>
         mapRequest(client, (request) => ({
-          ...request,
-          credentials: "include"
+          ...request
         }))
     })
 
@@ -54,7 +53,7 @@ export class FarmapClient extends Effect.Service<FarmapClient>()("ui/FarmapClien
 
     const getPhotoById = (id: number) => client.MapAttachments.getById({ path: { id: AttachmentId.make(id) } })
 
-    const getNonce = client.Auth.nonce
+    const getNonce = () => client.Auth.nonce()
 
     const getCurrentUser = () => client.Auth.getCurrentUser().pipe(Effect.catchAll(() => Effect.succeed(null)))
 
@@ -104,5 +103,5 @@ export function makeFarmapClient(baseURL: string, layer: Layer.Layer<HttpClient>
   )
 }
 
-const farmapPublicClient = makeFarmapClient(PUBLIC_API_URL, BrowserClient)
+const farmapPublicClient = makeFarmapClient("/api", BrowserClient)
 export { farmapPublicClient as farmapApi }
