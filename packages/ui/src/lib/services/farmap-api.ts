@@ -1,4 +1,3 @@
-import { PUBLIC_API_URL } from "$env/static/public"
 import { HttpApiClient } from "@effect/platform"
 import { BrowserHttpClient } from "@effect/platform-browser"
 import type { HttpClient } from "@effect/platform/HttpClient"
