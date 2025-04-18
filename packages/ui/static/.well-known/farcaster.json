@@ -1,0 +1,17 @@
+{
+  "accountAssociation": {
+    "header": "eyJmaWQiOjEyMTYzLCJ0eXBlIjoiY3VzdG9keSIsImtleSI6IjB4NGNjNTY0NDI0ZDA1MUI3ZkY2YmUwYzAxNDRCMjhFMGMxNTIxNTFiRSJ9",
+    "payload": "eyJkb21haW4iOiJmYXJtYXAudmVyY2VsLmFwcCJ9",
+    "signature": "MHg4ZTY4MWQ0OTZiMDFhM2ZlNjA5YTM2MjFmYTBlOTA2MzZlOWM3OWZkNmQ0MmJjMWUxMGNkODA3OTQ1NjI5YmMyMjYxOWQwNmVmNjgxN2UyZjRkZjdmY2E2NzllMGQxMmZlYmYxMGM0ZWZmMmNiODNjMzI3NmM3NWYxYTMyYzNhNDFj"
+  },
+  "frame": {
+    "version": "1",
+    "name": "FarMap",
+    "iconUrl": "https://farmap.vercel.app/logo.png",
+    "homeUrl": "https://farmap.vercel.app",
+    "imageUrl": "https://farmap.vercel.app/splash.png",
+    "buttonTitle": "Upload Photos to FarMap",
+    "splashImageUrl": "https://farmap.vercel.app/pin.png",
+    "splashBackgroundColor": "#f5f5f5"
+  }
+}
