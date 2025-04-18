@@ -41,6 +41,8 @@ class UserStore {
             attachment.fileUrl,
             userAvatarUrl
           )
+
+          return attachment
         })
       )
     )

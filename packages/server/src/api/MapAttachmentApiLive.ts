@@ -3,10 +3,11 @@ import { AttachmentNotFound, FarMapApi, InputError } from "@farmap/domain/Api"
 import { FileStore } from "@farmap/domain/FileStorage"
 import { MapAttachmentModel } from "@farmap/domain/MapAttachments"
 import { AttachmentQueryParams } from "@farmap/domain/Query"
-import { User } from "@farmap/domain/Users"
-import { Effect, pipe, Schema } from "effect"
+import { User, UserPreview } from "@farmap/domain/Users"
+import { Effect, Option, pipe, Schema } from "effect"
 import { MapAttachmentService } from "../services/MapAttachmentsService.js"
 import { SocialPreviewService } from "../services/SocialPreviewService.js"
+import { UserService } from "../services/UserService.js"
 
 export const MapAttachmentsApiLive = HttpApiBuilder.group(
   FarMapApi,
@@ -16,6 +17,7 @@ export const MapAttachmentsApiLive = HttpApiBuilder.group(
       const map = yield* MapAttachmentService
       const mapPreviews = yield* SocialPreviewService
       const fileStorage = yield* FileStore
+      const users = yield* UserService
 
       return handlers
         .handle("createUploadUrl", ({ payload }) =>
@@ -43,7 +45,21 @@ export const MapAttachmentsApiLive = HttpApiBuilder.group(
             Effect.andThen((user) => map.deleteUserAttachment(user, id)),
             Effect.map(() => ({ ok: true }))
           ))
-        .handle("getById", ({ path: { id } }) => map.getById(id))
+        .handle("getById", ({ path: { id } }) =>
+          Effect.gen(function*() {
+            const attachment = yield* map.getById(id)
+            const creator = Option.getOrThrow(yield* users.getById(attachment.creatorId))
+
+            return {
+              attachment,
+              creator: UserPreview.make({
+                userId: creator.id,
+                fid: creator.fid,
+                displayName: creator.displayName,
+                displayImage: creator.displayImage
+              })
+            }
+          }))
         .handle("getByIds", ({ urlParams: { ids } }) =>
           map.getByIds(ids).pipe(
             Effect.map((attachments) => ({
@@ -52,16 +68,24 @@ export const MapAttachmentsApiLive = HttpApiBuilder.group(
             }))
           ))
         .handle("getSocialPreview", ({ path: { id } }) =>
-          mapPreviews.getOrGenerateSocialPreview(id).pipe(
-            Effect.map(({ attachment, url }) => ({
+          Effect.gen(function*() {
+            const { attachment, url } = yield* mapPreviews.getOrGenerateSocialPreview(id)
+            const creator = Option.getOrThrow(yield* users.getById(attachment.userId))
+
+            return {
               url,
-              attachment: MapAttachmentModel.toAttachmentSchema(attachment)
-            })),
-            Effect.catchTags({
-              FileNotFound: () => Effect.fail(new AttachmentNotFound({ id })),
-              FileFetchError: (error) => pipe(Effect.logError(error), Effect.die)
-            })
-          ))
+              attachment: MapAttachmentModel.toAttachmentSchema(attachment),
+              creator: UserPreview.make({
+                userId: creator.id,
+                fid: creator.fid,
+                displayName: creator.displayName,
+                displayImage: creator.displayImage
+              })
+            }
+          }).pipe(Effect.catchTags({
+            FileNotFound: () => Effect.fail(new AttachmentNotFound({ id })),
+            FileFetchError: (error) => pipe(Effect.logError(error), Effect.die)
+          })))
         .handle("query", ({ urlParams }) =>
           Schema.decodeUnknown(AttachmentQueryParams)(urlParams).pipe(
             Effect.andThen((params) => map.query(params)),

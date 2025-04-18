@@ -1,12 +1,13 @@
 import { makeServerClient } from "$lib/services/farmap-api.server"
 import type { Attachment } from "@farmap/domain"
+import type { UserPreview } from "@farmap/domain/Users"
 import { error } from "@sveltejs/kit"
 import { Effect, pipe } from "effect"
 import type { PageServerLoad } from "./$types"
 
 export const load: PageServerLoad = async (
   { params }
-): Promise<{ socialPreview: string; attachment: Attachment } | null> => {
+): Promise<{ socialPreview: string; attachment: Attachment; creator: UserPreview } | null> => {
   try {
     const id = parseInt(params.id)
     if (isNaN(id)) {
@@ -18,7 +19,7 @@ export const load: PageServerLoad = async (
     return await Effect.runPromise(
       pipe(
         farmapApi.getSocialPreview(id),
-        Effect.andThen(({ attachment, url }) => Effect.succeed({ socialPreview: url, attachment })),
+        Effect.andThen(({ attachment, creator, url }) => Effect.succeed({ socialPreview: url, attachment, creator })),
         Effect.catchAll((err) => {
           console.error("Error fetching social preview:", err)
           return Effect.succeed(null)

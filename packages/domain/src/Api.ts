@@ -102,7 +102,7 @@ export class MapAttachmentsApi extends HttpApiGroup.make("MapAttachments")
   // unauthenticated
   .add(
     HttpApiEndpoint.get("getById", "/attachments/:id")
-      .addSuccess(AttachmentSchema)
+      .addSuccess(Schema.Struct({ attachment: AttachmentSchema, creator: UserPreview }))
       .addError(AttachmentNotFound, { status: 404 })
       .setPath(Schema.Struct({ id: AttachmentIdFromString }))
   )
@@ -117,7 +117,7 @@ export class MapAttachmentsApi extends HttpApiGroup.make("MapAttachments")
   .add(
     HttpApiEndpoint.get("getSocialPreview", "/attachments/social-preview/:id")
       .setPath(Schema.Struct({ id: AttachmentIdFromString }))
-      .addSuccess(Schema.Struct({ url: FileUrl, attachment: AttachmentSchema }))
+      .addSuccess(Schema.Struct({ url: FileUrl, attachment: AttachmentSchema, creator: UserPreview }))
       .addError(AttachmentNotFound, { status: 404 })
   )
   .add(

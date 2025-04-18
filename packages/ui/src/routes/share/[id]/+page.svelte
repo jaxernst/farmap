@@ -1,8 +1,11 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
+	import sdk from '@farcaster/frame-sdk/src';
 
 	let imageUrl = $derived(page.data.socialPreview);
 	let attachment = $derived(page.data.attachment);
+	let creator = $derived(page.data.creator);
 	let showOriginal = $state(false);
 
 	const frame = {
@@ -17,6 +20,12 @@
 				splashImageUrl: 'https://farmap.vercel.app/logo.png',
 				splashBackgroundColor: '#f5f5f5'
 			}
+		}
+	};
+
+	const handleViewProfile = async () => {
+		if (await sdk.context) {
+			sdk.actions.viewProfile({ fid: creator.fid });
 		}
 	};
 </script>
@@ -37,20 +46,37 @@
 </svelte:head>
 
 <div class="container bg-white">
-	<div class="photo-container">
+	<div class="photo-container shadow-lg">
 		<img src={imageUrl} alt="Map" class="main-photo" />
 	</div>
 
-	<div class="info">
-		<h1>Location Photo</h1>
-		<p>
-			Coordinates: {Number(attachment?.position.lat).toFixed(6)}°N,
-			{Number(attachment?.position.long).toFixed(6)}°E
-		</p>
-		<a href={`/?toAttachment=${attachment.id}`} class="view-button">View on Map</a>
-		<button class="view-button-secondary" onclick={() => (showOriginal = !showOriginal)}>
-			{showOriginal ? 'Hide Original' : 'View Original'}
-		</button>
+	<div class="mt-6 flex flex-col gap-4">
+		<div class="flex flex-col gap-3">
+			<h1 class="leading-2 text-[28px]">Location Photo</h1>
+
+			<button
+				onclick={handleViewProfile}
+				class="mt-2 flex cursor-pointer items-center gap-1 text-sm font-medium"
+			>
+				<img src={creator.displayImage} alt="Avatar" class="h-4 w-4 rounded-full" />
+				{creator.displayName}
+			</button>
+
+			<p class="text-sm">
+				Coordinates: {Number(attachment?.position.lat).toFixed(6)}°N,
+				{Number(attachment?.position.long).toFixed(6)}°E
+			</p>
+		</div>
+
+		<div>
+			<button class="view-button" onclick={() => goto(`/?toAttachment=${attachment.id}`)}>
+				View on Map
+			</button>
+
+			<button class="view-button-secondary" onclick={() => (showOriginal = !showOriginal)}>
+				{showOriginal ? 'Hide Original' : 'View Original'}
+			</button>
+		</div>
 	</div>
 
 	{#if showOriginal}
@@ -71,26 +97,11 @@
 		width: 100%;
 		border-radius: 12px;
 		overflow: hidden;
-		box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 	}
 
 	.main-photo {
 		width: 100%;
 		display: block;
-	}
-
-	.info {
-		margin-top: 1.5rem;
-	}
-
-	h1 {
-		font-size: 2rem;
-		margin-bottom: 0.5rem;
-	}
-
-	p {
-		color: #555;
-		margin-bottom: 1.5rem;
 	}
 
 	.view-button {

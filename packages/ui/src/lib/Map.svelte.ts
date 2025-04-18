@@ -10,6 +10,14 @@ class LeafletMapStore {
   currentLocation: L.LatLng | null = $state(null)
   markers: Array<{ id: string; marker: L.Marker }> = $state([])
   clickMarker: L.Marker | null = $state(null)
+  markerData: Array<{
+    id: string
+    lat: number
+    lng: number
+    dataUrl: string
+    markerIconUrl?: string | null
+    isMine: boolean
+  }> = $state([])
 
   private async ensureLeaflet() {
     if (!this.L) {
@@ -44,7 +52,31 @@ class LeafletMapStore {
       this.placeClickMarker(e.latlng)
     })
 
+    // Recreate markers if we have marker data
+    if (this.markerData.length > 0) {
+      await this.recreateMarkers()
+    }
+
     return this.map
+  }
+
+  private async recreateMarkers() {
+    if (!this.map) return
+
+    // Clear existing markers
+    this.clearMarkers()
+
+    // Recreate all markers from stored data
+    for (const data of this.markerData) {
+      await this.addPhotoMarker(
+        data.id,
+        data.lat,
+        data.lng,
+        data.dataUrl,
+        data.markerIconUrl,
+        data.isMine
+      )
+    }
   }
 
   async addPhotoMarker(
@@ -52,7 +84,8 @@ class LeafletMapStore {
     lat: number,
     lng: number,
     dataUrl: string,
-    markerIconUrl?: string | null
+    markerIconUrl?: string | null,
+    isMine = true
   ) {
     if (!this.map) return null
 
@@ -64,6 +97,7 @@ class LeafletMapStore {
       props: {
         imageUrl: dataUrl,
         attachmentId: id,
+        isMine,
         onDelete: () => this.removePhotoMarker(id)
       }
     })
@@ -92,6 +126,8 @@ class LeafletMapStore {
       .openPopup()
 
     this.markers = [...this.markers, { id, marker }]
+    this.markerData = [...this.markerData, { id, lat, lng, dataUrl, markerIconUrl, isMine }]
+
     return id
   }
 
@@ -105,6 +141,7 @@ class LeafletMapStore {
       // Remove the marker from the map
       markerToRemove.marker.remove()
       this.markers = this.markers.filter((m) => m.id !== id)
+      this.markerData = this.markerData.filter((m) => m.id !== id)
 
       console.log(`Marker ${id} removed successfully`)
     } else {
@@ -136,6 +173,10 @@ class LeafletMapStore {
       attachment.marker.openPopup()
       this.panTo(attachment.marker.getLatLng().lat, attachment.marker.getLatLng().lng)
     }
+  }
+
+  hasAttachment(attachmentId: string) {
+    return this.markers.some((m) => m.id === attachmentId)
   }
 
   async placeClickMarker(latlng: L.LatLng) {
