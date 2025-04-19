@@ -129,6 +129,12 @@ export const generateSocialPreview = ({
             fit: "contain",
             background: { r: 0, g: 0, b: 0, alpha: 0 }
           })
+          .toBuffer()
+      )
+
+      // Apply corner rounding separately
+      const roundedPhotoBuffer = yield* Effect.promise(() =>
+        sharp(resizedPhotoBuffer)
           .composite([
             {
               input: Buffer.from(
@@ -140,6 +146,7 @@ export const generateSocialPreview = ({
             }
           ])
           .ensureAlpha()
+          .png()
           .toBuffer()
       )
 
@@ -156,7 +163,7 @@ export const generateSocialPreview = ({
           .composite([
             {
               // Position the photo on the canvas with new horizontal centering
-              input: resizedPhotoBuffer,
+              input: roundedPhotoBuffer,
               left: photoLeft,
               top: Math.floor((canvasHeight - photoHeight) / 2)
             },
@@ -166,6 +173,7 @@ export const generateSocialPreview = ({
               left: mapLeftPosition
             }
           ])
+          .flatten({ background: bgColor }) // Flatten with background color
           .jpeg({ quality: 80 })
           .toBuffer()
       )
