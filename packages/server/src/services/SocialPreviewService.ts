@@ -91,11 +91,17 @@ export const generateSocialPreview = ({
     const canvasWidth = PREVIEW_WIDTH
     const canvasHeight = PREVIEW_HEIGHT
 
-    // Get image metadata to determine aspect ratio
-    const metadata = yield* Effect.promise(() => sharp(photoBuffer).metadata())
+    // Normalize the image first to handle EXIF orientation
+    const normalizedBuffer = yield* Effect.promise(() =>
+      sharp(photoBuffer)
+        .rotate() // Automatically rotate based on EXIF orientation
+        .toBuffer()
+    )
+
+    // Get metadata from the normalized image
+    const metadata = yield* Effect.promise(() => sharp(normalizedBuffer).metadata())
     const imageAspectRatio = (metadata.width || 1) / (metadata.height || 1)
 
-    // Background color for canvas (neutral gray)
     const bgColor = BG_COLOR
 
     let finalImage
@@ -116,18 +122,19 @@ export const generateSocialPreview = ({
       const photoLeft = Math.floor((availableWidth - photoWidth) / 2)
 
       const resizedPhotoBuffer = yield* Effect.promise(() =>
-        sharp(photoBuffer)
+        sharp(normalizedBuffer) // Use the normalized buffer here
           .resize({
             height: Math.round(photoHeight),
             width: Math.round(photoWidth),
             fit: "contain",
             background: { r: 0, g: 0, b: 0, alpha: 0 }
           })
-          // Add rounded corners to the photo
           .composite([
             {
               input: Buffer.from(
-                `<svg><rect x="0" y="0" width="${photoWidth}" height="${photoHeight}" rx="20" ry="20"/></svg>`
+                `<svg><rect x="0" y="0" width="${Math.round(photoWidth)}" height="${
+                  Math.round(photoHeight)
+                }" rx="20" ry="20"/></svg>`
               ),
               blend: "dest-in"
             }
@@ -165,14 +172,14 @@ export const generateSocialPreview = ({
     } else {
       // For normal or wide aspect ratios, use the existing behavior
       const resizedPhotoBuffer = yield* Effect.promise(() =>
-        sharp(photoBuffer)
+        sharp(normalizedBuffer) // Use the normalized buffer here
           .resize({
             width: canvasWidth,
             height: canvasHeight,
             fit: "cover",
             position: "center"
           })
-          .toBuffer()
+          .toBuffer() // Remove the explicit rotate(0) call
       )
 
       finalImage = yield* Effect.promise(() =>
