@@ -72,7 +72,7 @@
 	}
 </script>
 
-<div class="fixed bottom-2 left-0 z-[1000] flex w-full items-center justify-center gap-2">
+<div class="fixed bottom-5 left-0 z-[1000] flex w-full items-center justify-center gap-2">
 	{#if uploadingPhoto}
 		<button class="action-button select-button disabled:cursor-not-allowed" disabled
 			>Uploading...</button

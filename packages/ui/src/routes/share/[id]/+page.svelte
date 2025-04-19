@@ -12,7 +12,7 @@
 		version: 'next',
 		imageUrl: imageUrl,
 		button: {
-			title: 'View on FarMap',
+			title: 'View on Map',
 			action: {
 				type: 'launch_frame',
 				url: `https://farmap.vercel.app/?toAttachment=${attachment.id}`,
