@@ -1,8 +1,21 @@
 <script lang="ts">
 	import { mapStore } from '$lib/Map.svelte';
 
+	const TOGGLE_POPUPS_ZOOM = 11;
+
 	$effect(() => {
-		mapStore.initializeMap('map');
+		mapStore.initializeMap('map').then(() => {
+			let lastZoom = 0;
+			mapStore.lMap?.on('zoomend', (x) => {
+				const zoom = x.target.getZoom();
+				if (zoom === TOGGLE_POPUPS_ZOOM) {
+					if (lastZoom === TOGGLE_POPUPS_ZOOM - 1) mapStore.openAllPopups();
+					if (lastZoom === TOGGLE_POPUPS_ZOOM + 1) mapStore.closeAllPopups();
+				}
+
+				lastZoom = zoom;
+			});
+		});
 	});
 </script>
 

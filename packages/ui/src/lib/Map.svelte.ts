@@ -19,6 +19,10 @@ class LeafletMapStore {
     isMine: boolean
   }> = $state([])
 
+  get lMap() {
+    return this.map
+  }
+
   private async ensureLeaflet() {
     if (!this.L) {
       this.L = await import("leaflet")
@@ -165,6 +169,20 @@ class LeafletMapStore {
       attachment.marker.openPopup()
       this.panTo(attachment.marker.getLatLng().lat, attachment.marker.getLatLng().lng)
     }
+  }
+
+  closeAllPopups() {
+    if (!this.map) return
+    this.map.closePopup()
+    this.markers.forEach(({ marker }) => marker.closePopup())
+  }
+
+  openAllPopups() {
+    if (!this.map) return
+    this.closeAllPopups()
+    this.markers.forEach(({ marker }) => {
+      setTimeout(() => marker.openPopup(), 10)
+    })
   }
 
   hasAttachment(attachmentId: string) {

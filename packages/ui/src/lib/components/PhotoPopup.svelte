@@ -5,11 +5,7 @@
 	import { AttachmentId } from '@farmap/domain';
 	import { Effect } from 'effect';
 
-	export let imageUrl: string;
-	export let attachmentId: string;
-	export let isMine = false;
-	export let open = true;
-	export let onDelete: () => void = () => {};
+	const { imageUrl, attachmentId, isMine = false, open = true, onDelete } = $props();
 
 	async function handleDeletePhoto() {
 		confirm('Are you sure you want to delete this photo?') && onDelete();
@@ -32,7 +28,7 @@
 
 		if (await sdk.context) {
 			sdk.actions.composeCast({
-				text: `Check out my photo on FarMap`,
+				text: `Check out my photo on FarMap:`,
 				embeds: [`${window.location.origin}/share/${attachmentId}`]
 			});
 		} else {
