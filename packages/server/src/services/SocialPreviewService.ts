@@ -10,6 +10,7 @@ const PREVIEW_WIDTH = 1200
 const PREVIEW_HEIGHT = 800
 const DEFAULT_MAP_SIZE = 280
 const DEFAULT_MAP_ZOOM = 10
+const BG_COLOR = "#7c65c1"
 
 export interface MapImageOptions {
   lat: number
@@ -90,29 +91,103 @@ export const generateSocialPreview = ({
     const canvasWidth = PREVIEW_WIDTH
     const canvasHeight = PREVIEW_HEIGHT
 
-    const resizedPhotoBuffer = yield* Effect.promise(() =>
-      sharp(photoBuffer)
-        .resize({
-          width: canvasWidth,
-          height: canvasHeight,
-          fit: "cover",
-          position: "center"
-        })
-        .toBuffer()
-    )
+    // Get image metadata to determine aspect ratio
+    const metadata = yield* Effect.promise(() => sharp(photoBuffer).metadata())
+    const imageAspectRatio = (metadata.width || 1) / (metadata.height || 1)
 
-    const finalImage = yield* Effect.promise(() =>
-      sharp(resizedPhotoBuffer)
-        .composite([
-          {
-            input: roundedMapBuffer,
-            top: 15,
-            left: canvasWidth - mapSize - 15
+    // Background color for canvas (neutral gray)
+    const bgColor = BG_COLOR
+
+    let finalImage
+
+    // If image is significantly taller than wide (portrait/tall orientation)
+    if (imageAspectRatio < 0.8) {
+      // Calculate dimensions for the centered photo
+      // Make it nearly fill the height (95%)
+      const photoHeight = canvasHeight * 0.95
+      const photoWidth = photoHeight * imageAspectRatio
+
+      // Position of the mini map on the right side
+      const mapLeftPosition = canvasWidth - mapSize - 15
+
+      // Center photo between left edge and left edge of mini map
+      // Available width is from 0 to mapLeftPosition
+      const availableWidth = mapLeftPosition
+      const photoLeft = Math.floor((availableWidth - photoWidth) / 2)
+
+      const resizedPhotoBuffer = yield* Effect.promise(() =>
+        sharp(photoBuffer)
+          .resize({
+            height: Math.round(photoHeight),
+            width: Math.round(photoWidth),
+            fit: "contain",
+            background: { r: 0, g: 0, b: 0, alpha: 0 }
+          })
+          // Add rounded corners to the photo
+          .composite([
+            {
+              input: Buffer.from(
+                `<svg><rect x="0" y="0" width="${photoWidth}" height="${photoHeight}" rx="20" ry="20"/></svg>`
+              ),
+              blend: "dest-in"
+            }
+          ])
+          .ensureAlpha()
+          .toBuffer()
+      )
+
+      // Create a canvas with the background color
+      finalImage = yield* Effect.promise(() =>
+        sharp({
+          create: {
+            width: canvasWidth,
+            height: canvasHeight,
+            channels: 4,
+            background: bgColor
           }
-        ])
-        .jpeg({ quality: 80 })
-        .toBuffer()
-    )
+        })
+          .composite([
+            {
+              // Position the photo on the canvas with new horizontal centering
+              input: resizedPhotoBuffer,
+              left: photoLeft,
+              top: Math.floor((canvasHeight - photoHeight) / 2)
+            },
+            {
+              input: roundedMapBuffer,
+              top: 15,
+              left: mapLeftPosition
+            }
+          ])
+          .jpeg({ quality: 80 })
+          .toBuffer()
+      )
+    } else {
+      // For normal or wide aspect ratios, use the existing behavior
+      const resizedPhotoBuffer = yield* Effect.promise(() =>
+        sharp(photoBuffer)
+          .resize({
+            width: canvasWidth,
+            height: canvasHeight,
+            fit: "cover",
+            position: "center"
+          })
+          .toBuffer()
+      )
+
+      finalImage = yield* Effect.promise(() =>
+        sharp(resizedPhotoBuffer)
+          .composite([
+            {
+              input: roundedMapBuffer,
+              top: 15,
+              left: canvasWidth - mapSize - 15
+            }
+          ])
+          .jpeg({ quality: 80 })
+          .toBuffer()
+      )
+    }
 
     return finalImage
   })
