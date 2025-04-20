@@ -117,7 +117,7 @@ class LeafletMapStore {
       .addTo(this.map)
       .bindPopup(popupContainer, {
         className: "custom-popup",
-        autoPan: true,
+        autoPan: false,
         closeButton: true,
         autoClose: false,
         closeOnClick: false
@@ -164,15 +164,15 @@ class LeafletMapStore {
 
   closeAllPopups() {
     if (!this.map) return
-    this.map.closePopup()
-    Object.values(this.markers).forEach(({ marker }) => marker.closePopup())
+    Object.values(this.markers).forEach(({ marker }) => {
+      marker.closePopup()
+    })
   }
 
   openAllPopups() {
     if (!this.map) return
-    this.closeAllPopups()
     Object.values(this.markers).forEach(({ marker }) => {
-      setTimeout(() => marker.openPopup(), 10)
+      marker.openPopup()
     })
   }
 
