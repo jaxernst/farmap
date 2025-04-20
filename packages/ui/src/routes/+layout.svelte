@@ -4,11 +4,9 @@
 	import { sdk } from '@farcaster/frame-sdk/src';
 	import { initializeApp } from '$lib/AppInit.svelte';
 	import { page } from '$app/state';
-	import ControlsOverlay from '../lib/components/ControlsOverlay.svelte';
-	import TitleOverlay from '../lib/components/TitleOverlay.svelte';
-	import { userStore } from '../lib/User.svelte';
 	import Map from '../lib/components/Map.svelte';
 	import { browser } from '$app/environment';
+	import { mapStore } from '../lib/Map.svelte';
 
 	/** Scratch notes
 	 Prod:
@@ -28,13 +26,15 @@
 
 	let { children } = $props();
 
-	let focusAttachmentId = page.url.searchParams.get('toAttachment');
+	let focusAttachmentId = $derived(page.url.searchParams.get('toAttachment'));
+	let zoomLevel = $derived(page.url.searchParams.get('zoom'));
 
 	let appInitFailed = $state(false);
 
 	if (browser) {
 		initializeApp({
 			mapElementId: 'map',
+			// svelte-ignore state_referenced_locally
 			focusAttachmentId,
 			popupZoomLevel: 11
 		})
@@ -44,6 +44,11 @@
 				appInitFailed = true;
 			});
 	}
+
+	$effect(() => {
+		if (focusAttachmentId) mapStore.panToAttachment(focusAttachmentId);
+		if (zoomLevel) mapStore.setZoom(parseInt(zoomLevel));
+	});
 </script>
 
 {#if appInitFailed}

@@ -202,6 +202,11 @@ class LeafletMapStore {
   getClickMarkerPosition(): L.LatLng | null {
     return this.clickMarker?.getLatLng() || null
   }
+
+  setZoom(zoom: number) {
+    if (!this.map) return
+    this.map.setZoom(zoom)
+  }
 }
 
 export const mapStore = new LeafletMapStore()

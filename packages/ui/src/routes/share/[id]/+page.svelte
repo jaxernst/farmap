@@ -69,7 +69,7 @@
 		</div>
 
 		<div>
-			<button class="view-button" onclick={() => goto(`/?toAttachment=${attachment.id}`)}>
+			<button class="view-button" onclick={() => goto(`/?toAttachment=${attachment.id}&zoom=14`)}>
 				View on Map
 			</button>
 
