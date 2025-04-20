@@ -2,22 +2,24 @@ import type L from "leaflet"
 import { mount } from "svelte"
 import PhotoPopup from "./components/PhotoPopup.svelte"
 
+type AttachmentId = string
+
 class LeafletMapStore {
   private L: typeof L | null = null
-  private noLabelTileLayer: string = "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png"
+  private tileLayer: string = "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png"
 
   map: L.Map | null = $state(null)
-  currentLocation: L.LatLng | null = $state(null)
-  markers: Array<{ id: string; marker: L.Marker }> = $state([])
   clickMarker: L.Marker | null = $state(null)
-  markerData: Array<{
-    id: string
+
+  markers: Record<AttachmentId, {
+    id: AttachmentId
+    marker: L.Marker
     lat: number
     lng: number
-    dataUrl: string
+    popupImageUrl: string
     markerIconUrl?: string | null
     isMine: boolean
-  }> = $state([])
+  }> = $state({})
 
   get lMap() {
     return this.map
@@ -27,6 +29,7 @@ class LeafletMapStore {
     if (!this.L) {
       this.L = await import("leaflet")
     }
+
     return this.L
   }
 
@@ -39,28 +42,18 @@ class LeafletMapStore {
     })
 
     // Add default tile layer
-    L.tileLayer(this.noLabelTileLayer, {
+    L.tileLayer(this.tileLayer, {
       subdomains: "abcd",
       maxZoom: 19,
       minZoom: 3
     }).addTo(this.map)
 
-    this.requestLocation()
-
-    this.map.on("locationfound", (e: L.LocationEvent) => {
-      console.log("locationfound", { e })
-      this.currentLocation = e.latlng
-    })
-
     this.map.on("click", (e: L.LeafletMouseEvent) => {
       this.placeClickMarker(e.latlng)
     })
 
-    // Recreate markers if we have marker data
-    if (this.markerData.length > 0) {
-      await this.recreateMarkers()
-    }
-
+    // Add any existing markers to the map
+    await this.recreateMarkers()
     return this.map
   }
 
@@ -71,12 +64,12 @@ class LeafletMapStore {
     this.clearMarkers()
 
     // Recreate all markers from stored data
-    for (const data of this.markerData) {
+    for (const data of Object.values(this.markers)) {
       await this.addPhotoMarker(
         data.id,
         data.lat,
         data.lng,
-        data.dataUrl,
+        data.popupImageUrl,
         data.markerIconUrl,
         data.isMine
       )
@@ -91,9 +84,11 @@ class LeafletMapStore {
     markerIconUrl?: string | null,
     isMine = true
   ) {
-    if (!this.map) return null
-
     const L = await this.ensureLeaflet()
+    if (!this.map) return null
+    if (this.markers[id]) {
+      this.removePhotoMarker(id)
+    }
 
     const popupContainer = document.createElement("div")
     mount(PhotoPopup, {
@@ -106,7 +101,7 @@ class LeafletMapStore {
       }
     })
 
-    // Create custom div icon if markerIconUrl is provided
+    // Create custom icon image tag if markerIconUrl is provided
     const markerOptions: L.MarkerOptions = {}
     if (markerIconUrl) {
       markerOptions.icon = L.divIcon({
@@ -129,21 +124,17 @@ class LeafletMapStore {
       })
       .openPopup()
 
-    this.markers = [...this.markers, { id, marker }]
-    this.markerData = [...this.markerData, { id, lat, lng, dataUrl, markerIconUrl, isMine }]
-
+    this.markers[id] = { id, marker, lat, lng, popupImageUrl: dataUrl, markerIconUrl, isMine }
     return id
   }
 
   removePhotoMarker(id: string) {
     if (!this.map) return
 
-    const markerToRemove = this.markers.find((m) => m.id === id)
+    const markerToRemove = this.markers[id]
     if (markerToRemove) {
-      // Remove the marker from the map
       markerToRemove.marker.remove()
-      this.markers = this.markers.filter((m) => m.id !== id)
-      this.markerData = this.markerData.filter((m) => m.id !== id)
+      delete this.markers[id]
     }
   }
 
@@ -153,8 +144,8 @@ class LeafletMapStore {
   }
 
   clearMarkers() {
-    this.markers.forEach(({ marker }) => marker.remove())
-    this.markers = []
+    Object.values(this.markers).forEach(({ marker }) => marker.remove())
+    this.markers = {}
   }
 
   panTo(lat: number, lng: number, zoom?: number) {
@@ -164,7 +155,7 @@ class LeafletMapStore {
 
   panToAttachment(attachmentId: string) {
     if (!this.map) return
-    const attachment = this.markers.find((m) => m.id === attachmentId)
+    const attachment = this.markers[attachmentId]
     if (attachment) {
       attachment.marker.openPopup()
       this.panTo(attachment.marker.getLatLng().lat, attachment.marker.getLatLng().lng)
@@ -174,25 +165,24 @@ class LeafletMapStore {
   closeAllPopups() {
     if (!this.map) return
     this.map.closePopup()
-    this.markers.forEach(({ marker }) => marker.closePopup())
+    Object.values(this.markers).forEach(({ marker }) => marker.closePopup())
   }
 
   openAllPopups() {
     if (!this.map) return
     this.closeAllPopups()
-    this.markers.forEach(({ marker }) => {
+    Object.values(this.markers).forEach(({ marker }) => {
       setTimeout(() => marker.openPopup(), 10)
     })
   }
 
   hasAttachment(attachmentId: string) {
-    return this.markers.some((m) => m.id === attachmentId)
+    return this.markers[attachmentId] !== undefined
   }
 
   async placeClickMarker(latlng: L.LatLng) {
-    if (!this.map) return
-
     const L = await this.ensureLeaflet()
+    if (!this.map) return
 
     // Remove existing click marker if any
     if (this.clickMarker) {

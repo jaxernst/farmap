@@ -1,38 +1,3 @@
-<script lang="ts">
-	import { mapStore } from '$lib/Map.svelte';
-
-	const TOGGLE_POPUPS_ZOOM = 11;
-	let popupsVisible = false;
-
-	$effect(() => {
-		mapStore.initializeMap('map').then(() => {
-			// Single handler that manages popup state based on current zoom
-			const updatePopupVisibility = () => {
-				if (!mapStore.lMap) return;
-
-				const currentZoom = mapStore.lMap.getZoom();
-				const shouldShowPopups = currentZoom >= TOGGLE_POPUPS_ZOOM;
-
-				// Only take action if state needs to change
-				if (shouldShowPopups && !popupsVisible) {
-					mapStore.openAllPopups();
-					popupsVisible = true;
-				} else if (!shouldShowPopups && popupsVisible) {
-					mapStore.closeAllPopups();
-					popupsVisible = false;
-				}
-			};
-
-			// Apply to all zoom-changing events
-			mapStore.lMap?.on('zoomend', updatePopupVisibility);
-			mapStore.lMap?.on('moveend', updatePopupVisibility); // Also catches pinch zooms
-
-			// Initialize state
-			updatePopupVisibility();
-		});
-	});
-</script>
-
 <div id="map"></div>
 
 <style>
