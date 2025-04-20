@@ -1,5 +1,6 @@
 <script lang="ts">
 	import '../app.css';
+	import 'leaflet/dist/leaflet.css';
 	import { sdk } from '@farcaster/frame-sdk/src';
 	import { initializeApp } from '$lib/AppInit.svelte';
 	import { page } from '$app/state';
