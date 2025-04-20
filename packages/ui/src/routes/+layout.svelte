@@ -7,6 +7,7 @@
 	import TitleOverlay from '../lib/components/TitleOverlay.svelte';
 	import { userStore } from '../lib/User.svelte';
 	import Map from '../lib/components/Map.svelte';
+	import { browser } from '$app/environment';
 
 	/** Scratch notes
 	 Prod:
@@ -30,16 +31,18 @@
 
 	let appInitFailed = $state(false);
 
-	console.log('initializing app');
-
-	initializeApp({
-		mapElementId: 'map',
-		focusAttachmentId,
-		popupZoomLevel: 11
-	}).catch((e) => {
-		console.error(e);
-		appInitFailed = true;
-	});
+	if (browser) {
+		initializeApp({
+			mapElementId: 'map',
+			focusAttachmentId,
+			popupZoomLevel: 11
+		})
+			.then(() => console.log('Initialized'))
+			.catch((e) => {
+				console.error(e);
+				appInitFailed = true;
+			});
+	}
 </script>
 
 {#if appInitFailed}
@@ -48,7 +51,9 @@
 
 <TitleOverlay />
 
-<Map />
+<div class="isolate">
+	<Map />
+</div>
 
 {#if userStore.user}
 	<ControlsOverlay />
