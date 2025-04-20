@@ -1,5 +1,7 @@
 <script lang="ts">
-	import Map from '$lib/components/Map.svelte';
+	import ControlsOverlay from '$lib/components/ControlsOverlay.svelte';
+	import TitleOverlay from '$lib/components/TitleOverlay.svelte';
+	import { userStore } from '$lib/User.svelte';
 
 	const frame = {
 		version: 'next',
@@ -22,3 +24,9 @@
 	<meta name="description" content="Upload everywhere" />
 	<meta name="fc:frame" content={JSON.stringify(frame)} />
 </svelte:head>
+
+<TitleOverlay />
+
+{#if userStore.user}
+	<ControlsOverlay />
+{/if}

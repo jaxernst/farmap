@@ -50,15 +50,9 @@
 	<div class="fixed inset-0 flex items-center justify-center">Oops, something went wrong</div>
 {/if}
 
-<TitleOverlay />
-
-<div class="isolate">
+<div class="isolate" class:invisible={page.url.pathname !== '/'}>
 	<Map />
 </div>
-
-{#if userStore.user}
-	<ControlsOverlay />
-{/if}
 
 <!-- Display 'open in farcaster button overlay if there's no frame context -->
 {#await sdk.context then context}
