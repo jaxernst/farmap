@@ -8,7 +8,7 @@ import {
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
 import type { FileId, FileMetadata, FileUploadRequest, FileUrl } from "@farmap/domain/FileStorage"
 import { FileFetchError, FileNotFound, FileStore } from "@farmap/domain/FileStorage"
-import { Config, Context, Effect, Layer } from "effect"
+import { Config, Context, Effect, Layer, Option } from "effect"
 import { v4 as uuidv4 } from "uuid"
 
 export class S3Config extends Context.Tag("S3Config")<
@@ -19,19 +19,22 @@ export class S3Config extends Context.Tag("S3Config")<
     accessKeyId: string
     secretAccessKey: string
     uploadUrlExpirationSeconds: number
-    endpoint?: string
+    endpoint?: string | null
   }
 >() {}
 
 const S3ConfigLive = Layer.effect(
   S3Config,
   Effect.gen(function*() {
+    const endpointOverride = yield* Config.option(Config.string("S3_ENDPOINT"))
+
     return S3Config.of({
       bucketName: yield* Config.string("S3_BUCKET_NAME"),
       region: yield* Config.string("S3_REGION"),
       accessKeyId: yield* Config.string("S3_ACCESS_KEY_ID"),
       secretAccessKey: yield* Config.string("S3_SECRET_ACCESS_KEY"),
-      uploadUrlExpirationSeconds: 10 * 60
+      uploadUrlExpirationSeconds: 10 * 60,
+      endpoint: Option.getOrNull(endpointOverride)
     })
   })
 )
@@ -133,7 +136,7 @@ const makeS3FileStore = () =>
       const customEndpoint = s3Client.config.endpoint
 
       if (customEndpoint) {
-        return `${customEndpoint}/${bucketName}/${id}` as FileUrl
+        return `${customEndpoint}/${id}` as FileUrl
       } else {
         return `https://${bucketName}.s3.${region}.amazonaws.com/${id}` as FileUrl
       }
