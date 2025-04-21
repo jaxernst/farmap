@@ -36,7 +36,6 @@ const ServerLive = HttpApiBuilder.serve(HttpMiddleware.logger).pipe(
   Layer.provide(Db.SqliteLive),
   HttpServer.withLogAddress,
   Layer.provide(NodeHttpServer.layer(createServer, { port: 3001 })),
-  Layer.provide(Logger.minimumLogLevel(LogLevel.Debug)),
   Layer.provide(DevToolsLive)
 )
 

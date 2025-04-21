@@ -205,7 +205,7 @@ export const generateSocialPreview = ({
     }
 
     return finalImage
-  })
+  }).pipe(Effect.withLogSpan("generateSocialPreview"))
 
 export class SocialPreviewService extends Effect.Service<SocialPreviewService>()(
   "api/SocialPreview",
@@ -260,13 +260,16 @@ export class SocialPreviewService extends Effect.Service<SocialPreviewService>()
           )
 
           const previewUrl = fileStorage.toFileUrl(previewFileId)
-          yield* repo.updatePreviewUrl(attachmentId, previewUrl)
+
+          yield* Effect.log(
+            yield* repo.updatePreviewUrl(attachmentId, previewUrl)
+          )
 
           return {
             url: previewUrl,
             attachment
           }
-        })
+        }).pipe(Effect.withLogSpan("getOrGenerateSocialPreview"))
 
       return {
         getOrGenerateSocialPreview

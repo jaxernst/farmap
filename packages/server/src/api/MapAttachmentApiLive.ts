@@ -29,7 +29,7 @@ export const MapAttachmentsApiLive = HttpApiBuilder.group(
           User.pipe(
             Effect.andThen((user) => map.attachToMap(user, position, fileId, fileType)),
             // Asynchronously generate the social preview
-            Effect.tap(({ id }) => Effect.fork(mapPreviews.getOrGenerateSocialPreview(id)))
+            Effect.tap(({ id }) => Effect.forkDaemon(mapPreviews.getOrGenerateSocialPreview(id)))
           ))
         .handle("myAttachments", () =>
           User.pipe(
