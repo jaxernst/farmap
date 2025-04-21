@@ -4,7 +4,7 @@ import { Context, Layer } from "effect"
 import { fileURLToPath } from "url"
 
 const sqliteClientLive = SqliteClient.layer({
-  filename: "./db/db.dev.sql"
+  filename: "./db/db.sql"
 })
 
 const sqliteClientTest = SqliteClient.layer({
@@ -17,7 +17,6 @@ const MigratorLive = SqliteMigrator.layer({
   )
 })
 
-// prettier-ignore
 export class Db extends Context.Tag("InitializedDatabase")<
   Db,
   SqlClient.SqlClient
