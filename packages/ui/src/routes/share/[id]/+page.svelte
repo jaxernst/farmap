@@ -54,15 +54,12 @@
 		<div class="flex flex-col gap-3">
 			<h1 class="leading-2 text-[28px]">Location Photo</h1>
 
-			<button
-				onclick={handleViewProfile}
-				class="mt-2 flex cursor-pointer items-center gap-1 text-sm font-medium"
-			>
-				<img src={creator.displayImage} alt="Avatar" class="h-4 w-4 rounded-full" />
+			<button onclick={handleViewProfile} class="mt-2 flex cursor-pointer items-center gap-1">
+				<img src={creator.displayImage} alt="Avatar" class="h-5 w-5 rounded-full" />
 				{creator.displayName}
 			</button>
 
-			<p class="text-sm">
+			<p class="text-sm text-black/60">
 				Coordinates: {Number(attachment?.position.lat).toFixed(6)}°N,
 				{Number(attachment?.position.long).toFixed(6)}°E
 			</p>

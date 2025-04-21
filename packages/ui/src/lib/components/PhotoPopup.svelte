@@ -108,7 +108,7 @@
 			{/if}
 			<a
 				href={`/share/${attachmentId}`}
-				class="rounded-full bg-white/75 px-2 py-0.5 text-xs font-semibold text-purple-500 sm:text-sm"
+				class="rounded-full bg-white/75 px-2 py-0.5 text-xs font-semibold text-purple-500 hover:bg-white/90 sm:text-sm"
 			>
 				Open
 			</a>
