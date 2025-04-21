@@ -28,7 +28,6 @@ const S3ConfigLive = Layer.effect(
   Effect.gen(function*() {
     // Can override s3 bucket domain for cdn urls
     const fileUrlEndpointOverride = yield* Config.option(Config.string("S3_ENDPOINT"))
-    console.log(fileUrlEndpointOverride, Option.getOrNull(fileUrlEndpointOverride))
 
     return S3Config.of({
       bucketName: yield* Config.string("S3_BUCKET_NAME"),
@@ -133,11 +132,9 @@ const makeS3FileStore = () =>
       })
 
     const toFileUrl = (id: FileId): FileUrl => {
-      console.log("toFileUrl", id)
       const bucketName = config.bucketName
       const region = config.region
       const customEndpoint = config.fileUrlEndpoint
-      console.log("customEndpoint", customEndpoint)
 
       if (customEndpoint) {
         return `${customEndpoint}/${id}` as FileUrl

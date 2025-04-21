@@ -30,8 +30,9 @@
 	}
 
 	$effect(() => {
-		if (focusAttachmentId) mapStore.panToAttachment(focusAttachmentId);
-		if (zoomLevel) mapStore.setZoom(parseInt(zoomLevel));
+		if (focusAttachmentId) {
+			mapStore.flyToAttachment(focusAttachmentId, zoomLevel ? parseInt(zoomLevel) : 14);
+		}
 	});
 </script>
 

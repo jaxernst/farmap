@@ -148,17 +148,17 @@ class LeafletMapStore {
     this.markers = {}
   }
 
-  panTo(lat: number, lng: number, zoom?: number) {
+  flyTo(lat: number, lng: number, zoom?: number) {
     if (!this.map) return
-    this.map.setView([lat, lng], zoom)
+    this.map.flyTo([lat, lng], zoom)
   }
 
-  panToAttachment(attachmentId: string) {
+  flyToAttachment(attachmentId: string, zoom?: number) {
     if (!this.map) return
     const attachment = this.markers[attachmentId]
     if (attachment) {
       attachment.marker.openPopup()
-      this.panTo(attachment.marker.getLatLng().lat, attachment.marker.getLatLng().lng)
+      this.flyTo(attachment.marker.getLatLng().lat, attachment.marker.getLatLng().lng, zoom)
     }
   }
 

@@ -74,7 +74,7 @@ export async function initializeApp(options: InitOptions): Promise<CleanupFuncti
       isMine
     )
 
-    mapStore.panToAttachment(attachment.id.toString())
+    mapStore.flyToAttachment(attachment.id.toString(), 14)
   } else if (userId) {
     mapStore.requestLocation()
   } else {
