@@ -60,7 +60,7 @@ importers:
         specifier: ^0.4.0
         version: 0.4.0(@babel/core@7.26.10)
       effect:
-        specifier: ^3.14.11
+        specifier: latest
         version: 3.14.11
       eslint:
         specifier: ^9.13.0
