@@ -33,6 +33,8 @@
 			return;
 		}
 
+		mapStore.flyTo(clickMarkerPosition.lat, clickMarkerPosition.lng, 15);
+
 		uploadingPhoto = true;
 		const result = await Effect.runPromise(
 			pipe(
