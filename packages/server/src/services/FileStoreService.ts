@@ -19,14 +19,16 @@ export class S3Config extends Context.Tag("S3Config")<
     accessKeyId: string
     secretAccessKey: string
     uploadUrlExpirationSeconds: number
-    endpoint?: string | null
+    fileUrlEndpoint?: string | null
   }
 >() {}
 
 const S3ConfigLive = Layer.effect(
   S3Config,
   Effect.gen(function*() {
-    const endpointOverride = yield* Config.option(Config.string("S3_ENDPOINT"))
+    // Can override s3 bucket domain for cdn urls
+    const fileUrlEndpointOverride = yield* Config.option(Config.string("S3_ENDPOINT"))
+    console.log(fileUrlEndpointOverride, Option.getOrNull(fileUrlEndpointOverride))
 
     return S3Config.of({
       bucketName: yield* Config.string("S3_BUCKET_NAME"),
@@ -34,7 +36,7 @@ const S3ConfigLive = Layer.effect(
       accessKeyId: yield* Config.string("S3_ACCESS_KEY_ID"),
       secretAccessKey: yield* Config.string("S3_SECRET_ACCESS_KEY"),
       uploadUrlExpirationSeconds: 10 * 60,
-      endpoint: Option.getOrNull(endpointOverride)
+      fileUrlEndpoint: Option.getOrNull(fileUrlEndpointOverride)
     })
   })
 )
@@ -131,9 +133,11 @@ const makeS3FileStore = () =>
       })
 
     const toFileUrl = (id: FileId): FileUrl => {
+      console.log("toFileUrl", id)
       const bucketName = config.bucketName
       const region = config.region
-      const customEndpoint = s3Client.config.endpoint
+      const customEndpoint = config.fileUrlEndpoint
+      console.log("customEndpoint", customEndpoint)
 
       if (customEndpoint) {
         return `${customEndpoint}/${id}` as FileUrl
