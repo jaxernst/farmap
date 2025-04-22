@@ -1,10 +1,10 @@
 import { Model, SqlClient, SqlSchema } from "@effect/sql"
 import { SessionModel } from "@farmap/domain/Auth"
 import type { FileUrl } from "@farmap/domain/FileStorage"
-import type { Position } from "@farmap/domain/MapAttachments"
-import { AttachmentId, AttachmentSchema, MapAttachmentModel } from "@farmap/domain/MapAttachments"
+import type { AttachmentId, Position } from "@farmap/domain/MapAttachments"
+import { AttachmentSchema, MapAttachmentModel } from "@farmap/domain/MapAttachments"
 import { UserId, UserModel } from "@farmap/domain/Users"
-import { DateTime, Effect, pipe, Schema } from "effect"
+import { DateTime, Effect, Schema } from "effect"
 import { InputError } from "../../domain/src/Api.js"
 
 export class AttachmentsRepo extends Effect.Service<AttachmentsRepo>()(
@@ -19,24 +19,20 @@ export class AttachmentsRepo extends Effect.Service<AttachmentsRepo>()(
         idColumn: "id"
       })
 
-      const findByIds = (ids: ReadonlyArray<AttachmentId>) =>
-        SqlSchema.findAll({
-          Request: Schema.Array(AttachmentId),
-          Result: AttachmentSchema,
-          execute: (ids) => sql`SELECT * FROM attachments WHERE (${sql.in(ids)})`
-        })(ids).pipe(Effect.orDie)
-
       const findByUserId = (userId: UserId) =>
         SqlSchema.findAll({
           Request: UserId,
-          Result: AttachmentSchema,
-          execute: (userId) =>
-            pipe(
-              sql`SELECT * FROM attachments WHERE userId = ${userId}`,
-              Effect.andThen((rows) =>
-                (rows as unknown as Array<MapAttachmentModel>).map((row) => MapAttachmentModel.toAttachmentSchema(row))
-              )
-            )
+          Result: Schema.transform(
+            MapAttachmentModel,
+            AttachmentSchema,
+            {
+              decode: (sqlResult) => MapAttachmentModel.toAttachmentSchema(sqlResult),
+              encode: (_) => {
+                throw new Error("Not implemented")
+              }
+            }
+          ),
+          execute: (userId) => sql`SELECT * FROM attachments WHERE userId = ${userId}`
         })(userId).pipe(Effect.orDie)
 
       const findByLocationSquare = (_location: Position, _distance: number) => new Error("Not Implemented")
@@ -48,7 +44,6 @@ export class AttachmentsRepo extends Effect.Service<AttachmentsRepo>()(
 
       return {
         ...repo,
-        findByIds,
         findByLocationSquare,
         findByUserId,
         updatePreviewUrl

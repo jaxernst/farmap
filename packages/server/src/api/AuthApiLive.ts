@@ -1,8 +1,8 @@
 import { HttpApiBuilder } from "@effect/platform"
 import { Authentication, FarMapApi } from "@farmap/domain/Api"
+import { SessionNotFound } from "@farmap/domain/Auth"
+import { User } from "@farmap/domain/Users"
 import { Duration, Effect, Option } from "effect"
-import { SessionNotFound } from "../../../domain/src/Auth.js"
-import { User } from "../../../domain/src/Users.js"
 import { AuthService } from "../services/AuthService.js"
 import { UserService } from "../services/UserService.js"
 

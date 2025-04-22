@@ -4,7 +4,7 @@ import { Schema } from "effect"
 import { FarcasterCredential, SessionExpired, SessionNotFound } from "./Auth.js"
 import { FileId, FileNotFound, FileTypeSchema, FileUploadRequestSchema, FileUrl } from "./FileStorage.js"
 import { AttachmentId, AttachmentIdFromString, AttachmentSchema, PositionSchema } from "./MapAttachments.js"
-import { AttachmentPage, AttachmentUrlParams } from "./Query.js"
+import { AttachmentPage, AttachmentUrlParams, AttachmentWithCreator } from "./Query.js"
 import { User, UserModel, UserNotFound, UserPreview } from "./Users.js"
 
 export class InputError extends Schema.TaggedError<InputError>()("InputError", {
@@ -93,11 +93,6 @@ export class MapAttachmentsApi extends HttpApiGroup.make("MapAttachments")
       .addError(AttachmentNotFound, { status: 404 })
       .addError(Unauthorized, { status: 401 })
   )
-  // .add(
-  //   HttpApiEndpoint.get("friendsAttachments", "/attachments/friends")
-  //     .addSuccess(AttachmentPage)
-  //     .addError(InputError, { status: 400 })
-  // )
   .middlewareEndpoints(Authentication)
   // unauthenticated
   .add(
@@ -107,12 +102,8 @@ export class MapAttachmentsApi extends HttpApiGroup.make("MapAttachments")
       .setPath(Schema.Struct({ id: AttachmentIdFromString }))
   )
   .add(
-    HttpApiEndpoint.get("getByIds", "/attachments/ids")
-      .setUrlParams(
-        Schema.Struct({ ids: Schema.Array(AttachmentIdFromString) })
-      )
-      .addSuccess(AttachmentPage)
-      .addError(InputError, { status: 400 })
+    HttpApiEndpoint.get("getAll", "/attachments/all")
+      .addSuccess(Schema.Array(AttachmentWithCreator))
   )
   .add(
     HttpApiEndpoint.get("getSocialPreview", "/attachments/social-preview/:id")

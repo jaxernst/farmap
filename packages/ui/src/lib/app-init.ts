@@ -1,10 +1,13 @@
 import sdk from "@farcaster/frame-sdk/src"
 import { type Attachment, AttachmentId } from "@farmap/domain/MapAttachments"
-import type { User, UserId, UserPreview } from "@farmap/domain/Users"
+import type { UserId, UserPreview } from "@farmap/domain/Users"
 import { Effect } from "effect"
 import { mapStore } from "./Map.svelte"
 import { farmapApi } from "./services/farmap-api"
 import { userStore } from "./User.svelte"
+
+const DEFAULT_CENTER: L.LatLngExpression = [39, -95]
+const DEFAULT_ZOOM = 3
 
 type InitOptions = {
   mapElementId: string
@@ -13,9 +16,6 @@ type InitOptions = {
 }
 
 type CleanupFunction = () => void
-
-const DEFAULT_CENTER: L.LatLngExpression = [39, -95]
-const DEFAULT_ZOOM = 3
 
 export async function initializeApp(options: InitOptions): Promise<CleanupFunction> {
   const { focusAttachmentId, mapElementId, popupZoomLevel = 11 } = options
@@ -93,6 +93,25 @@ export async function initializeApp(options: InitOptions): Promise<CleanupFuncti
   } else {
     map.setZoom(map.getMinZoom())
   }
+
+  farmapApi.getAllAttachments().pipe(
+    Effect.tap((attachments) => {
+      attachments.forEach(({ attachment, creator }) => {
+        if (mapStore.hasAttachment(attachment.id.toString())) return
+
+        mapStore.addPhotoMarker(
+          attachment.id.toString(),
+          attachment.position.lat,
+          attachment.position.long,
+          attachment.fileUrl,
+          creator.displayImage,
+          creator.userId === userId,
+          false
+        )
+      })
+    }),
+    Effect.runPromise
+  )
 
   return () => cleanupFunctions.forEach((fn) => fn())
 }

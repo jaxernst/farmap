@@ -63,7 +63,9 @@ export class FarmapClient extends Effect.Service<FarmapClient>()("ui/FarmapClien
 
     const signOut = client.Auth.signOut
 
-    const myAttachments = () => client.MapAttachments.myAttachments()
+    const myAttachments = client.MapAttachments.myAttachments
+
+    const getAllAttachments = client.MapAttachments.getAll
 
     const getSocialPreview = (id: number) =>
       client.MapAttachments.getSocialPreview({ path: { id: AttachmentId.make(id) } })
@@ -76,6 +78,7 @@ export class FarmapClient extends Effect.Service<FarmapClient>()("ui/FarmapClien
       deleteAttachment,
       getPhotoById,
       myAttachments,
+      getAllAttachments,
       getSocialPreview,
 
       auth: {

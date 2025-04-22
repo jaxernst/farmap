@@ -85,7 +85,8 @@ class LeafletMapStore {
     lng: number,
     dataUrl: string,
     markerIconUrl?: string | null,
-    isMine = true
+    isMine = true,
+    openPopup = true
   ) {
     const L = await this.ensureLeaflet()
     if (!this.map) return null
@@ -124,7 +125,10 @@ class LeafletMapStore {
         autoClose: false,
         closeOnClick: false
       })
-      .openPopup()
+
+    if (openPopup) {
+      marker.openPopup()
+    }
 
     this.markers[id] = { id, marker, lat, lng, popupImageUrl: dataUrl, markerIconUrl, isMine }
     return id

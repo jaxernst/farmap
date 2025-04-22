@@ -70,13 +70,10 @@ export class MapAttachmentService extends Effect.Service<MapAttachmentService>()
           return []
         })
 
-      const getByIds = repo.findByIds
-
       return {
         attachToMap,
         deleteUserAttachment,
         getById,
-        getByIds,
         query
       }
     }),

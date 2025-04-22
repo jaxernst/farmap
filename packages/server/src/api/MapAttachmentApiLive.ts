@@ -6,6 +6,7 @@ import { AttachmentQueryParams } from "@farmap/domain/Query"
 import { User, UserPreview } from "@farmap/domain/Users"
 import { Effect, Option, pipe, Schema } from "effect"
 import { MapAttachmentService } from "../services/MapAttachmentsService.js"
+import { MapQueryService } from "../services/MapQueryService.js"
 import { SocialPreviewService } from "../services/SocialPreviewService.js"
 import { UserService } from "../services/UserService.js"
 
@@ -18,6 +19,7 @@ export const MapAttachmentsApiLive = HttpApiBuilder.group(
       const mapPreviews = yield* SocialPreviewService
       const fileStorage = yield* FileStore
       const users = yield* UserService
+      const mapQuery = yield* MapQueryService
 
       return handlers
         .handle("createUploadUrl", ({ payload }) =>
@@ -73,13 +75,6 @@ export const MapAttachmentsApiLive = HttpApiBuilder.group(
               })
             }
           }))
-        .handle("getByIds", ({ urlParams: { ids } }) =>
-          map.getByIds(ids).pipe(
-            Effect.map((attachments) => ({
-              attachments,
-              totalCount: attachments.length
-            }))
-          ))
         .handle("getSocialPreview", ({ path: { id } }) =>
           Effect.gen(function*() {
             const { attachment, url } = yield* mapPreviews.getOrGenerateSocialPreview(id)
@@ -108,5 +103,6 @@ export const MapAttachmentsApiLive = HttpApiBuilder.group(
             })),
             Effect.catchTag("ParseError", () => Effect.fail(new InputError({ message: "Invalid query params" })))
           ))
+        .handle("getAll", () => mapQuery.getPublicAttachments())
     })
 )

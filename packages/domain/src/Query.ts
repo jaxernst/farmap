@@ -1,6 +1,6 @@
 import { Schema } from "effect"
 import { AttachmentSchema, Latitude, Longitude } from "./MapAttachments.js"
-import { UserId } from "./Users.js"
+import { UserId, UserPreview } from "./Users.js"
 
 export type AttachmentQueryParams = Schema.Schema.Type<
   typeof AttachmentQueryParams
@@ -26,4 +26,9 @@ export const AttachmentPage = Schema.Struct({
   attachments: Schema.Array(AttachmentSchema),
   nextCursor: Schema.optional(Schema.String),
   totalCount: Schema.Number
+})
+
+export const AttachmentWithCreator = Schema.Struct({
+  attachment: AttachmentSchema,
+  creator: UserPreview
 })

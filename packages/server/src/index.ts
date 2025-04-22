@@ -11,6 +11,7 @@ import { AuthService } from "./services/AuthService.js"
 import { FarcasterService } from "./services/FarcasterService.js"
 import { FileStoreService } from "./services/FileStoreService.js"
 import { MapAttachmentService } from "./services/MapAttachmentsService.js"
+import { MapQueryService } from "./services/MapQueryService.js"
 import { SocialPreviewService } from "./services/SocialPreviewService.js"
 import { UserService } from "./services/UserService.js"
 import { Db } from "./Sql.js"
@@ -24,16 +25,20 @@ const DevToolsLive = DevTools.layerWebSocket().pipe(
 const corsMiddleware = HttpApiBuilder.middlewareCors()
 
 const ServerLive = HttpApiBuilder.serve(HttpMiddleware.logger).pipe(
+  // App Api
   Layer.provide(corsMiddleware),
   Layer.provide(ApiLive),
   Layer.provide(AuthMiddlewareLive),
+  // Api services
   Layer.provide(AuthService.Default),
   Layer.provide(UserService.Default),
   Layer.provide(MapAttachmentService.Default),
+  Layer.provide(MapQueryService.Default),
   Layer.provide(SocialPreviewService.Default),
   Layer.provide(FileStoreService.S3Live),
   Layer.provide(FarcasterService.PinataLive),
   Layer.provide(Db.SqliteLive),
+  // App server
   HttpServer.withLogAddress,
   Layer.provide(NodeHttpServer.layer(createServer, { port: 3001 })),
   Layer.provide(DevToolsLive)
