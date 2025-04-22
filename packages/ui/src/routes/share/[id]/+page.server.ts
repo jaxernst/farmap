@@ -6,13 +6,20 @@ import { Effect, pipe } from "effect"
 import type { PageServerLoad } from "./$types"
 
 export const load: PageServerLoad = async (
-  { params }
+  { params, setHeaders }
 ): Promise<{ socialPreview: string; attachment: Attachment; creator: UserPreview } | null> => {
   try {
     const id = parseInt(params.id)
     if (isNaN(id)) {
       throw error(400, "Invalid ID parameter")
     }
+
+    // Cache for 1 day (86400 seconds) on CDN and in browsers
+    setHeaders({
+      "Cache-Control": "public, max-age=86400, s-maxage=86400",
+      "CDN-Cache-Control": "public, max-age=86400",
+      "Vercel-CDN-Cache-Control": "public, max-age=86400"
+    })
 
     const farmapApi = makeServerClient()
 
