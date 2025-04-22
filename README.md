@@ -15,7 +15,7 @@ To execute a file with `tsx`:
 pnpm tsx ./path/to/the/file.ts
 ```
 
-## Run the dev app:
+## Run the dev servers:
 
 Start the node server and Sveltekit server:
 `pnpm dev`
