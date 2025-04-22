@@ -21,6 +21,25 @@
 		display: none;
 	}
 
+	:global(.leaflet-popup-close-button) {
+		font-size: 16px !important;
+		font-weight: bold;
+		transform: translate(-0.22em, -0.22em);
+		padding: 6px;
+		background: rgba(255, 255, 255, 0.8);
+		color: #ffffff !important;
+		border-radius: 50%;
+	}
+
+	:global(.leaflet-popup-close-button span) {
+		display: none;
+	}
+
+	:global(.leaflet-popup-close-button::after) {
+		content: '-';
+		display: block;
+	}
+
 	:global(.click-marker .ring) {
 		width: 20px;
 		height: 20px;
