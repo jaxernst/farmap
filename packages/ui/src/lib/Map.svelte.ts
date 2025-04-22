@@ -41,7 +41,11 @@ class LeafletMapStore {
 
     this.map = L.map(elementId, {
       attributionControl: false,
-      worldCopyJump: true,
+      maxBounds: L.latLngBounds(
+        L.latLng(-90, -180),
+        L.latLng(90, 180)
+      ),
+      maxBoundsViscosity: .1,
       center,
       zoom
     })
