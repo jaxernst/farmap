@@ -45,6 +45,17 @@ export const MapAttachmentsApiLive = HttpApiBuilder.group(
         .handle("deleteAttachment", ({ path: { id } }) =>
           User.pipe(
             Effect.andThen((user) => map.deleteUserAttachment(user, id)),
+            Effect.tap((attachment) =>
+              Effect.forkDaemon(
+                Effect.all([
+                  fileStorage.deleteFile(fileStorage.fromFileUrl(attachment.fileUrl)),
+                  fileStorage.deleteFile(fileStorage.fromFileUrl(attachment.previewUrl!))
+                ]).pipe(
+                  Effect.tap(() => Effect.logInfo("Attachment cleanup completed successfully")),
+                  Effect.catchAll((error) => Effect.logError("Attachment cleanup failed", { error }))
+                )
+              ).pipe(Effect.withLogSpan("deleteAttachment.cleanup"))
+            ),
             Effect.map(() => ({ ok: true }))
           ))
         .handle("getById", ({ path: { id } }) =>

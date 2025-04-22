@@ -47,6 +47,7 @@ export class MapAttachmentService extends Effect.Service<MapAttachmentService>()
           if (Option.isNone(row)) return yield* new AttachmentNotFound({ id })
           if (row.value.userId !== userId) return yield* new Unauthorized()
           yield* repo.delete(id)
+          return row.value
         })
 
       const getById = (id: AttachmentId) =>

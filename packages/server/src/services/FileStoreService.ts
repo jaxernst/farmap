@@ -143,6 +143,10 @@ const makeS3FileStore = () =>
       }
     }
 
+    const fromFileUrl = (url: FileUrl): FileId => {
+      return url.split("/").pop() as FileId
+    }
+
     const checkFileExists = (id: FileId): Effect.Effect<boolean> =>
       Effect.gen(function*() {
         const bucketName = config.bucketName
@@ -210,10 +214,11 @@ const makeS3FileStore = () =>
       confirmUpload,
       getFileMetadata,
       deleteFile,
-      toFileUrl,
       uploadFile,
       checkFileExists,
-      getFile
+      getFile,
+      toFileUrl,
+      fromFileUrl
     }
   })
 

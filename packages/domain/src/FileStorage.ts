@@ -57,6 +57,7 @@ export interface FileStorage {
   getFile(id: FileId): Effect.Effect<Buffer, FileFetchError | FileNotFound>
   deleteFile(id: FileId): Effect.Effect<void, FileNotFound>
   toFileUrl(id: FileId): FileUrl
+  fromFileUrl(url: FileUrl): FileId
   uploadFile(
     fileId: FileId,
     buffer: Buffer,
