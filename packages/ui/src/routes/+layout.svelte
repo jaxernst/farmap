@@ -44,20 +44,4 @@
 	<Map />
 </div>
 
-<!-- Display 'open in farcaster button overlay if there's no frame context -->
-{#await sdk.context then context}
-	{#if !context}
-		<div
-			class="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-3xl border-2 border-purple-400 bg-white"
-		>
-			<a
-				class="flex items-center gap-2 rounded-md px-4 py-2 text-lg font-medium text-purple-500"
-				href="https://warpcast.com/~/mini-apps/launch?domain={window.location.host}"
-			>
-				Open app in Farcaster
-			</a>
-		</div>
-	{/if}
-{/await}
-
 {@render children()}
