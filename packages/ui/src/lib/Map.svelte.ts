@@ -1,3 +1,4 @@
+import { PUBLIC_MAPBOX_ACCESS_TOKEN } from "$env/static/public"
 import type L from "leaflet"
 import { mount } from "svelte"
 import PhotoPopup from "./components/PhotoPopup.svelte"
@@ -6,7 +7,9 @@ type AttachmentId = string
 
 class LeafletMapStore {
   private L: typeof L | null = null
-  private tileLayer: string = "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png"
+  private tileLayer: string =
+    `https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=${PUBLIC_MAPBOX_ACCESS_TOKEN}`
+  private mapboxStyleId: string = "mapbox/streets-v11"
 
   map: L.Map | null = $state(null)
   clickMarker: L.Marker | null = $state(null)
@@ -41,9 +44,11 @@ class LeafletMapStore {
       zoom
     })
 
-    // Add default tile layer
     L.tileLayer(this.tileLayer, {
-      subdomains: "abcd",
+      attribution: "© <a href=\"https://www.mapbox.com/about/maps/\">Mapbox</a>",
+      id: this.mapboxStyleId,
+      tileSize: 512,
+      zoomOffset: -1,
       maxZoom: 19,
       minZoom: 3
     }).addTo(this.map)
@@ -52,7 +57,6 @@ class LeafletMapStore {
       this.placeClickMarker(e.latlng)
     })
 
-    // Add any existing markers to the map
     await this.recreateMarkers()
     return this.map
   }
@@ -60,10 +64,8 @@ class LeafletMapStore {
   private async recreateMarkers() {
     if (!this.map) return
 
-    // Clear existing markers
     this.clearMarkers()
 
-    // Recreate all markers from stored data
     for (const data of Object.values(this.markers)) {
       await this.addPhotoMarker(
         data.id,
@@ -101,7 +103,6 @@ class LeafletMapStore {
       }
     })
 
-    // Create custom icon image tag if markerIconUrl is provided
     const markerOptions: L.MarkerOptions = {}
     if (markerIconUrl) {
       markerOptions.icon = L.divIcon({
@@ -184,12 +185,10 @@ class LeafletMapStore {
     const L = await this.ensureLeaflet()
     if (!this.map) return
 
-    // Remove existing click marker if any
     if (this.clickMarker) {
       this.clickMarker.remove()
     }
 
-    // Create new click marker with a ring icon
     const ringIcon = L.divIcon({
       className: "click-marker",
       html: "<div class=\"ring\"></div>",
