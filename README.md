@@ -1,16 +1,10 @@
-# Effect Monorepo Template
+# Farmap - a Farcaster photo sharing mini app
 
-This template provides a solid foundation for building scalable and maintainable TypeScript applications with Effect. 
+Built with Effect TS + Sveltekit + Leaflet
 
+[Effect is cool and you should use it](https://effect.website/)
+ 
 ## Running Code
-
-Bun: Typescript server and any ts + js files can be run directly without a build step  
-
-To execute a file: 
-
-```shr
-bun ./path/to/the/file.ts
-```
 
 Pnpm, yarn , npm:
 This template leverages [tsx](https://tsx.is) to allow execution of TypeScript files via NodeJS as if they were written in plain JavaScript.
@@ -21,26 +15,8 @@ To execute a file with `tsx`:
 pnpm tsx ./path/to/the/file.ts
 ```
 
-## Operations
+## Run the dev app:
 
-**Run dev server**
-```sh
-bun run --cwd packages/server dev
-```
-
-**Building**
-
-To build all packages in the monorepo:
-
-```sh
-bun build
-```
-
-**Testing**
-
-To test all packages in the monorepo:
-
-```sh
-bun test
-```
+Start the node server and Sveltekit server:
+`pnpm dev`
 
