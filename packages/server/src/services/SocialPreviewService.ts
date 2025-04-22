@@ -9,7 +9,7 @@ import { AttachmentsRepo } from "../Repo.js"
 const PREVIEW_WIDTH = 1200
 const PREVIEW_HEIGHT = 800
 const DEFAULT_MAP_SIZE = 280
-const DEFAULT_MAP_ZOOM = 12
+const DEFAULT_MAP_ZOOM = 14
 const BG_COLOR = "#7c65c1"
 
 export interface MapImageOptions {
