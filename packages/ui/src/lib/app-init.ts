@@ -1,6 +1,6 @@
 import sdk from "@farcaster/frame-sdk/src"
-import { AttachmentId } from "@farmap/domain/MapAttachments"
-import type { UserId } from "@farmap/domain/Users"
+import { type Attachment, AttachmentId } from "@farmap/domain/MapAttachments"
+import type { User, UserId, UserPreview } from "@farmap/domain/Users"
 import { Effect } from "effect"
 import { mapStore } from "./Map.svelte"
 import { farmapApi } from "./services/farmap-api"
@@ -14,11 +14,28 @@ type InitOptions = {
 
 type CleanupFunction = () => void
 
+const DEFAULT_CENTER: L.LatLngExpression = [39, -95]
+const DEFAULT_ZOOM = 3
+
 export async function initializeApp(options: InitOptions): Promise<CleanupFunction> {
   const { focusAttachmentId, mapElementId, popupZoomLevel = 11 } = options
   const cleanupFunctions: Array<() => void> = []
 
-  const map = await mapStore.initializeMap(mapElementId)
+  // If there's a attachment to focus on, get that attachment's position to initialize the map to
+  let focusAttachment: Attachment | undefined
+  let focusAttachmentCreator: UserPreview | undefined
+  let focusCenter: L.LatLngExpression | undefined
+  if (focusAttachmentId) {
+    const res = await Effect.runPromise(
+      farmapApi.getPhotoById(AttachmentId.make(parseInt(focusAttachmentId)))
+    )
+
+    focusAttachment = res.attachment
+    focusAttachmentCreator = res.creator
+    focusCenter = [focusAttachment.position.lat, focusAttachment.position.long]
+  }
+
+  const map = await mapStore.initializeMap(mapElementId, focusCenter ?? DEFAULT_CENTER, DEFAULT_ZOOM)
 
   await sdk.actions.ready({ disableNativeGestures: true })
 
@@ -58,23 +75,19 @@ export async function initializeApp(options: InitOptions): Promise<CleanupFuncti
   }
 
   // Handle focus attachment if specified
-  if (focusAttachmentId) {
-    const { attachment, creator } = await Effect.runPromise(
-      farmapApi.getPhotoById(AttachmentId.make(parseInt(focusAttachmentId)))
-    )
-
-    const isMine = userId === attachment.creatorId
+  if (focusAttachment) {
+    const isMine = userId === focusAttachment.creatorId
 
     await mapStore.addPhotoMarker(
-      attachment.id.toString(),
-      attachment.position.lat,
-      attachment.position.long,
-      attachment.fileUrl,
-      creator.displayImage,
+      focusAttachment.id.toString(),
+      focusAttachment.position.lat,
+      focusAttachment.position.long,
+      focusAttachment.fileUrl,
+      focusAttachmentCreator?.displayImage,
       isMine
     )
 
-    mapStore.flyToAttachment(attachment.id.toString(), 14)
+    mapStore.flyToAttachment(focusAttachment.id.toString(), 14)
   } else if (userId) {
     mapStore.requestLocation()
   } else {
