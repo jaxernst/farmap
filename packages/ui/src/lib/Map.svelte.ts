@@ -40,6 +40,7 @@ class LeafletMapStore {
     const L = await this.ensureLeaflet()
 
     this.map = L.map(elementId, {
+      attributionControl: false,
       center,
       zoom
     })
