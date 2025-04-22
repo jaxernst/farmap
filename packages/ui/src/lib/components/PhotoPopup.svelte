@@ -28,7 +28,9 @@
 
 		if (await sdk.context) {
 			sdk.actions.composeCast({
-				text: `Check out my photo on FarMap:`,
+				text: `Check out my photo on FarMap:
+				${window.location.origin}/share/${attachmentId}
+				`,
 				embeds: [`${window.location.origin}/share/${attachmentId}`]
 			});
 		} else {
