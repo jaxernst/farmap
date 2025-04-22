@@ -109,7 +109,7 @@ class LeafletMapStore {
     if (markerIconUrl) {
       markerOptions.icon = L.divIcon({
         className: "custom-photo-marker",
-        html: ` <img src="${markerIconUrl}" alt="" class="rounded-full w-[32px] h-[32px]" /> `,
+        html: ` <img src="${markerIconUrl}" alt="" class="rounded-full object-cover aspect-square w-[32px]" /> `,
         iconSize: [32, 32],
         iconAnchor: [16, 16],
         popupAnchor: [0, -16]
