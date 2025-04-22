@@ -1,7 +1,7 @@
 import { AttachmentNotFound } from "@farmap/domain/Api"
 import { FileId, FileStore } from "@farmap/domain/FileStorage"
 import type { AttachmentId } from "@farmap/domain/MapAttachments"
-import { Config, Effect, Option } from "effect"
+import { Effect, Option } from "effect"
 import sharp from "sharp"
 import StaticMaps from "staticmaps"
 import { AttachmentsRepo } from "../Repo.js"
@@ -27,15 +27,15 @@ export const generateMapImage = ({
   width,
   zoom
 }: MapImageOptions) =>
-  Effect.gen(function*() {
-    const mapboxAccessToken = yield* Config.string("MAPBOX_ACCESS_TOKEN")
-
+  Effect.promise(async () => {
     const map = new StaticMaps({
       width,
       height,
       paddingX: 0,
       paddingY: 0,
-      tileUrl: `https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/{z}/{x}/{y}?access_token=${mapboxAccessToken}`
+      tileUrl: "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png",
+      tileSubdomains: ["a", "b", "c", "d"],
+      zoomRange: { min: 1, max: 17 }
     })
 
     const coord: [number, number] = [long, lat]
@@ -46,11 +46,8 @@ export const generateMapImage = ({
     } as const
 
     map.addCircle(marker)
-
-    return yield* Effect.promise(async () => {
-      await map.render([long, lat], zoom)
-      return await map.image.buffer("image/png")
-    })
+    await map.render([long, lat], zoom)
+    return map.image.buffer("image/png")
   })
 
 export const generateSocialPreview = ({
