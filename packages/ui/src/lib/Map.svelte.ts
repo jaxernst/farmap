@@ -41,6 +41,7 @@ class LeafletMapStore {
 
     this.map = L.map(elementId, {
       attributionControl: false,
+      worldCopyJump: true,
       center,
       zoom
     })
