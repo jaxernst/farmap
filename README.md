@@ -1,4 +1,6 @@
-# Farmap: map-based photo sharing on Farcaster
+# FarMap: map-based photo sharing on Farcaster
+
+[FarMap web app](https://farmap.vercel.app)
 
 Upload photos to the global map and share them in your social-feed via Farcaster mini-app links
 
@@ -10,17 +12,19 @@ Built as a Farcaster mini app with Effect TS + SvelteKit
 
 [Mini apps are cool and you should use them](https://miniapps.farcaster.xyz/)
 
+
 # Why Effect
 
-Effect is a powerful TypeScript library/meta-language heavily inspired by functional programming. It provides a unified approach for handling asynchronous operations, type-safe error handling, resource management, first class dependency injection, and much more.
+Effect is a powerful TypeScript library/meta-language heavily inspired by functional programming. It provides a unified approach for asynchronous operations, type-safe error handling, resource management, dependency injection, and much more. Effect allows complex logic + relationships to be programmed with simple, declarative code.
 
-Effect has powerful tools for managing dependencies and runtime requirements for applications. This makes it easy to write code that is minimally coupled and maximally maintainable while preserving type safety and error safety across the stack. I've compiled some notes about the structure of this monorepo to highlight some of strengths and unpack the system:
+I found the dependency injection system to be particularly powerful and useful for building this app. Because dependency injection is baked into all of the tools/abstractions that effect offers, it guides you toward a more interface-driven programming style where implementaion details remain hidden from the api consumer. This results in minimally coupled code that is maximally maintainable, all while preserving type safety and error safety across the stack. 
 
+# Monorepo Packages
 ## packages/domain -> Defines all types, schemas, and interfaces for Farmap
 
 - Common place to define Effect 'tags' which are essentially dependency injectable interfaces. Tags can represent data OR functionality
 - App services and modules can use these tag definitions without knowledge of the live implementation
-- Contains data model and api type definitions with two way schemas for encoding <> decoding all data types used through the application
+- Contains data model and api type definitions with two-way schemas for encoding <> decoding all data types used through the application
 - Contains the cannonical REST api definition (distinct from the implementation) which includes all possible return types, error types, status codes, etc. This makes it trivial to maintain type safety between client and server implementations
 
 ## packages/ui -> SvelteKit application
@@ -31,7 +35,7 @@ Effect has powerful tools for managing dependencies and runtime requirements for
 
 ## packages/server -> Effect http server (no backend framework, just effect)
 
-- index.ts is where all the 'live' implementations get composed together and served. This entrypoint is where all the services and interfaces get their implementations injected
+- index.ts is where all the 'live' implementations get composed together and served. This entrypoint is where all the services and modules get their dependencies injected
 
 #### Generic interfaces + live implementations (generally defined in packages/domain and implemented in /packages/server):
 
