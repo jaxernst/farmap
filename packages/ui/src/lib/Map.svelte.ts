@@ -151,7 +151,7 @@ class LeafletMapStore {
 
   async requestLocation() {
     if (!this.map) return
-    this.map.locate({ setView: true, maxZoom: 16 })
+    this.map.locate({ setView: true, maxZoom: 4 })
   }
 
   clearMarkers() {

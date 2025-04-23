@@ -82,7 +82,7 @@ export async function initializeApp(options: InitOptions): Promise<CleanupFuncti
     }
   }
 
-  // Handle focus attachment if specified
+  // Initalize 'fly to' location
   if (focusAttachment) {
     const isMine = userId === focusAttachment.creatorId
 
@@ -102,6 +102,7 @@ export async function initializeApp(options: InitOptions): Promise<CleanupFuncti
     map.setZoom(map.getMinZoom())
   }
 
+  // Load all public attachments
   farmapApi.getAllAttachments().pipe(
     Effect.tap((attachments) => {
       attachments.forEach(({ attachment, creator }) => {
