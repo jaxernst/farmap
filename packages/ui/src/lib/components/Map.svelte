@@ -21,6 +21,23 @@
 		display: none;
 	}
 
+	:global(.custom-photo-marker) {
+		height: 32px;
+		width: 32px;
+		border-radius: 100%;
+		overflow: hidden;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	:global(.custom-photo-marker img) {
+		width: 32px;
+		height: 32px;
+		object-fit: cover;
+		object-position: center;
+	}
+
 	:global(.leaflet-popup-close-button) {
 		font-size: 16px !important;
 		font-weight: bold;
