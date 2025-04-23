@@ -47,29 +47,6 @@ export async function initializeApp(options: InitOptions): Promise<CleanupFuncti
 
   await sdk.actions.ready({ disableNativeGestures: true })
 
-  // Setup popup management
-  let popupsVisible = false
-  const updatePopupVisibility = () => {
-    const currentZoom = map.getZoom()
-    const shouldShowPopups = currentZoom >= popupZoomLevel
-
-    if (shouldShowPopups && !popupsVisible) {
-      mapStore.openAllPopups()
-      popupsVisible = true
-    } else if (!shouldShowPopups && popupsVisible) {
-      mapStore.closeAllPopups()
-      popupsVisible = false
-    }
-  }
-
-  // Register event listeners
-  map.on("zoomend", updatePopupVisibility)
-  map.on("moveend", updatePopupVisibility)
-  cleanupFunctions.push(() => {
-    map.off("zoomend", updatePopupVisibility)
-    map.off("moveend", updatePopupVisibility)
-  })
-
   let userId: UserId | undefined
 
   // Attempt sign in only if their is a Farcaster frame context
