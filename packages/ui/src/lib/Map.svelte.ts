@@ -151,7 +151,12 @@ class LeafletMapStore {
 
   async requestLocation() {
     if (!this.map) return
-    this.map.locate({ setView: true, maxZoom: 4 })
+
+    this.map.once("locationfound", (e: L.LocationEvent) => {
+      this.map?.flyTo(e.latlng, 14)
+    })
+
+    this.map.locate({ setView: false })
   }
 
   clearMarkers() {
