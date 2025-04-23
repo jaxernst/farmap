@@ -45,8 +45,6 @@ class LeafletMapStore {
       zoom,
       bounceAtZoomLimits: false,
       worldCopyJump: true,
-      zoomSnap: 0.25,
-      zoomDelta: 0.25,
       inertia: true,
       inertiaDeceleration: 1000,
       tapTolerance: 15,
@@ -60,8 +58,7 @@ class LeafletMapStore {
       tileSize: 512,
       zoomOffset: -1,
       maxZoom: 19,
-      minZoom: 2,
-      noWrap: true
+      minZoom: 2.5
     }).addTo(this.map)
 
     this.map.on("click", (e: L.LeafletMouseEvent) => {
