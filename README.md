@@ -1,4 +1,4 @@
-# Farmap - map-based photo sharing on Farcaster
+# Farmap: map-based photo sharing on Farcaster
 
 Upload photos to the global map and share them in your social-feed via Farcaster mini-app links
 
