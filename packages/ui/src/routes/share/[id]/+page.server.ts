@@ -1,15 +1,18 @@
 import { makeServerClient } from "$lib/services/farmap-api.server"
 import type { Attachment } from "@farmap/domain"
 import type { UserPreview } from "@farmap/domain/Users"
-import { error } from "@sveltejs/kit"
+import { error, redirect } from "@sveltejs/kit"
 import { Effect, pipe } from "effect"
 import type { PageServerLoad } from "./$types"
 
 export const load: PageServerLoad = async (
   { params, setHeaders }
 ): Promise<{ socialPreview: string; attachment: Attachment; creator: UserPreview } | null> => {
+  const id = parseInt(params.id)
+  if (id === 6) throw redirect(301, "/share/19")
+  if (id === 15) throw redirect(301, "/share/21")
+
   try {
-    const id = parseInt(params.id)
     if (isNaN(id)) {
       throw error(400, "Invalid ID parameter")
     }
