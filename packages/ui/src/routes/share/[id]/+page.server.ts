@@ -9,6 +9,8 @@ export const load: PageServerLoad = async (
   { params, setHeaders }
 ): Promise<{ socialPreview: string; attachment: Attachment; creator: UserPreview } | null> => {
   const id = parseInt(params.id)
+
+  // To be deleted: Patch for deleted attachments 6 + 15 (redirect both)
   if (id === 6) throw redirect(301, "/share/19")
   if (id === 15) throw redirect(301, "/share/21")
 

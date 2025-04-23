@@ -45,6 +45,7 @@ export const POST: RequestHandler = async ({ params, request }) => {
     const pathParts = params.path.split("/")
     const potentialId = parseInt(pathParts[pathParts.length - 1])
 
+    // To be deleted: Patch for deleted attachments 6 + 15 (redirect both)
     if (!isNaN(potentialId)) {
       if (potentialId === 6) {
         pathParts[pathParts.length - 1] = "19"
