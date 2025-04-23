@@ -8,7 +8,7 @@
 		version: 'next',
 		imageUrl: 'https://farmap.vercel.app/splash.png',
 		button: {
-			title: 'Upload to FarMap',
+			title: 'Upload to the map',
 			action: {
 				type: 'launch_frame',
 				url: 'https://farmap.vercel.app/',
