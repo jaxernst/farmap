@@ -24,6 +24,8 @@ class LeafletMapStore {
     isMine: boolean
   }> = $state({})
 
+  private popupZoomThreshold = 11
+
   get lMap() {
     return this.map
   }
@@ -77,6 +79,8 @@ class LeafletMapStore {
         }
       )
     )
+
+    this.setupPopupVisibilityManager()
 
     await this.recreateMarkers()
     return this.map
@@ -251,6 +255,40 @@ class LeafletMapStore {
     const currentZoom = this.map.getZoom()
     const newZoom = Math.min(Math.round(currentZoom * multiplier), this.map.getMaxZoom())
     this.map.flyTo(latlng || this.clickMarker?.getLatLng() || this.map.getCenter(), newZoom)
+  }
+
+  setupPopupVisibilityManager() {
+    if (!this.map) return
+
+    // Track last 'open all' or 'close all' action to prevent reopening/closing popups
+    let popupsVisible = false
+
+    const updatePopupVisibility = () => {
+      if (!this.map) return
+
+      const currentZoom = this.map.getZoom()
+      const shouldShowPopups = currentZoom >= this.popupZoomThreshold
+
+      if (shouldShowPopups && !popupsVisible) {
+        this.openAllPopups()
+        popupsVisible = true
+      } else if (!shouldShowPopups && popupsVisible) {
+        this.closeAllPopups()
+        popupsVisible = false
+      }
+    }
+
+    updatePopupVisibility()
+
+    this.map.on("zoomend", updatePopupVisibility)
+    this.map.on("moveend", updatePopupVisibility)
+
+    return () => {
+      if (this.map) {
+        this.map.off("zoomend", updatePopupVisibility)
+        this.map.off("moveend", updatePopupVisibility)
+      }
+    }
   }
 }
 

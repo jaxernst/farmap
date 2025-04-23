@@ -37,9 +37,6 @@
     "removeComments": false,
     "plugins": [{ "name": "@effect/language-service" }],
     "paths": {
-      "@farmap/cli": ["./packages/cli/src/index.js"],
-      "@farmap/cli/*": ["./packages/cli/src/*.js"],
-      "@farmap/cli/test/*": ["./packages/cli/test/*.js"],
       "@farmap/domain": ["./packages/domain/src/index.js"],
       "@farmap/domain/*": ["./packages/domain/src/*.js"],
       "@farmap/domain/test/*": ["./packages/domain/test/*.js"],
