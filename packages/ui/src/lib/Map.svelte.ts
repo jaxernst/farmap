@@ -155,12 +155,6 @@ class LeafletMapStore {
       })
     )
 
-    // Make sure the marker opens popup on single click
-    marker.on("click", (e) => {
-      marker.openPopup()
-      L.DomEvent.stopPropagation(e)
-    })
-
     if (openPopup) {
       marker.openPopup()
     }
