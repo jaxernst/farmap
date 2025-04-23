@@ -41,13 +41,17 @@ class LeafletMapStore {
 
     this.map = L.map(elementId, {
       attributionControl: false,
-      maxBounds: L.latLngBounds(
-        L.latLng(-90, -180),
-        L.latLng(90, 180)
-      ),
-      maxBoundsViscosity: .1,
       center,
-      zoom
+      zoom,
+      bounceAtZoomLimits: false,
+      worldCopyJump: true,
+      zoomSnap: 0.25,
+      zoomDelta: 0.25,
+      inertia: true,
+      inertiaDeceleration: 1000,
+      tapTolerance: 15,
+      tapHold: true,
+      wheelPxPerZoomLevel: 300
     })
 
     L.tileLayer(this.tileLayer, {
@@ -56,7 +60,8 @@ class LeafletMapStore {
       tileSize: 512,
       zoomOffset: -1,
       maxZoom: 19,
-      minZoom: 3
+      minZoom: 2,
+      noWrap: true
     }).addTo(this.map)
 
     this.map.on("click", (e: L.LeafletMouseEvent) => {
