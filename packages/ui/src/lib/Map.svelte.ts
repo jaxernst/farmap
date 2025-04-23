@@ -49,7 +49,8 @@ class LeafletMapStore {
       inertiaDeceleration: 1000,
       tapTolerance: 15,
       tapHold: true,
-      wheelPxPerZoomLevel: 300
+      wheelPxPerZoomLevel: 300,
+      doubleClickZoom: false
     })
 
     L.tileLayer(this.tileLayer, {
@@ -61,9 +62,21 @@ class LeafletMapStore {
       minZoom: 2.5
     }).addTo(this.map)
 
-    this.map.on("click", (e: L.LeafletMouseEvent) => {
+    this.map.on("click", (e) => {
       this.placeClickMarker(e.latlng)
     })
+
+    // Use a custom double click listener (leaflet's is bad)
+    this.map.on(
+      "click",
+      doubleClickListener(
+        (e) => {
+          if (!this.map) return
+          console.log("Double click detected")
+          this.flyZoom(e.latlng)
+        }
+      )
+    )
 
     await this.recreateMarkers()
     return this.map
@@ -132,6 +145,21 @@ class LeafletMapStore {
         autoClose: false,
         closeOnClick: false
       })
+
+    // Apply double-click zoom-in handling to the marker
+    marker.on(
+      "click",
+      doubleClickListener((e) => {
+        console.log("Double click on marker detected")
+        this.flyZoom(e.latlng)
+      })
+    )
+
+    // Make sure the marker opens popup on single click
+    marker.on("click", (e) => {
+      marker.openPopup()
+      L.DomEvent.stopPropagation(e)
+    })
 
     if (openPopup) {
       marker.openPopup()
@@ -223,6 +251,54 @@ class LeafletMapStore {
     if (!this.map) return
     this.map.setZoom(zoom)
   }
+
+  flyZoom(latlng?: L.LatLng, multiplier = 1.8) {
+    if (!this.map) return
+    const currentZoom = this.map.getZoom()
+    const newZoom = Math.min(Math.round(currentZoom * multiplier), this.map.getMaxZoom())
+    this.map.flyTo(latlng || this.clickMarker?.getLatLng() || this.map.getCenter(), newZoom)
+  }
 }
 
 export const mapStore = new LeafletMapStore()
+
+//
+
+//
+
+//
+
+//
+
+//
+
+//
+
+//  Util
+
+function doubleClickListener(
+  onDoubleClick: (e: L.LeafletMouseEvent) => void,
+  options: {
+    threshold?: number // Time in ms between clicks (default: 300)
+    distance?: number // Max distance between clicks in pixels (default: 20)
+  } = {}
+) {
+  const { distance = 20, threshold = 300 } = options
+  let lastClickTime = 0
+  let lastClickLatlng: L.LatLng | null = null
+
+  return (e: L.LeafletMouseEvent) => {
+    const currentTime = new Date().getTime()
+    const timeDiff = currentTime - lastClickTime
+
+    if (
+      timeDiff < threshold && lastClickLatlng &&
+      e.latlng.distanceTo(lastClickLatlng) < distance
+    ) {
+      onDoubleClick(e)
+    }
+
+    lastClickTime = currentTime
+    lastClickLatlng = e.latlng
+  }
+}
