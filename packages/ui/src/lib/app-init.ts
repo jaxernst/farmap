@@ -26,13 +26,21 @@ export async function initializeApp(options: InitOptions): Promise<CleanupFuncti
   let focusAttachmentCreator: UserPreview | undefined
   let focusCenter: L.LatLngExpression | undefined
   if (focusAttachmentId) {
+    const attachmentId = AttachmentId.make(parseInt(focusAttachmentId))
     const res = await Effect.runPromise(
-      farmapApi.getPhotoById(AttachmentId.make(parseInt(focusAttachmentId)))
+      farmapApi.getPhotoById(attachmentId).pipe(
+        Effect.catchTag("AttachmentNotFound", () => {
+          alert("Can't seem to find that photo, maybe it was deleted?")
+          return Effect.succeed(undefined)
+        })
+      )
     )
 
-    focusAttachment = res.attachment
-    focusAttachmentCreator = res.creator
-    focusCenter = [focusAttachment.position.lat, focusAttachment.position.long]
+    if (res) {
+      focusAttachment = res.attachment
+      focusAttachmentCreator = res.creator
+      focusCenter = [focusAttachment.position.lat, focusAttachment.position.long]
+    }
   }
 
   const map = await mapStore.initializeMap(mapElementId, focusCenter ?? DEFAULT_CENTER, DEFAULT_ZOOM)
