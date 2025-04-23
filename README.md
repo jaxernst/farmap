@@ -1,5 +1,9 @@
 # Farmap - map-based photo sharing on Farcaster
 
+Upload photos to the global map and share them in your social-feed via Farcaster mini-app links
+
+![Farmap Preview](/farmap-preview.png)
+
 Built as a Farcaster mini app with Effect TS + SvelteKit
 
 [Effect is cool and you should use it](https://effect.website/)
