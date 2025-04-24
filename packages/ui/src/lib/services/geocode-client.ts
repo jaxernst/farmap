@@ -41,8 +41,15 @@ const MapboxGeocoder = Effect.gen(function*() {
     }))
   })
 
+  const geocodeCache = new Map<string, string | null>()
+
   const reverse = (lat: number, long: number, maxLocationNameFragments: number = 3) =>
     Effect.gen(function*() {
+      const cacheKey = `${lat},${long},${maxLocationNameFragments}`
+      if (geocodeCache.has(cacheKey)) {
+        return geocodeCache.get(cacheKey)!
+      }
+
       const params = Schema.encodeSync(ToQueryParams)({ lat, long })
       // Focus on POIs, parks, and places for concise names
       const types = "poi,neighborhood,locality,place,region"
@@ -56,7 +63,10 @@ const MapboxGeocoder = Effect.gen(function*() {
         out.push(feature.text)
       }
 
-      return out.join(", ")
+      const result = out.join(", ")
+      geocodeCache.set(cacheKey, result)
+
+      return result
     }).pipe(
       Effect.catchTag("ParseError", (e) => {
         console.error("Unexpected response from Mapbox API:", e)

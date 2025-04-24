@@ -1,10 +1,21 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import sdk from '@farcaster/frame-sdk/src';
+	import { GeocoderClient } from '../services/geocode-client';
+	import { Effect } from 'effect';
 
 	const { socialPreview, attachment, creator } = $props();
 	let imageUrl = $derived(socialPreview);
 	let showOriginal = $state(false);
+	let locationName = $state<string | null>(null);
+
+	$effect(() => {
+		Effect.runPromise(
+			GeocoderClient.reverse(attachment.position.lat, attachment.position.long)
+		).then((name) => {
+			locationName = name;
+		});
+	});
 
 	const handleViewProfile = async () => {
 		if (await sdk.context) {
@@ -19,15 +30,25 @@
 	</div>
 
 	<div class="mt-6 flex flex-col gap-4">
-		<div class="flex flex-col gap-3">
-			<h1 class="leading-2 text-[28px]">Location Photo</h1>
+		<div class="flex flex-col">
+			<h1 class="text-[24px] leading-7">
+				{#if locationName}
+					{locationName} <span class="text-base">📍</span>
+				{:else}
+					Location Photo
+				{/if}
+			</h1>
 
 			<p class="text-sm text-black/50">
 				{Number(attachment?.position.lat).toFixed(6)}°N,
 				{Number(attachment?.position.long).toFixed(6)}°E
 			</p>
 
-			<button onclick={handleViewProfile} class="flex cursor-pointer items-center gap-1">
+			{#if locationName}
+				<p class=" text-sm"></p>
+			{/if}
+
+			<button onclick={handleViewProfile} class="my-3 flex cursor-pointer items-center gap-1">
 				<img src={creator.displayImage} alt="Avatar" class="h-5 w-5 rounded-full" />
 				{creator.displayName}
 			</button>
