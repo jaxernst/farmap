@@ -65,15 +65,19 @@
 		e.stopPropagation();
 
 		// Prepare share text with location if available
-		const shareText = locationName
-			? `Check out my photo from 📍${locationName}:`
-			: `Check out my photo on FarMap:`;
+
+		const shareText = [`Check out my photo on FarMap:`];
+
+		if (locationName) {
+			shareText.push(`📍 ${locationName}`);
+		}
 
 		const shareLink = `${window.location.origin}/share/${attachmentId}`;
+		shareText.push(shareLink);
 
 		if (await sdk.context) {
 			sdk.actions.composeCast({
-				text: `${shareText} \n ${shareLink}`,
+				text: shareText.join('\n'),
 				embeds: [`${window.location.origin}/share/${attachmentId}`]
 			});
 		} else {
