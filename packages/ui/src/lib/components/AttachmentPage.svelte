@@ -11,7 +11,7 @@
 
 	$effect(() => {
 		Effect.runPromise(
-			GeocoderClient.reverse(attachment.position.lat, attachment.position.long)
+			GeocoderClient.reverseSearchLocation(attachment.position.lat, attachment.position.long)
 		).then((name) => {
 			locationName = name;
 		});
