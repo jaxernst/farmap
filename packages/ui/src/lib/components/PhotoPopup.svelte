@@ -12,12 +12,11 @@
 	let popupOpen = $state(false);
 	let popupObserver: MutationObserver;
 
-	$inspect(locationName);
-
 	// Query for location name only once popup has been opened
 	$effect(() => {
 		if (!locationName && lat && lng && popupOpen) {
 			Effect.runPromise(GeocoderClient.reverse(lat, lng)).then((result) => {
+				console.log('Reverse geocoded popup location:', locationName);
 				locationName = result;
 			});
 		}
