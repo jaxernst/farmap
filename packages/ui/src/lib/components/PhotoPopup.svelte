@@ -4,8 +4,19 @@
 	import sdk from '@farcaster/frame-sdk/src';
 	import { AttachmentId } from '@farmap/domain';
 	import { Effect } from 'effect';
+	import { GeocoderClient } from '../services/geocode-client';
 
-	const { imageUrl, attachmentId, isMine = false, open = true, onDelete } = $props();
+	const { imageUrl, attachmentId, isMine = false, open = true, onDelete, lat, lng } = $props();
+
+	let locationName = $state<string | null>(null);
+
+	$effect(() => {
+		if (lat && lng) {
+			Effect.runPromise(GeocoderClient.reverse(lat, lng)).then((result) => {
+				locationName = result;
+			});
+		}
+	});
 
 	async function handleDeletePhoto() {
 		confirm('Are you sure you want to delete this photo?') && onDelete();
@@ -26,9 +37,13 @@
 		e.preventDefault();
 		e.stopPropagation();
 
+		// Prepare share text with location if available
+		const locationText = locationName ? ` from ${locationName}` : '';
+		const shareText = `Check out my photo${locationText} on FarMap: \n ${window.location.origin}/share/${attachmentId} `;
+
 		if (await sdk.context) {
 			sdk.actions.composeCast({
-				text: `Check out my photo on FarMap: \n ${window.location.origin}/share/${attachmentId} `,
+				text: shareText,
 				embeds: [`${window.location.origin}/share/${attachmentId}`]
 			});
 		} else {

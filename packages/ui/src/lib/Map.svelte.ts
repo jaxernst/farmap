@@ -125,7 +125,9 @@ class LeafletMapStore {
         imageUrl: dataUrl,
         attachmentId: id,
         isMine,
-        onDelete: () => this.removePhotoMarker(id)
+        onDelete: () => this.removePhotoMarker(id),
+        lat,
+        lng
       }
     })
 

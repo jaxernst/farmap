@@ -87,7 +87,7 @@ export const generateSocialPreview = ({
     })
 
     // Map with rounded corners
-    const roundedMapBuffer = yield* Effect.promise(() =>
+    const roundedMapBuffer = yield* Effect.tryPromise(() =>
       sharp(mapBuffer)
         .composite([
           {
@@ -106,14 +106,14 @@ export const generateSocialPreview = ({
     const canvasHeight = PREVIEW_HEIGHT
 
     // Normalize the image first to handle EXIF orientation
-    const normalizedBuffer = yield* Effect.promise(() =>
+    const normalizedBuffer = yield* Effect.tryPromise(() =>
       sharp(photoBuffer)
         .rotate() // Automatically rotate based on EXIF orientation
         .toBuffer()
     )
 
     // Get metadata from the normalized image
-    const metadata = yield* Effect.promise(() => sharp(normalizedBuffer).metadata())
+    const metadata = yield* Effect.tryPromise(() => sharp(normalizedBuffer).metadata())
     const imageAspectRatio = (metadata.width || 1) / (metadata.height || 1)
 
     const bgColor = BG_COLOR
@@ -135,7 +135,7 @@ export const generateSocialPreview = ({
       const availableWidth = mapLeftPosition
       const photoLeft = Math.floor((availableWidth - photoWidth) / 2)
 
-      const resizedPhotoBuffer = yield* Effect.promise(() =>
+      const resizedPhotoBuffer = yield* Effect.tryPromise(() =>
         sharp(normalizedBuffer) // Use the normalized buffer here
           .resize({
             height: Math.round(photoHeight),
@@ -256,11 +256,15 @@ export class SocialPreviewService extends Effect.Service<SocialPreviewService>()
           // const fileMetadata = yield* fileStorage.getFileMetadata(fileId);
 
           const photoBuffer = yield* fileStorage.getFile(fileId)
+
           const previewImageBuffer = yield* generateSocialPreview({
             photoBuffer,
             lat: attachment.latitude,
             long: attachment.longitude
-          })
+          }).pipe(Effect.catchTag("UnknownException", () => {
+            // Use the original photo when social preview gen fails unexpectedly
+            return Effect.succeed(photoBuffer)
+          }))
 
           // Upload the preview image directly to storage
           const previewFileId = FileId.make(
