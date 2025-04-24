@@ -33,7 +33,7 @@
 		<div class="flex flex-col">
 			<h1 class="text-[24px] leading-7">
 				{#if locationName}
-					{locationName} <span class="text-base">📍</span>
+					{locationName} 📍
 				{:else}
 					Location Photo
 				{/if}
