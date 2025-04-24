@@ -41,16 +41,22 @@ const MapboxGeocoder = Effect.gen(function*() {
     }))
   })
 
-  const reverse = (lat: number, long: number) =>
+  const reverse = (lat: number, long: number, maxLocationNameFragments: number = 3) =>
     Effect.gen(function*() {
       const params = Schema.encodeSync(ToQueryParams)({ lat, long })
       // Focus on POIs, parks, and places for concise names
-      const types = "poi,neighborhood,locality,place"
+      const types = "poi,neighborhood,locality,place,region"
       const url = `${MAPBOX_API_HOST}${params}?types=${types}&access_token=${MAPBOX_ACCESS_TOKEN}`
 
       const response = yield* httpClient.get(url)
       const res = yield* Schema.decodeUnknown(MapboxReverseGeocodeResponse)(yield* response.json)
-      return res.features[0]?.text ?? null
+
+      const out = []
+      for (const feature of res.features.slice(0, maxLocationNameFragments)) {
+        out.push(feature.text)
+      }
+
+      return out.join(", ")
     }).pipe(
       Effect.catchTag("ParseError", (e) => {
         console.error("Unexpected response from Mapbox API:", e)

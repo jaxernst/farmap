@@ -66,7 +66,7 @@
 
 		// Prepare share text with location if available
 
-		const shareText = [`Check out my photo on FarMap:`];
+		const shareText = [`Check out my photo on FarMap: \n`];
 
 		if (locationName) {
 			shareText.push(`📍 ${locationName}`);
