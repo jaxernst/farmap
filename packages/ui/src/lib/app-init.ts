@@ -18,38 +18,37 @@ type InitOptions = {
 type CleanupFunction = () => void
 
 export async function initializeApp(options: InitOptions): Promise<CleanupFunction> {
-  const { focusAttachmentId, mapElementId, popupZoomLevel = 11 } = options
+  const { focusAttachmentId, mapElementId, popupZoomLevel = 13 } = options
   const cleanupFunctions: Array<() => void> = []
 
-  // If there's a attachment to focus on, get that attachment's position to initialize the map to
+  // If there's a attachment to focus on, get that attachment's position for map initialization
   let focusAttachment: Attachment | undefined
   let focusAttachmentCreator: UserPreview | undefined
   let focusCenter: L.LatLngExpression | undefined
   if (focusAttachmentId) {
     const attachmentId = AttachmentId.make(parseInt(focusAttachmentId))
-    const res = await Effect.runPromise(
+
+    await Effect.runPromise(
       farmapApi.getPhotoById(attachmentId).pipe(
+        Effect.tap((res) => {
+          focusAttachment = res.attachment
+          focusAttachmentCreator = res.creator
+          focusCenter = [focusAttachment.position.lat, focusAttachment.position.long]
+        }),
         Effect.catchTag("AttachmentNotFound", () => {
           alert("Can't seem to find that photo, maybe it was deleted?")
-          return Effect.succeed(undefined)
+          return Effect.succeed(null)
         })
       )
     )
-
-    if (res) {
-      focusAttachment = res.attachment
-      focusAttachmentCreator = res.creator
-      focusCenter = [focusAttachment.position.lat, focusAttachment.position.long]
-    }
   }
 
   const map = await mapStore.initializeMap(mapElementId, focusCenter ?? DEFAULT_CENTER, DEFAULT_ZOOM)
 
   await sdk.actions.ready({ disableNativeGestures: true })
 
-  let userId: UserId | undefined
-
   // Attempt sign in only if their is a Farcaster frame context
+  let userId: UserId | undefined
   if (await sdk.context) {
     try {
       userId = (await userStore.signIn()).userId
@@ -72,7 +71,7 @@ export async function initializeApp(options: InitOptions): Promise<CleanupFuncti
       isMine
     )
 
-    mapStore.flyToAttachment(focusAttachment.id.toString(), 14)
+    mapStore.flyToAttachment(focusAttachment.id.toString(), popupZoomLevel)
   } else if (userId) {
     mapStore.requestLocation()
   } else {

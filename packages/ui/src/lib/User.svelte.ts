@@ -39,7 +39,9 @@ class UserStore {
             attachment.position.lat,
             attachment.position.long,
             attachment.fileUrl,
-            userAvatarUrl
+            userAvatarUrl,
+            true,
+            false
           )
 
           return attachment
