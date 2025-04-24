@@ -15,7 +15,7 @@
 	// Query for location name only once popup has been opened
 	$effect(() => {
 		if (!locationName && lat && lng && popupOpen) {
-			Effect.runPromise(GeocoderClient.reverseSearchLocation(lat, lng)).then((result) => {
+			Effect.runPromise(GeocoderClient.reverse(lat, lng)).then((result) => {
 				console.log('Reverse geocoded popup location:', result);
 				locationName = result;
 			});

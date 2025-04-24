@@ -1,63 +1,81 @@
 import { PUBLIC_MAPBOX_ACCESS_TOKEN } from "$env/static/public"
 import { HttpClient } from "@effect/platform"
 import { layerXMLHttpRequest } from "@effect/platform-browser/BrowserHttpClient"
-import { Cache, Context, Duration, Effect, Schema } from "effect"
+import { Context, Effect, Schema } from "effect"
+
+const ToQueryParams = Schema.transform(
+  Schema.String,
+  Schema.Struct({
+    lat: Schema.Number,
+    long: Schema.Number
+  }),
+  {
+    strict: false,
+    decode: (fromString) => {
+      const params = new URLSearchParams(fromString)
+      return {
+        lat: params.get("latitude"),
+        long: params.get("longitude")
+      }
+    },
+    encode: (struct) => `/${struct.long},${struct.lat}.json`
+  }
+)
 
 export class Geocoder extends Context.Tag("geocode/reverse")<Geocoder, {
-  readonly reverseSearchLocation: (lat: number, long: number) => Effect.Effect<string | null>
+  readonly reverse: (lat: number, long: number) => Effect.Effect<string | null>
 }>() {}
 
 const MapboxGeocoder = Effect.gen(function*() {
   const httpClient = yield* HttpClient.HttpClient
-  const MAPBOX_ENDPOINT = "https://api.mapbox.com/search/geocode/v6/reverse"
+
+  const MAPBOX_API_HOST = "https://api.mapbox.com/geocoding/v5/mapbox.places"
   const MAPBOX_ACCESS_TOKEN = PUBLIC_MAPBOX_ACCESS_TOKEN
 
-  const responseSchema = Schema.Struct({
+  // Mapbox response schema (simplified)
+  const MapboxReverseGeocodeResponse = Schema.Struct({
     features: Schema.Array(Schema.Struct({
-      properties: Schema.Struct({
-        full_address: Schema.optional(Schema.String),
-        feature_type: Schema.String
-      })
+      place_type: Schema.Array(Schema.String),
+      text: Schema.String,
+      place_name: Schema.String
     }))
   })
 
-  const ignoreFeatures = ["address", "street", "district", "postcode", "country"]
+  const geocodeCache = new Map<string, string | null>()
 
-  const reverseSearchLocation = (
-    { lat, long }: { lat: number; long: number }
-  ) =>
+  const reverse = (lat: number, long: number, maxLocationNameFragments: number = 3) =>
     Effect.gen(function*() {
-      const url = `${MAPBOX_ENDPOINT}?longitude=${long}&latitude=${lat}&access_token=${MAPBOX_ACCESS_TOKEN}`
-
-      const response = yield* httpClient.get(url)
-      const res = yield* Schema.decodeUnknown(responseSchema)(
-        yield* response.json
-      )
-
-      const filtered = res.features.filter((feature) => !ignoreFeatures.includes(feature.properties.feature_type))
-      if (filtered.length > 0 && filtered[0].properties.full_address) {
-        // Trim to 3 comma separated fragments at most
-        const fragments = filtered[0].properties.full_address.split(",")
-          .map((fragment) => fragment.trim())
-          .slice(0, 3)
-
-        return fragments.join(", ")
+      const cacheKey = `${lat},${long},${maxLocationNameFragments}`
+      if (geocodeCache.has(cacheKey)) {
+        return geocodeCache.get(cacheKey)!
       }
 
-      return null
+      const params = Schema.encodeSync(ToQueryParams)({ lat, long })
+      // Focus on POIs, parks, and places for concise names
+      const types = "poi,neighborhood,locality,place,region"
+      const url = `${MAPBOX_API_HOST}${params}?types=${types}&access_token=${MAPBOX_ACCESS_TOKEN}`
+
+      const response = yield* httpClient.get(url)
+      const res = yield* Schema.decodeUnknown(MapboxReverseGeocodeResponse)(yield* response.json)
+
+      const out = []
+      for (const feature of res.features.slice(0, maxLocationNameFragments)) {
+        out.push(feature.text)
+      }
+
+      const result = out.join(", ")
+      geocodeCache.set(cacheKey, result)
+
+      return result
     }).pipe(
-      Effect.catchAll(() => Effect.succeed(null))
+      Effect.catchTag("ParseError", (e) => {
+        console.error("Unexpected response from Mapbox API:", e)
+        return Effect.succeed(null)
+      }),
+      Effect.orElseSucceed(() => null)
     )
 
-  const reverseSearchCache = yield* Cache.make({
-    capacity: 1000,
-    timeToLive: Duration.infinity,
-    lookup: reverseSearchLocation
-  })
-
-  return Geocoder.of({
-    reverseSearchLocation: (lat, long) => reverseSearchCache.get({ lat, long })
-  })
+  return Geocoder.of({ reverse })
 })
 
 export const GeocoderClient = MapboxGeocoder.pipe(
