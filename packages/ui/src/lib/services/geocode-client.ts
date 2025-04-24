@@ -1,3 +1,4 @@
+import { PUBLIC_MAPBOX_ACCESS_TOKEN } from "$env/static/public"
 import { HttpClient } from "@effect/platform"
 import { layerXMLHttpRequest } from "@effect/platform-browser/BrowserHttpClient"
 import { Context, Effect, Schema } from "effect"
@@ -17,7 +18,7 @@ const ToQueryParams = Schema.transform(
         long: params.get("longitude")
       }
     },
-    encode: (struct) => `?latitude=${struct.lat}&longitude=${struct.long}`
+    encode: (struct) => `/${struct.long},${struct.lat}.json`
   }
 )
 
@@ -25,37 +26,34 @@ export class Geocoder extends Context.Tag("geocode/reverse")<Geocoder, {
   readonly reverse: (lat: number, long: number) => Effect.Effect<string | null>
 }>() {}
 
-const BdcGeocoder = Effect.gen(function*() {
+const MapboxGeocoder = Effect.gen(function*() {
   const httpClient = yield* HttpClient.HttpClient
 
-  const BDC_API_HOST = "https://api-bdc.io/data"
-  const reverseGeocodeEndpoint = BDC_API_HOST + "/reverse-geocode-client"
+  const MAPBOX_API_HOST = "https://api.mapbox.com/geocoding/v5/mapbox.places"
+  const MAPBOX_ACCESS_TOKEN = PUBLIC_MAPBOX_ACCESS_TOKEN
 
-  const BdcReverseGeocodeResponse = Schema.Struct({
-    localityInfo: Schema.Struct({
-      informative: Schema.Array(Schema.Struct({
-        name: Schema.String,
-        description: Schema.optional(Schema.String),
-        order: Schema.Number
-      }))
-    })
+  // Mapbox response schema (simplified)
+  const MapboxReverseGeocodeResponse = Schema.Struct({
+    features: Schema.Array(Schema.Struct({
+      place_type: Schema.Array(Schema.String),
+      text: Schema.String,
+      place_name: Schema.String
+    }))
   })
 
   const reverse = (lat: number, long: number) =>
     Effect.gen(function*() {
       const params = Schema.encodeSync(ToQueryParams)({ lat, long })
-      console.log()
-      const response = yield* httpClient.get(`${reverseGeocodeEndpoint}${params}`)
-      const res = yield* Schema.decodeUnknown(BdcReverseGeocodeResponse)(yield* response.json)
-      // Get the most specific location name
-      const mostSpecific = res.localityInfo.informative
-        .filter((x) => !["FIPS code", "postal code", "time zone"].includes(x.description ?? ""))
-        .toSorted(({ order: a }, { order: b }) => b - a)[0]
+      // Focus on POIs, parks, and places for concise names
+      const types = "poi,neighborhood,locality,place"
+      const url = `${MAPBOX_API_HOST}${params}?types=${types}&access_token=${MAPBOX_ACCESS_TOKEN}`
 
-      return mostSpecific.name
+      const response = yield* httpClient.get(url)
+      const res = yield* Schema.decodeUnknown(MapboxReverseGeocodeResponse)(yield* response.json)
+      return res.features[0]?.text ?? null
     }).pipe(
       Effect.catchTag("ParseError", (e) => {
-        console.error("Unexpected response from BDC api:", e)
+        console.error("Unexpected response from Mapbox API:", e)
         return Effect.succeed(null)
       }),
       Effect.orElseSucceed(() => null)
@@ -64,7 +62,7 @@ const BdcGeocoder = Effect.gen(function*() {
   return Geocoder.of({ reverse })
 })
 
-export const GeocoderClient = BdcGeocoder.pipe(
+export const GeocoderClient = MapboxGeocoder.pipe(
   Effect.provide(layerXMLHttpRequest),
   Effect.runSync
 )

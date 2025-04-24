@@ -16,7 +16,7 @@
 	$effect(() => {
 		if (!locationName && lat && lng && popupOpen) {
 			Effect.runPromise(GeocoderClient.reverse(lat, lng)).then((result) => {
-				console.log('Reverse geocoded popup location:', locationName);
+				console.log('Reverse geocoded popup location:', result);
 				locationName = result;
 			});
 		}
@@ -66,7 +66,7 @@
 
 		// Prepare share text with location if available
 		const shareText = locationName
-			? `Check out my photo from 📍 ${locationName}:`
+			? `Check out my photo from 📍${locationName}:`
 			: `Check out my photo on FarMap:`;
 
 		const shareLink = `${window.location.origin}/share/${attachmentId}`;
