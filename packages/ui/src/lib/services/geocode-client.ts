@@ -32,26 +32,30 @@ const BdcGeocoder = Effect.gen(function*() {
   const reverseGeocodeEndpoint = BDC_API_HOST + "/reverse-geocode-client"
 
   const BdcReverseGeocodeResponse = Schema.Struct({
-    informative: Schema.Array(Schema.Struct({
-      name: Schema.String,
-      description: Schema.String,
-      order: Schema.Number
-    }))
+    localityInfo: Schema.Struct({
+      informative: Schema.Array(Schema.Struct({
+        name: Schema.String,
+        description: Schema.optional(Schema.String),
+        order: Schema.Number
+      }))
+    })
   })
 
   const reverse = (lat: number, long: number) =>
     Effect.gen(function*() {
       const params = Schema.encodeSync(ToQueryParams)({ lat, long })
-      const response = yield* httpClient.get(`${reverseGeocodeEndpoint}${params}`).pipe(
-        Effect.flatMap(Schema.decodeUnknown(BdcReverseGeocodeResponse))
-      )
-
+      console.log()
+      const response = yield* httpClient.get(`${reverseGeocodeEndpoint}${params}`)
+      const res = yield* Schema.decodeUnknown(BdcReverseGeocodeResponse)(yield* response.json)
       // Get the most specific location name
-      const mostSpecific = response.informative.toSorted(({ order: a }, { order: b }) => a - b)[0]
+      const mostSpecific = res.localityInfo.informative
+        .filter((x) => !["FIPS code", "postal code", "time zone"].includes(x.description ?? ""))
+        .toSorted(({ order: a }, { order: b }) => b - a)[0]
+
       return mostSpecific.name
     }).pipe(
-      Effect.catchTag("ParseError", () => {
-        console.error("Unexpected response from BDC api")
+      Effect.catchTag("ParseError", (e) => {
+        console.error("Unexpected response from BDC api:", e)
         return Effect.succeed(null)
       }),
       Effect.orElseSucceed(() => null)

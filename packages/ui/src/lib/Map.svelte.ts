@@ -80,8 +80,6 @@ class LeafletMapStore {
       )
     )
 
-    this.setupPopupVisibilityManager()
-
     await this.recreateMarkers()
     return this.map
   }
@@ -127,7 +125,8 @@ class LeafletMapStore {
         isMine,
         onDelete: () => this.removePhotoMarker(id),
         lat,
-        lng
+        lng,
+        open: openPopup
       }
     })
 
