@@ -9,7 +9,7 @@ class LeafletMapStore {
   private L: typeof L | null = null
   private tileLayer: string =
     `https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=${PUBLIC_MAPBOX_ACCESS_TOKEN}`
-  private mapboxStyleId: string = "mapbox/streets-v11"
+  private mapboxStyleId: string = "jaxernst/cm9w2u9yx00jo01spgfy83yar"
 
   map: L.Map | null = $state(null)
   clickMarker: L.Marker | null = $state(null)
