@@ -9,7 +9,7 @@ class LeafletMapStore {
   private L: typeof L | null = null
   private tileLayer: string =
     `https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=${PUBLIC_MAPBOX_ACCESS_TOKEN}`
-  private mapboxStyleId: string = "jaxernst/cm9wcrsvl00st01rm8ydehmnr"
+  private mapboxStyleId: string = "jaxernst/cm9w2u9yx00jo01spgfy83yar"
 
   map: L.Map | null = $state(null)
   clickMarker: L.Marker | null = $state(null)
@@ -63,6 +63,15 @@ class LeafletMapStore {
       maxZoom: 19,
       minZoom: 2.5
     }).addTo(this.map)
+
+    // Add vector tile layer (if using Leaflet.VectorGrid)
+    if (window.L.vectorGrid) {
+      L.vectorGrid.protobuf("https://your-vector-tile-url/{z}/{x}/{y}.mvt", {
+        vectorTileLayerStyles: {
+          // Configure styles for each layer in your vector tiles
+        }
+      }).addTo(this.map)
+    }
 
     this.map.on("click", (e) => {
       this.placeClickMarker(e.latlng)
