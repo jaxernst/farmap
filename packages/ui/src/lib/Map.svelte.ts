@@ -51,7 +51,6 @@ class LeafletMapStore {
       inertiaDeceleration: 1000,
       tapTolerance: 15,
       tapHold: true,
-      wheelPxPerZoomLevel: 300,
       doubleClickZoom: false
     })
 
@@ -63,15 +62,6 @@ class LeafletMapStore {
       maxZoom: 19,
       minZoom: 2.5
     }).addTo(this.map)
-
-    // Add vector tile layer (if using Leaflet.VectorGrid)
-    if (window.L.vectorGrid) {
-      L.vectorGrid.protobuf("https://your-vector-tile-url/{z}/{x}/{y}.mvt", {
-        vectorTileLayerStyles: {
-          // Configure styles for each layer in your vector tiles
-        }
-      }).addTo(this.map)
-    }
 
     this.map.on("click", (e) => {
       this.placeClickMarker(e.latlng)
@@ -260,7 +250,7 @@ class LeafletMapStore {
     this.map.setZoom(zoom)
   }
 
-  flyZoom(latlng?: L.LatLng, multiplier = 1.8) {
+  flyZoom(latlng?: L.LatLng, multiplier = 2.1) {
     if (!this.map) return
     const currentZoom = this.map.getZoom()
     const newZoom = Math.min(Math.round(currentZoom * multiplier), this.map.getMaxZoom())
