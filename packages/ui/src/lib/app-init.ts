@@ -25,6 +25,8 @@ export async function initializeApp(options: InitOptions): Promise<CleanupFuncti
   let focusAttachment: Attachment | undefined
   let focusAttachmentCreator: UserPreview | undefined
   let focusCenter: L.LatLngExpression | undefined
+  let preloadedTilesKey: string | undefined
+
   if (focusAttachmentId) {
     const attachmentId = AttachmentId.make(parseInt(focusAttachmentId))
 
@@ -71,7 +73,19 @@ export async function initializeApp(options: InitOptions): Promise<CleanupFuncti
       isMine
     )
 
-    await mapStore.flyToAttachment(focusAttachment.id.toString(), focusZoomLevel)
+    // Preload tiles for flyTo destination to make the transition smoother
+    // Do this before the flyTo animation starts
+    if (focusZoomLevel) {
+      preloadedTilesKey = await mapStore.preloadTilesForLocation(
+        focusAttachment.position.lat,
+        focusAttachment.position.long,
+        focusZoomLevel,
+        3, // Slightly larger padding for better coverage
+        true // Include adjacent zoom levels
+      )
+    }
+
+    mapStore.flyToAttachment(focusAttachment.id.toString(), focusZoomLevel)
   } else if (userId) {
     mapStore.requestLocation()
   } else {
@@ -98,5 +112,7 @@ export async function initializeApp(options: InitOptions): Promise<CleanupFuncti
     Effect.runPromise
   )
 
-  return () => cleanupFunctions.forEach((fn) => fn())
+  return () => {
+    cleanupFunctions.forEach((fn) => fn())
+  }
 }

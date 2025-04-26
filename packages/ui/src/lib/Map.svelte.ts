@@ -25,6 +25,7 @@ class LeafletMapStore {
   }> = $state({})
 
   private popupZoomThreshold = 11
+  private preloadedTiles: Record<string, Array<HTMLImageElement>> = {}
 
   get lMap() {
     return this.map
@@ -194,6 +195,12 @@ class LeafletMapStore {
 
   flyTo(lat: number, lng: number, zoom?: number) {
     if (!this.map) return
+
+    // Preload tiles for the destination if zoom is specified
+    if (zoom !== undefined) {
+      this.preloadTilesForLocation(lat, lng, zoom)
+    }
+
     this.map.flyTo([lat, lng], zoom)
   }
 
@@ -202,6 +209,17 @@ class LeafletMapStore {
     const attachment = this.markers[attachmentId]
     if (attachment) {
       attachment.marker.openPopup()
+
+      // Get current zoom if not specified
+      const targetZoom = zoom ?? this.map.getZoom()
+
+      // Preload tiles for smoother animation
+      this.preloadTilesForLocation(
+        attachment.marker.getLatLng().lat,
+        attachment.marker.getLatLng().lng,
+        targetZoom
+      )
+
       this.flyTo(attachment.marker.getLatLng().lat, attachment.marker.getLatLng().lng, zoom)
     }
   }
@@ -288,6 +306,95 @@ class LeafletMapStore {
         this.map.off("zoomend", updatePopupVisibility)
         this.map.off("moveend", updatePopupVisibility)
       }
+    }
+  }
+  private long2tile(lon: number, zoom: number): number {
+    return Math.floor((lon + 180) / 360 * Math.pow(2, zoom))
+  }
+
+  private lat2tile(lat: number, zoom: number): number {
+    return Math.floor(
+      (1 - Math.log(Math.tan(lat * Math.PI / 180) + 1 / Math.cos(lat * Math.PI / 180)) / Math.PI) / 2 *
+        Math.pow(2, zoom)
+    )
+  }
+
+  /**
+   * Preloads map tiles for a specific location and zoom level
+   *
+   * @param lat Latitude of the location to preload
+   * @param lng Longitude of the location to preload
+   * @param zoomLevel Target zoom level to preload
+   * @param padding Amount of tiles to preload around the center (default: 2)
+   * @param includeAdjacentZoomLevels Whether to also preload tiles at adjacent zoom levels (default: true)
+   * @returns The key identifying the preloaded tiles set
+   */
+  async preloadTilesForLocation(
+    lat: number,
+    lng: number,
+    zoomLevel: number,
+    padding = 2,
+    includeAdjacentZoomLevels = true
+  ): Promise<string> {
+    if (!this.map) return ""
+
+    const key = `${lat.toFixed(5)}_${lng.toFixed(5)}_${zoomLevel}`
+    if (this.preloadedTiles[key]) {
+      return key // Already preloaded
+    }
+
+    this.preloadedTiles[key] = []
+    const tiles: Array<HTMLImageElement> = this.preloadedTiles[key]
+
+    // Get the tile coordinates for the center
+    const centerX = this.long2tile(lng, zoomLevel)
+    const centerY = this.lat2tile(lat, zoomLevel)
+
+    // Load tiles around the center
+    const zoomLevels = includeAdjacentZoomLevels
+      ? [Math.max(0, zoomLevel - 1), zoomLevel, Math.min(22, zoomLevel + 1)]
+      : [zoomLevel]
+
+    for (const zoom of zoomLevels) {
+      // Calculate scale factor between this zoom and target zoom
+      const scaleFactor = Math.pow(2, zoom - zoomLevel)
+      const adjCenterX = centerX * scaleFactor
+      const adjCenterY = centerY * scaleFactor
+
+      // Adjusted padding based on zoom level
+      const adjPadding = padding * scaleFactor
+
+      // Calculate the tile range
+      const minX = Math.floor(adjCenterX - adjPadding)
+      const maxX = Math.ceil(adjCenterX + adjPadding)
+      const minY = Math.floor(adjCenterY - adjPadding)
+      const maxY = Math.ceil(adjCenterY + adjPadding)
+
+      for (let y = minY; y <= maxY; y++) {
+        for (let x = minX; x <= maxX; x++) {
+          // Create the tile URL - use the same pattern as the map's tile layer
+          const url = this.tileLayer
+            .replace("{id}", this.mapboxStyleId)
+            .replace("{z}", zoom.toString())
+            .replace("{x}", x.toString())
+            .replace("{y}", y.toString())
+
+          // Preload the tile by creating an image that will be cached
+          const img = new Image()
+          img.src = url
+          tiles.push(img)
+        }
+      }
+    }
+
+    return key
+  }
+
+  cleanupPreloadedTiles(key?: string) {
+    if (key) {
+      delete this.preloadedTiles[key]
+    } else {
+      this.preloadedTiles = {}
     }
   }
 }
