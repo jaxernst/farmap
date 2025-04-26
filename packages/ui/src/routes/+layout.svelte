@@ -1,7 +1,7 @@
 <script lang="ts">
 	import '../app.css';
 	import 'leaflet/dist/leaflet.css';
-	import { sdk } from '@farcaster/frame-sdk/src';
+
 	import { initializeApp } from '$lib/app-init';
 	import { page } from '$app/state';
 	import Map from '../lib/components/Map.svelte';
@@ -20,7 +20,7 @@
 			mapElementId: 'map',
 			// svelte-ignore state_referenced_locally
 			focusAttachmentId,
-			popupZoomLevel: 11
+			focusZoomLevel: 14
 		})
 			.then(() => console.log('Initialized'))
 			.catch((e) => {

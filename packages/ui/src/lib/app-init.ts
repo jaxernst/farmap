@@ -10,15 +10,15 @@ const DEFAULT_CENTER: L.LatLngExpression = [39, -95]
 const DEFAULT_ZOOM = 3
 
 type InitOptions = {
-  mapElementId: string
   focusAttachmentId?: string | null
-  popupZoomLevel?: number
+  focusZoomLevel?: number
+  mapElementId: string
 }
 
 type CleanupFunction = () => void
 
 export async function initializeApp(options: InitOptions): Promise<CleanupFunction> {
-  const { focusAttachmentId, mapElementId, popupZoomLevel = 13 } = options
+  const { focusAttachmentId, focusZoomLevel, mapElementId } = options
   const cleanupFunctions: Array<() => void> = []
 
   // If there's a attachment to focus on, get that attachment's position for map initialization
@@ -71,7 +71,7 @@ export async function initializeApp(options: InitOptions): Promise<CleanupFuncti
       isMine
     )
 
-    mapStore.flyToAttachment(focusAttachment.id.toString(), popupZoomLevel)
+    await mapStore.flyToAttachment(focusAttachment.id.toString(), focusZoomLevel)
   } else if (userId) {
     mapStore.requestLocation()
   } else {
