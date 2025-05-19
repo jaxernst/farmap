@@ -2,6 +2,7 @@
   "name": "farmap",
   "private": true,
   "type": "module",
+  "pnpm-version": "9.15.9",
   "workspaces": [
     "packages/*"
   ],
