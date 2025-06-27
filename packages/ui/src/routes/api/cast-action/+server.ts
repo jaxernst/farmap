@@ -2,10 +2,9 @@ import { json } from "@sveltejs/kit"
 
 export const GET = async () => {
   return json({
-    name: "Upload to FarMap",
+    name: "FarMap Upload",
     icon: "image",
     description: "Upload a photo to the interactive map and share it in your feed",
-    aboutUrl: "https://farmap.vercel.app",
     action: {
       type: "post" as const,
       postUrl: "https://farmap.vercel.app/api/cast-action"
