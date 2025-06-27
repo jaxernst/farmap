@@ -36,7 +36,7 @@ importers:
         specifier: ^0.33.5
         version: 0.33.10(@effect/experimental@0.44.10(@effect/platform@0.80.10(effect@3.14.11))(effect@3.14.11))(@effect/platform@0.80.10(effect@3.14.11))(effect@3.14.11)
       '@effect/vitest':
-        specifier: latest
+        specifier: ^0.20.10
         version: 0.20.10(effect@3.14.11)(vitest@2.1.9(@types/node@22.14.1)(lightningcss@1.29.2))
       '@eslint/compat':
         specifier: 1.2.2
@@ -60,7 +60,7 @@ importers:
         specifier: ^0.4.0
         version: 0.4.0(@babel/core@7.26.10)
       effect:
-        specifier: latest
+        specifier: ^3.14.11
         version: 3.14.11
       eslint:
         specifier: ^9.13.0
@@ -96,13 +96,13 @@ importers:
   packages/domain:
     dependencies:
       '@effect/experimental':
-        specifier: latest
+        specifier: ^0.44.10
         version: 0.44.10(@effect/platform@0.80.10(effect@3.14.11))(effect@3.14.11)
       '@effect/platform':
-        specifier: latest
+        specifier: ^0.80.10
         version: 0.80.10(effect@3.14.11)
       '@effect/sql':
-        specifier: latest
+        specifier: ^0.33.10
         version: 0.33.10(@effect/experimental@0.44.10(@effect/platform@0.80.10(effect@3.14.11))(effect@3.14.11))(@effect/platform@0.80.10(effect@3.14.11))(effect@3.14.11)
     publishDirectory: dist
 
@@ -115,13 +115,13 @@ importers:
         specifier: ^3.782.0
         version: 3.787.0
       '@effect/platform':
-        specifier: latest
+        specifier: ^0.80.10
         version: 0.80.10(effect@3.14.11)
       '@effect/platform-node':
-        specifier: latest
+        specifier: ^0.76.20
         version: 0.76.20(@effect/cluster@0.29.20(@effect/platform@0.80.10(effect@3.14.11))(@effect/rpc@0.55.15(@effect/platform@0.80.10(effect@3.14.11))(effect@3.14.11))(@effect/sql@0.33.10(@effect/experimental@0.44.10(@effect/platform@0.80.10(effect@3.14.11))(effect@3.14.11))(@effect/platform@0.80.10(effect@3.14.11))(effect@3.14.11))(effect@3.14.11))(@effect/platform@0.80.10(effect@3.14.11))(@effect/rpc@0.55.15(@effect/platform@0.80.10(effect@3.14.11))(effect@3.14.11))(@effect/sql@0.33.10(@effect/experimental@0.44.10(@effect/platform@0.80.10(effect@3.14.11))(effect@3.14.11))(@effect/platform@0.80.10(effect@3.14.11))(effect@3.14.11))(effect@3.14.11)
       '@effect/sql-sqlite-node':
-        specifier: latest
+        specifier: ^0.34.10
         version: 0.34.10(@effect/experimental@0.44.10(@effect/platform@0.80.10(effect@3.14.11))(effect@3.14.11))(@effect/platform@0.80.10(effect@3.14.11))(@effect/sql@0.33.10(@effect/experimental@0.44.10(@effect/platform@0.80.10(effect@3.14.11))(effect@3.14.11))(@effect/platform@0.80.10(effect@3.14.11))(effect@3.14.11))(effect@3.14.11)
       '@farcaster/auth-client':
         specifier: ^0.3.0
@@ -149,13 +149,13 @@ importers:
   packages/ui:
     devDependencies:
       '@effect/platform':
-        specifier: latest
+        specifier: ^0.80.10
         version: 0.80.10(effect@3.14.11)
       '@effect/platform-browser':
-        specifier: latest
+        specifier: ^0.60.1
         version: 0.60.1(@effect/platform@0.80.10(effect@3.14.11))(effect@3.14.11)
       '@effect/platform-node':
-        specifier: latest
+        specifier: ^0.76.20
         version: 0.76.20(@effect/cluster@0.29.20(@effect/platform@0.80.10(effect@3.14.11))(@effect/rpc@0.55.15(@effect/platform@0.80.10(effect@3.14.11))(effect@3.14.11))(@effect/sql@0.33.10(@effect/experimental@0.44.10(@effect/platform@0.80.10(effect@3.14.11))(effect@3.14.11))(@effect/platform@0.80.10(effect@3.14.11))(effect@3.14.11))(effect@3.14.11))(@effect/platform@0.80.10(effect@3.14.11))(@effect/rpc@0.55.15(@effect/platform@0.80.10(effect@3.14.11))(effect@3.14.11))(@effect/sql@0.33.10(@effect/experimental@0.44.10(@effect/platform@0.80.10(effect@3.14.11))(effect@3.14.11))(@effect/platform@0.80.10(effect@3.14.11))(effect@3.14.11))(effect@3.14.11)
       '@farcaster/frame-sdk':
         specifier: 0.0.34

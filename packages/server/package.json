@@ -24,9 +24,9 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.782.0",
     "@aws-sdk/s3-request-presigner": "^3.782.0",
-    "@effect/platform": "latest",
-    "@effect/platform-node": "latest",
-    "@effect/sql-sqlite-node": "latest",
+    "@effect/platform": "^0.80.10",
+    "@effect/platform-node": "^0.76.20",
+    "@effect/sql-sqlite-node": "^0.34.10",
     "@farcaster/auth-client": "^0.3.0",
     "@types/staticmaps": "^1.12.5",
     "sharp": "^0.33.2",

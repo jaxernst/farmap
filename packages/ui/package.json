@@ -14,9 +14,9 @@
 		"lint": "prettier --check ."
 	},
 	"devDependencies": {
-		"@effect/platform": "latest",
-		"@effect/platform-browser": "latest",
-		"@effect/platform-node": "latest",
+		"@effect/platform": "^0.80.10",
+		"@effect/platform-browser": "^0.60.1",
+		"@effect/platform-node": "^0.76.20",
 		"@farcaster/frame-sdk": "0.0.34",
 		"@farmap/domain": "workspace:*",
 		"@sveltejs/adapter-auto": "^4.0.0",

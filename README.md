@@ -12,14 +12,14 @@ Built as a Farcaster mini app with Effect TS + SvelteKit
 
 [Mini apps are cool and you should use them](https://miniapps.farcaster.xyz/)
 
-
 # Why Effect
 
 Effect is a powerful TypeScript library/meta-language heavily inspired by functional programming. It provides a unified approach for asynchronous operations, type-safe error handling, resource management, dependency injection, and much more. Effect allows complex logic + relationships to be programmed with simple, declarative code.
 
-I found the dependency injection system to be particularly powerful and useful for building this app. Because dependency injection is baked into all of the tools/abstractions that effect offers, it guides you toward a more interface-driven programming style where implementaion details remain hidden from the api consumer. This results in minimally coupled code that is maximally maintainable, all while preserving type safety and error safety across the stack. 
+I found the dependency injection system to be particularly powerful and useful for building this app. Because dependency injection is baked into all of the tools/abstractions that effect offers, it guides you toward a more interface-driven programming style where implementaion details remain hidden from the api consumer. This results in minimally coupled code that is maximally maintainable, all while preserving type safety and error safety across the stack.
 
 # Monorepo Packages
+
 ## packages/domain -> Defines all types, schemas, and interfaces for Farmap
 
 - Common place to define Effect 'tags' which are essentially dependency injectable interfaces. Tags can represent data OR functionality

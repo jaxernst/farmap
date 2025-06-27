@@ -16,7 +16,10 @@
     "lint": "eslint \"**/{src,test,examples,scripts,dtslint}/**/*.{ts,mjs}\"",
     "lint-fix": "pnpm lint --fix",
     "test": "vitest",
-    "coverage": "vitest --coverage"
+    "coverage": "vitest --coverage",
+    "update-deps": "pnpm update --latest",
+    "update-deps-interactive": "pnpm update --interactive",
+    "check-updates": "pnpm outdated"
   },
   "devDependencies": {
     "@babel/cli": "^7.25.9",
@@ -28,7 +31,7 @@
     "@effect/language-service": "^0.2.0",
     "@effect/experimental": "^0.44.6",
     "@effect/sql": "^0.33.5",
-    "@effect/vitest": "latest",
+    "@effect/vitest": "^0.20.10",
     "@eslint/compat": "1.2.2",
     "@eslint/eslintrc": "3.1.0",
     "@eslint/js": "9.13.0",
@@ -36,7 +39,7 @@
     "@typescript-eslint/eslint-plugin": "^8.12.2",
     "@typescript-eslint/parser": "^8.12.2",
     "babel-plugin-annotate-pure-calls": "^0.4.0",
-    "effect": "latest",
+    "effect": "^3.14.11",
     "eslint": "^9.13.0",
     "eslint-import-resolver-typescript": "^3.6.3",
     "eslint-plugin-codegen": "^0.29.0",
