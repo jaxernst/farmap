@@ -119,7 +119,57 @@ export class MapAttachmentsApi extends HttpApiGroup.make("MapAttachments")
   )
 {}
 
+export class CastActionApi extends HttpApiGroup.make("CastAction")
+  .add(
+    HttpApiEndpoint.get("getMetadata", "/cast-action")
+      .addSuccess(Schema.Struct({
+        name: Schema.String,
+        icon: Schema.String,
+        description: Schema.String,
+        aboutUrl: Schema.optional(Schema.String),
+        action: Schema.Struct({
+          type: Schema.Literal("post"),
+          postUrl: Schema.String
+        })
+      }))
+  )
+  .add(
+    HttpApiEndpoint.post("handleAction", "/cast-action")
+      .setPayload(Schema.Struct({
+        untrustedData: Schema.Struct({
+          frame_url: Schema.String,
+          button_index: Schema.Number,
+          cast_id: Schema.Struct({
+            fid: Schema.Number,
+            hash: Schema.String
+          })
+        }),
+        trustedData: Schema.Struct({
+          messageBytes: Schema.String
+        })
+      }))
+      .addSuccess(Schema.Union(
+        Schema.Struct({
+          type: Schema.Literal("message"),
+          message: Schema.String,
+          link: Schema.optional(Schema.String)
+        }),
+        Schema.Struct({
+          type: Schema.Literal("frame"),
+          frameUrl: Schema.String
+        })
+      ))
+      .addError(
+        Schema.Struct({
+          message: Schema.String
+        }),
+        { status: 400 }
+      )
+  )
+{}
+
 export class FarMapApi extends HttpApi.make("api")
   .add(MapAttachmentsApi)
   .add(AuthApi)
+  .add(CastActionApi)
 {}
