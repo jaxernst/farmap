@@ -1,11 +1,11 @@
-<div class="fixed right-4 top-4 z-[1000] flex flex-col items-center justify-center">
+<div class="fixed right-4 top-4 z-[1000] flex select-none flex-col items-center justify-center">
 	<h1
-		class="transform font-['Architects_Daughter'] text-[33px] font-bold leading-5 tracking-normal text-purple-500 transition-transform duration-300 hover:scale-110"
+		class="leading-2 font-['Architects_Daughter'] text-[32px] font-bold tracking-tight text-purple-500 drop-shadow-[0_0_16px_rgba(255,255,255,1)]"
 	>
-		Far<span class="text-[14px]">{' '}</span>Map
+		FarMap
 	</h1>
 	<p
-		class=" -translate-1 font-['Architects_Daughter'] text-[11px] font-medium leading-5 tracking-tighter text-neutral-500"
+		class="mt-1 -translate-x-2 text-[8.5px] font-semibold leading-5 text-neutral-700 drop-shadow-[0_0_8px_rgba(255,255,255,1)]"
 	>
 		Upload Everywhere
 	</p>
