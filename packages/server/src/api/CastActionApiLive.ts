@@ -15,7 +15,7 @@ export const CastActionApiLive = HttpApiBuilder.group(
           Effect.succeed({
             name: "Upload to FarMap",
             icon: "image",
-            description: "Upload a photo to the interactive map and share it in your feed",
+            description: "map and share photos",
             aboutUrl: "https://farmap.vercel.app",
             action: {
               type: "post" as const,
