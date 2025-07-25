@@ -50,7 +50,7 @@ class MapboxMapStore {
       // Disable rotation and pitch for better mobile UX
       dragRotate: false,
       pitchWithRotate: false,
-      touchZoomRotate: false,
+      touchZoomRotate: true, // Enable touch zoom but disable rotation below
       // Optimize for mobile performance
       renderWorldCopies: false,
       // Performance optimizations
