@@ -1,6 +1,6 @@
 <script lang="ts">
 	import '../app.css';
-	import 'leaflet/dist/leaflet.css';
+	import 'mapbox-gl/dist/mapbox-gl.css';
 
 	import { initializeApp } from '$lib/app-init';
 	import { page } from '$app/state';

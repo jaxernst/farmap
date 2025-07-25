@@ -5,8 +5,9 @@ import { Effect } from "effect"
 import { mapStore } from "./Map.svelte"
 import { farmapApi } from "./services/farmap-api"
 import { userStore } from "./User.svelte"
+import type { LngLatLike } from "mapbox-gl"
 
-const DEFAULT_CENTER: L.LatLngExpression = [39, -95]
+const DEFAULT_CENTER: LngLatLike = [-95, 39]
 const DEFAULT_ZOOM = 3
 
 type InitOptions = {
@@ -24,7 +25,7 @@ export async function initializeApp(options: InitOptions): Promise<CleanupFuncti
   // If there's a attachment to focus on, get that attachment's position for map initialization
   let focusAttachment: Attachment | undefined
   let focusAttachmentCreator: UserPreview | undefined
-  let focusCenter: L.LatLngExpression | undefined
+  let focusCenter: LngLatLike | undefined
   let preloadedTilesKey: string | undefined
 
   if (focusAttachmentId) {
@@ -35,7 +36,7 @@ export async function initializeApp(options: InitOptions): Promise<CleanupFuncti
         Effect.tap((res) => {
           focusAttachment = res.attachment
           focusAttachmentCreator = res.creator
-          focusCenter = [focusAttachment.position.lat, focusAttachment.position.long]
+          focusCenter = [focusAttachment.position.long, focusAttachment.position.lat]
         }),
         Effect.catchTag("AttachmentNotFound", () => {
           alert("Can't seem to find that photo, maybe it was deleted?")

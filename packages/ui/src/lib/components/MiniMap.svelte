@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import type L from 'leaflet';
+	import { PUBLIC_MAPBOX_ACCESS_TOKEN } from "$env/static/public"
+	import type { Map } from 'mapbox-gl';
 
 	export let lat: number;
 	export let long: number;
@@ -8,41 +9,32 @@
 	export let size = '100%';
 
 	let mapElement: HTMLElement;
-	let map: L.Map | null = null;
+	let map: Map | null = null;
 
 	onMount(() => {
 		const initMap = async () => {
-			// Import Leaflet dynamically
-			const L = await import('leaflet');
+			// Import Mapbox GL dynamically
+			const mapboxgl = await import('mapbox-gl');
+			mapboxgl.default.accessToken = PUBLIC_MAPBOX_ACCESS_TOKEN;
 
 			// Initialize a separate map for the mini-map
-			map = L.map(mapElement, {
-				center: [lat, long],
+			map = new mapboxgl.default.Map({
+				container: mapElement,
+				style: 'mapbox://styles/mapbox/streets-v12', // Simple style for mini-map
+				center: [long, lat],
 				zoom: zoom,
-				zoomControl: false,
-				attributionControl: false,
-				dragging: false,
-				scrollWheelZoom: false,
-				doubleClickZoom: false,
-				touchZoom: false
+				interactive: false, // Disable all interactions
+				attributionControl: false
 			});
 
-			// Add a simple tile layer
-			L.tileLayer(
-				'https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}{r}.png',
-				{
-					subdomains: 'abcd',
-					maxZoom: 19,
-					minZoom: 3
-				}
-			).addTo(map);
-
 			// Add a marker at the specified location
-			const marker = L.marker([lat, long]).addTo(map);
+			new mapboxgl.default.Marker()
+				.setLngLat([long, lat])
+				.addTo(map);
 
 			// Make sure the map is resized properly
 			setTimeout(() => {
-				map?.invalidateSize();
+				map?.resize();
 			}, 100);
 		};
 
