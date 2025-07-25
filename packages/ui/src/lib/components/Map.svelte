@@ -41,11 +41,11 @@
 	}
 
 	:global(.mapboxgl-popup-close-button) {
-		font-size: 16px !important;
+		font-size: 12px !important;
 		font-weight: bold;
 		padding: 0 !important;
 		margin: 0 !important;
-		background: rgba(0, 0, 0, 0.7) !important;
+		background: rgba(0, 0, 0, 0.4) !important;
 		color: #ffffff !important;
 		border-radius: 50%;
 		width: 24px !important;
@@ -57,15 +57,19 @@
 		cursor: pointer;
 		text-decoration: none;
 		line-height: 1 !important;
-		top: 8px;
-		right: 8px;
+		top: 7px;
+		right: 7px;
 		text-align: center !important;
+		/* Ensure proper positioning in corner */
+		position: absolute !important;
+		/* Ensure the 'x' character is properly centered */
+		font-family: Arial, sans-serif !important;
+		letter-spacing: 0 !important;
 	}
 
 	:global(.mapboxgl-popup-close-button:hover) {
 		background: rgba(0, 0, 0, 0.9) !important;
 	}
-
 
 	:global(.click-marker .ring) {
 		width: 20px;
