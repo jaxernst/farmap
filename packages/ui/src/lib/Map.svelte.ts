@@ -46,18 +46,39 @@ class MapboxMapStore {
       center,
       zoom,
       attributionControl: false,
-      doubleClickZoom: false
+      doubleClickZoom: false,
+      // Disable rotation and pitch for better mobile UX
+      dragRotate: false,
+      pitchWithRotate: false,
+      touchZoomRotate: false,
+      // Optimize for mobile performance
+      renderWorldCopies: false,
+      // Performance optimizations
+      antialias: false, // Disable antialiasing for better mobile performance
+      // Faster zoom transitions
+      scrollZoom: {
+        around: 'center'
+      },
+      // Optimize touch behavior for mobile
+      touchPitch: false
     })
 
+    // Enable faster zoom with higher scroll zoom speed
+    this.map.scrollZoom.setWheelZoomRate(1/150) // Faster wheel zoom (default is 1/450)
+    this.map.scrollZoom.setZoomRate(1/100) // Faster trackpad zoom (default is 1/100)
+    
+    // Enable faster touch zoom for mobile
+    this.map.touchZoomRotate.disableRotation()
+    
     this.map.on('click', (e) => {
       this.placeClickMarker([e.lngLat.lng, e.lngLat.lat])
     })
 
-    // Custom double click listener
+    // Custom double click listener with faster zoom
     this.map.on('click', 
       doubleClickListener((e) => {
         console.log("Double click detected")
-        this.flyZoom([e.lngLat.lng, e.lngLat.lat])
+        this.flyZoom([e.lngLat.lng, e.lngLat.lat], 3.0) // Increased zoom multiplier from 2.1 to 3.0
       })
     )
 
@@ -134,11 +155,11 @@ class MapboxMapStore {
       .setPopup(popup)
       .addTo(this.map)
 
-    // Handle double-click on marker
+    // Handle double-click on marker with faster zoom
     marker.getElement().addEventListener('click', 
       doubleClickListener((e) => {
         console.log("Double click on marker detected")
-        this.flyZoom([lng, lat])
+        this.flyZoom([lng, lat], 3.0) // Faster zoom on marker double-click
       })
     )
 
@@ -183,7 +204,9 @@ class MapboxMapStore {
     if (!this.map) return
     this.map.flyTo({ 
       center: [lng, lat], 
-      zoom: zoom ?? this.map.getZoom()
+      zoom: zoom ?? this.map.getZoom(),
+      speed: 1.8, // Faster than default for better UX
+      curve: 1.42
     })
   }
 
@@ -244,12 +267,17 @@ class MapboxMapStore {
     this.map.setZoom(zoom)
   }
 
-  flyZoom(lngLat?: LngLatLike, multiplier = 2.1) {
+  flyZoom(lngLat?: LngLatLike, multiplier = 3.0) {
     if (!this.map) return
     const currentZoom = this.map.getZoom()
     const newZoom = Math.min(Math.round(currentZoom * multiplier), this.map.getMaxZoom())
     const center = lngLat || this.clickMarker?.getLngLat() || this.map.getCenter()
-    this.map.flyTo({ center, zoom: newZoom })
+    this.map.flyTo({ 
+      center, 
+      zoom: newZoom,
+      speed: 2.2, // Faster animation speed (default is 1.2)
+      curve: 1.42 // Slightly more aggressive curve for faster feel
+    })
   }
 
   setupPopupVisibilityManager() {
