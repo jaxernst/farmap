@@ -2,10 +2,9 @@ import sdk from "@farcaster/frame-sdk/src"
 import { type Attachment, AttachmentId } from "@farmap/domain/MapAttachments"
 import type { UserId, UserPreview } from "@farmap/domain/Users"
 import { Effect } from "effect"
+import type { LngLatLike } from "mapbox-gl"
 import { mapStore } from "./Map.svelte"
 import { farmapApi } from "./services/farmap-api"
-import { userStore } from "./User.svelte"
-import type { LngLatLike } from "mapbox-gl"
 
 const DEFAULT_CENTER: LngLatLike = [-95, 39]
 const DEFAULT_ZOOM = 3
@@ -26,7 +25,6 @@ export async function initializeApp(options: InitOptions): Promise<CleanupFuncti
   let focusAttachment: Attachment | undefined
   let focusAttachmentCreator: UserPreview | undefined
   let focusCenter: LngLatLike | undefined
-  let preloadedTilesKey: string | undefined
 
   if (focusAttachmentId) {
     const attachmentId = AttachmentId.make(parseInt(focusAttachmentId))
@@ -53,6 +51,17 @@ export async function initializeApp(options: InitOptions): Promise<CleanupFuncti
   // Don't auto sign-in - let the upload button trigger it when needed
   let userId: UserId | undefined
 
+  // Try to get current user if already signed in
+  try {
+    const currentUser = await Effect.runPromise(farmapApi.auth.getCurrentUser())
+    if (currentUser) {
+      userId = currentUser.userId
+    }
+  } catch {
+    // User not signed in, which is fine
+    console.log("No user signed in")
+  }
+
   // Initalize 'fly to' location
   if (focusAttachment) {
     const isMine = userId === focusAttachment.creatorId
@@ -69,7 +78,7 @@ export async function initializeApp(options: InitOptions): Promise<CleanupFuncti
     // Preload tiles for flyTo destination to make the transition smoother
     // Do this before the flyTo animation starts
     if (focusZoomLevel) {
-      preloadedTilesKey = await mapStore.preloadTilesForLocation(
+      await mapStore.preloadTilesForLocation(
         focusAttachment.position.lat,
         focusAttachment.position.long,
         focusZoomLevel,
