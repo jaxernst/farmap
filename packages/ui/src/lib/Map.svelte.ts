@@ -1,5 +1,5 @@
 import { PUBLIC_MAPBOX_ACCESS_TOKEN } from "$env/static/public"
-import type { Map, Marker, Popup, LngLatLike, LngLat } from "mapbox-gl"
+import type { LngLat, LngLatLike, Map, Marker, Popup } from "mapbox-gl"
 import { mount } from "svelte"
 import PhotoPopup from "./components/PhotoPopup.svelte"
 
@@ -57,25 +57,30 @@ class MapboxMapStore {
       antialias: false, // Disable antialiasing for better mobile performance
       // Faster zoom transitions
       scrollZoom: {
-        around: 'center'
+        around: "center"
       },
       // Optimize touch behavior for mobile
       touchPitch: false
     })
 
     // Enable faster zoom with higher scroll zoom speed
-    this.map.scrollZoom.setWheelZoomRate(1/150) // Faster wheel zoom (default is 1/450)
-    this.map.scrollZoom.setZoomRate(1/100) // Faster trackpad zoom (default is 1/100)
-    
+    this.map.scrollZoom.setWheelZoomRate(1 / 150) // Faster wheel zoom (default is 1/450)
+    this.map.scrollZoom.setZoomRate(1 / 100) // Faster trackpad zoom (default is 1/100)
+
     // Enable faster touch zoom for mobile
     this.map.touchZoomRotate.disableRotation()
-    
-    this.map.on('click', (e) => {
+
+    // Better touch zoom sensitivity using wheel zoom rate
+    // This affects both scroll and touch zoom behavior
+    this.map.scrollZoom.setWheelZoomRate(1 / 100) // More sensitive than default 1/450
+
+    this.map.on("click", (e) => {
       this.placeClickMarker([e.lngLat.lng, e.lngLat.lat])
     })
 
     // Custom double click listener with faster zoom
-    this.map.on('click', 
+    this.map.on(
+      "click",
       doubleClickListener((e) => {
         console.log("Double click detected")
         this.flyZoom([e.lngLat.lng, e.lngLat.lat], 3.0) // Increased zoom multiplier from 2.1 to 3.0
@@ -156,8 +161,9 @@ class MapboxMapStore {
       .addTo(this.map)
 
     // Handle double-click on marker with faster zoom
-    marker.getElement().addEventListener('click', 
-      doubleClickListener((e) => {
+    marker.getElement().addEventListener(
+      "click",
+      doubleClickListener((_e) => {
         console.log("Double click on marker detected")
         this.flyZoom([lng, lat], 3.0) // Faster zoom on marker double-click
       })
@@ -202,8 +208,8 @@ class MapboxMapStore {
 
   flyTo(lat: number, lng: number, zoom?: number) {
     if (!this.map) return
-    this.map.flyTo({ 
-      center: [lng, lat], 
+    this.map.flyTo({
+      center: [lng, lat],
       zoom: zoom ?? this.map.getZoom(),
       speed: 1.8, // Faster than default for better UX
       curve: 1.42
@@ -251,7 +257,7 @@ class MapboxMapStore {
 
     const ringElement = document.createElement("div")
     ringElement.className = "click-marker"
-    ringElement.innerHTML = '<div class="ring"></div>'
+    ringElement.innerHTML = "<div class=\"ring\"></div>"
 
     this.clickMarker = new mapboxgl.default.Marker({ element: ringElement })
       .setLngLat(lngLat)
@@ -272,8 +278,8 @@ class MapboxMapStore {
     const currentZoom = this.map.getZoom()
     const newZoom = Math.min(Math.round(currentZoom * multiplier), this.map.getMaxZoom())
     const center = lngLat || this.clickMarker?.getLngLat() || this.map.getCenter()
-    this.map.flyTo({ 
-      center, 
+    this.map.flyTo({
+      center,
       zoom: newZoom,
       speed: 2.2, // Faster animation speed (default is 1.2)
       curve: 1.42 // Slightly more aggressive curve for faster feel
@@ -318,14 +324,14 @@ class MapboxMapStore {
     lat: number,
     lng: number,
     zoomLevel: number,
-    padding = 2,
-    includeAdjacentZoomLevels = true
+    _padding = 2,
+    _includeAdjacentZoomLevels = true
   ): Promise<string> {
     // Mapbox GL handles tile preloading automatically
     return `${lat.toFixed(5)}_${lng.toFixed(5)}_${zoomLevel}`
   }
 
-  cleanupPreloadedTiles(key?: string) {
+  cleanupPreloadedTiles(_key?: string) {
     // Not needed with Mapbox GL
   }
 }
@@ -342,20 +348,20 @@ function doubleClickListener(
 ) {
   const { distance = 20, threshold = 300 } = options
   let lastClickTime = 0
-  let lastClickPos: { x: number, y: number } | null = null
+  let lastClickPos: { x: number; y: number } | null = null
 
   return (e: any) => {
     const currentTime = new Date().getTime()
     const timeDiff = currentTime - lastClickTime
-    
+
     const currentPos = { x: e.clientX || e.point?.x || 0, y: e.clientY || e.point?.y || 0 }
 
     if (
       timeDiff < threshold && lastClickPos &&
       Math.sqrt(
-        Math.pow(currentPos.x - lastClickPos.x, 2) + 
-        Math.pow(currentPos.y - lastClickPos.y, 2)
-      ) < distance
+          Math.pow(currentPos.x - lastClickPos.x, 2) +
+            Math.pow(currentPos.y - lastClickPos.y, 2)
+        ) < distance
     ) {
       onDoubleClick(e)
     }

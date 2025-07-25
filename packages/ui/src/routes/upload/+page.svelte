@@ -98,47 +98,42 @@
 
 <TitleOverlay />
 
-{#if userStore.user}
-	<div class="fixed bottom-5 left-0 z-[1000] flex w-full items-center justify-center gap-2">
-		{#if uploadingPhoto}
-			<button class="action-button select-button disabled:cursor-not-allowed" disabled>
-				Uploading...
-			</button>
-		{:else if castComposed}
-			<div class="flex flex-col items-center gap-2">
-				<div class="font-bold text-green-600">✅ Photo uploaded and cast composed!</div>
-				<button class="action-button select-button" onclick={resetUpload}> Upload Another </button>
-			</div>
-		{:else if uploadedPhoto}
-			<button class="action-button select-button" onclick={handleSelectLocation}>
-				Select Location
-			</button>
-			<button class="action-button cancel-button" onclick={resetUpload}> Cancel </button>
-		{:else}
-			<PhotoUpload onPhotoUpload={handleUploadImage} />
-		{/if}
-	</div>
-{:else}
-	<div class="flex h-screen items-center justify-center">
-		<div class="text-center">
-			<h2 class="mb-4 text-xl font-bold">Please sign in to upload photos</h2>
-			<p class="text-gray-600">You need to be signed in with Farcaster to use this feature.</p>
-		</div>
-	</div>
-{/if}
-
-<!-- Display 'open in farcaster button overlay if there's no frame context -->
 {#await sdk.context then context}
-	{#if !context}
-		<div
-			class="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-3xl border-2 border-purple-400 bg-white"
-		>
-			<a
-				class="flex items-center gap-2 rounded-md px-4 py-2 text-center text-lg font-medium text-purple-500"
-				href="https://warpcast.com/~/mini-apps/launch?domain={window.location.host}"
-			>
-				Open app in Farcaster
-			</a>
+	{#if context && userStore.user}
+		<div class="fixed bottom-5 left-0 z-[1000] flex w-full items-center justify-center gap-2">
+			{#if uploadingPhoto}
+				<button class="action-button select-button disabled:cursor-not-allowed" disabled>
+					Uploading...
+				</button>
+			{:else if castComposed}
+				<div class="flex flex-col items-center gap-2">
+					<div class="font-bold text-green-600">✅ Photo uploaded and cast composed!</div>
+					<button class="action-button select-button" onclick={resetUpload}>
+						Upload Another
+					</button>
+				</div>
+			{:else if uploadedPhoto}
+				<button class="action-button select-button" onclick={handleSelectLocation}>
+					Select Location
+				</button>
+				<button class="action-button cancel-button" onclick={resetUpload}> Cancel </button>
+			{:else}
+				<PhotoUpload onPhotoUpload={handleUploadImage} />
+			{/if}
+		</div>
+	{:else if !context}
+		<div class="flex h-screen items-center justify-center">
+			<div class="text-center">
+				<h2 class="mb-4 text-xl font-bold">Please open in Farcaster</h2>
+				<p class="text-gray-600">This feature requires the Farcaster app.</p>
+			</div>
+		</div>
+	{:else}
+		<div class="flex h-screen items-center justify-center">
+			<div class="text-center">
+				<h2 class="mb-4 text-xl font-bold">Please sign in to upload photos</h2>
+				<p class="text-gray-600">You need to be signed in with Farcaster to use this feature.</p>
+			</div>
 		</div>
 	{/if}
 {/await}

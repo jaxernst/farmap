@@ -4,6 +4,7 @@
 	import PhotoUpload from './PhotoUpload.svelte';
 	import { Effect, pipe } from 'effect';
 	import { Latitude, Longitude } from '@farmap/domain';
+	import sdk from '@farcaster/frame-sdk/src';
 
 	let uploadedPhoto: {
 		filename: string;
@@ -74,20 +75,24 @@
 	}
 </script>
 
-<div class="fixed bottom-5 left-0 z-[1000] flex w-full items-center justify-center gap-2">
-	{#if uploadingPhoto}
-		<button class="action-button select-button disabled:cursor-not-allowed" disabled
-			>Uploading...</button
-		>
-	{:else if uploadedPhoto}
-		<button class="action-button select-button" onclick={handleSelectLocation}>
-			Select Location
-		</button>
-		<button class="action-button cancel-button" onclick={resetUpload}> Cancel </button>
-	{:else}
-		<PhotoUpload onPhotoUpload={handleUploadImage} />
+{#await sdk.context then context}
+	{#if context}
+		<div class="fixed bottom-5 left-0 z-[1000] flex w-full items-center justify-center gap-2">
+			{#if uploadingPhoto}
+				<button class="action-button select-button disabled:cursor-not-allowed" disabled
+					>Uploading...</button
+				>
+			{:else if uploadedPhoto}
+				<button class="action-button select-button" onclick={handleSelectLocation}>
+					Select Location
+				</button>
+				<button class="action-button cancel-button" onclick={resetUpload}> Cancel </button>
+			{:else}
+				<PhotoUpload onPhotoUpload={handleUploadImage} />
+			{/if}
+		</div>
 	{/if}
-</div>
+{/await}
 
 <style>
 	.action-button {

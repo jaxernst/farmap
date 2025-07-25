@@ -23,7 +23,7 @@
 				return;
 			}
 		}
-		
+
 		// Trigger file input
 		const input = document.getElementById('photo-upload') as HTMLInputElement;
 		input?.click();
@@ -46,9 +46,7 @@
 	}
 </script>
 
-<button class="upload-button" onclick={handleUploadClick}>
-	📷
-</button>
+<button class="upload-button" onclick={handleUploadClick}> Upload </button>
 <input
 	type="file"
 	id="photo-upload"
@@ -61,12 +59,11 @@
 	.upload-button {
 		background-color: #4caf50;
 		color: white;
-		padding: 10px;
-		width: 48px;
-		height: 48px;
-		border-radius: 50%;
+		padding: 12px 24px;
+		border-radius: 4px;
 		cursor: pointer;
-		font-size: 20px;
+		font-size: 16px;
+		font-weight: bold;
 		border: none;
 		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 		transition: all 0.2s ease;
