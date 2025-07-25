@@ -43,16 +43,29 @@
 	:global(.mapboxgl-popup-close-button) {
 		font-size: 16px !important;
 		font-weight: bold;
-		padding: 6px;
-		background: rgba(255, 255, 255, 0.8);
+		padding: 0 !important;
+		margin: 0 !important;
+		background: rgba(0, 0, 0, 0.7) !important;
 		color: #ffffff !important;
 		border-radius: 50%;
-		width: 30px;
-		height: 30px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
+		width: 24px !important;
+		height: 24px !important;
+		display: flex !important;
+		align-items: center !important;
+		justify-content: center !important;
+		border: none;
+		cursor: pointer;
+		text-decoration: none;
+		line-height: 1 !important;
+		top: 8px;
+		right: 8px;
+		text-align: center !important;
 	}
+
+	:global(.mapboxgl-popup-close-button:hover) {
+		background: rgba(0, 0, 0, 0.9) !important;
+	}
+
 
 	:global(.click-marker .ring) {
 		width: 20px;

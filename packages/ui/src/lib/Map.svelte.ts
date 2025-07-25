@@ -56,9 +56,7 @@ class MapboxMapStore {
       // Performance optimizations
       antialias: false, // Disable antialiasing for better mobile performance
       // Faster zoom transitions
-      scrollZoom: {
-        around: "center"
-      },
+      scrollZoom: true,
       // Optimize touch behavior for mobile
       touchPitch: false
     })
