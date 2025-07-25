@@ -50,16 +50,8 @@ export async function initializeApp(options: InitOptions): Promise<CleanupFuncti
 
   await sdk.actions.ready({ disableNativeGestures: true })
 
-  // Attempt sign in only if their is a Farcaster frame context
+  // Don't auto sign-in - let the upload button trigger it when needed
   let userId: UserId | undefined
-  if (await sdk.context) {
-    try {
-      userId = (await userStore.signIn()).userId
-      userStore.initAttachments()
-    } catch {
-      console.warn("No Sign in")
-    }
-  }
 
   // Initalize 'fly to' location
   if (focusAttachment) {

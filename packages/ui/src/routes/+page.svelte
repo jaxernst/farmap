@@ -28,9 +28,7 @@
 
 <TitleOverlay />
 
-{#if userStore.user}
-	<ControlsOverlay />
-{/if}
+<ControlsOverlay />
 
 <!-- Display 'open in farcaster button overlay if there's no frame context -->
 {#await sdk.context then context}
